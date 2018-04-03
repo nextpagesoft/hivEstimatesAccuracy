@@ -1,0 +1,22 @@
+---
+name: "Multiple Imputations (mice) Diagnostic"
+author: "HIV Estimates Accuracy tool"
+title: "Multiple Imputations (mice)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_fragment:
+    number_sections: yes
+    smart: yes
+    fig_caption: yes
+params:
+  InputData: NA    
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+
+require(data.table, quietly = TRUE)
+require(coda, quietly = TRUE)
+```
+
+This diagnostic report has not been implemented yet.

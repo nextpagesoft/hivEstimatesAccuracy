@@ -1,0 +1,38 @@
+---
+name: "Reporting Delays Intermediate"
+author: "HIV Estimates Accuracy tool"
+title: "Reporting Delays"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_fragment:
+    number_sections: no
+    smart: yes
+    fig_caption: yes
+params:
+  InputData: NA 
+---
+```{r setup, include = FALSE}
+require(hivEstimatesAccuracy, quietly = TRUE)
+knitr::opts_chunk$set(echo = FALSE, results = "markup", message = FALSE, warning = FALSE, include = TRUE, fig.height = 5, fig.width = 12)
+```
+
+```{r, results='asis'}
+cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
+```
+
+**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**
+```{r}
+params[["InputData"]]$Artifacts$OutputPlotTotal
+```
+
+```{r results = "asis"}
+if (!is.null(params[["InputData"]]$Artifacts$OutputPlotStrat)) {
+  cat("**Figure 2. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year and stratum.**")
+}
+```
+
+```{r}
+for (plot in params[["InputData"]]$Artifacts$OutputPlotStrat) {
+  print(plot)
+}
+```

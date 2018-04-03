@@ -1,0 +1,335 @@
+/* Fonts */
+@font-face {
+  font-family: "MetaPro";
+  src: url("../fonts/MetaPro-Bold_30244.ttf") format('truetype'); /* Safari, Android, iOS */
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url("../fonts/MaterialIcons-Regular.woff2") format("woff2"),
+    url("../fonts/MaterialIcons-Regular.woff") format("woff"),
+    url("../fonts/MaterialIcons-Regular.ttf") format("truetype");
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 40px;  /* Preferred icon size */
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+/* Tags */
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #333;
+}
+
+body p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
+}
+
+h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 0;
+  padding-top: 10px;
+}
+
+pre {
+  word-break: normal;
+  word-wrap: normal;
+  white-space: pre;
+}
+
+/* Header  */
+.main-header {
+  background-color: #e1efd3;
+}
+
+.main-header .sidebar-toggle {
+  padding: 14px 15px;
+}
+
+.skin-blue .main-header .logo,
+.skin-blue .main-header .navbar
+{
+  background-color: transparent;
+  font-size: 16px;
+  font-weight: bold;
+  color: rgb(51, 51, 51);
+  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
+}
+
+.skin-blue .main-header .logo:hover
+{
+  background-color: #c9e2b0;
+}
+
+.skin-blue .main-header .navbar .sidebar-toggle,
+.skin-blue .main-header .navbar .nav>li>a
+{
+  color: rgb(51, 51, 51);
+}
+
+.skin-blue .main-header .navbar .sidebar-toggle:hover,
+.skin-blue .main-header .navbar .nav>li>a:hover
+{
+  background-color: #c9e2b0;
+  color: rgb(51, 51, 51);
+}
+
+.skin-blue .main-header .navbar .navbar-custom-menu
+{
+  font-size: 14px;
+}
+
+/* Sidebar */
+.skin-blue .left-side,
+.skin-blue .main-sidebar,
+.skin-blue .wrapper
+{
+  background-color: #fff;
+}
+
+.skin-blue .sidebar-menu > li > a
+{
+  background-color: #c4e1e3;
+  color: #333;
+  font-weight: bold;
+  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
+}
+
+.skin-blue .sidebar-menu > li.active > a,
+.skin-blue .sidebar-menu > li:hover > a
+{
+  border-left-color: #7cbdc1;
+  background-color: #b0d7da;
+  color: #333;
+}
+
+/* Content */
+.content-wrapper, .right-side
+{
+  background-color: #f2f8f9;
+}
+
+.content {
+  padding-top: 0;
+  background-color: transparent;
+}
+
+/* Boxes */
+.box {
+  border-radius: 0;
+  box-shadow: 0;
+}
+
+.box.box-primary {
+    border-top-color: #7cbdc1;
+}
+
+.box-header {
+  padding: 5px;
+}
+
+.box.box-solid.box-primary,
+.box.box-solid.box-warning {
+  border: 0;
+}
+
+.box.box-solid.box-primary > .box-header {
+  background-color: #b0d7da;
+  color: #333;
+}
+
+.box.box-solid.box-warning > .box-header {
+  background-color: rgb(177, 214, 141);
+  color: #333;
+}
+
+.box-header .box-title,
+.box-header > .fa,
+.box-header > .glyphicon,
+.box-header>.ion {
+  font-size: 22px;
+  padding-left: 5px;
+}
+
+.box-body h3, .box-body h4 {
+  font-size: 14px;
+}
+
+/* Tab sets */
+.nav-tabs-custom {
+  box-shadow: 0 0 6px rgba(0, 0, 0, .5);
+  height: 200px;
+}
+
+.nav-tabs-custom > .tab-content {
+  height: 156px;
+  overflow: auto;
+}
+
+.tab-content h3 {
+  font-size: 14px;
+}
+
+.nav a {
+  font-weight: bold;
+}
+
+.nav-tabs-custom > .nav-tabs > li.active {
+  border-top-color: #7cbdc1;
+}
+
+/* Inputs */
+div.box-body .shiny-input-container h3 {
+  font-size: 16px;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #bbbbbb;
+  font-weight: normal;
+  font-style: italic;
+  opacity: 1; /* Firefox */
+}
+
+/* Progress bar */
+.progress-bar {
+  background-color: #7cbdc1 !important;
+  background-image: none !important;
+}
+
+/* Main Report */
+#reportDiv h1 {
+  font-size: 20px;
+}
+
+#reportDiv table {
+    border-spacing: 0;
+    border-collapse: separate;
+    font-size: 13px;
+}
+
+#reportDiv table td, #reportDiv table th {
+    padding: 3px 20px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+#reportDiv table th {
+  background-color: #e1efd3;
+  text-align: right;
+}
+
+/* Intermediate report  */
+.intermReport h1 {
+  font-size: 18px;
+  color: #3c8dbc;
+}
+
+/* Pages */
+
+/* Data upload */
+#upload-colNamesP  {
+  height: 200px;
+  overflow: auto;
+}
+
+#upload-attrMappingTable {
+  width: 100%;
+  border-collapse: separate;
+  background: #f5f5f5;
+}
+
+.upload-attrNameCol {
+  width: 200px;
+}
+
+#upload-attrMappingTable th:first-child,
+#upload-attrMappingTable td:first-child {
+  box-shadow: inset 1px 0 0 #fff;
+}
+
+#upload-attrMappingTable th:last-child,
+#upload-attrMappingTable td:last-child {
+  border-right: 1px solid #e8e8e8;
+  box-shadow: inset -1px 0 0 #fff;
+}
+
+#upload-attrMappingTable tr:nth-child(odd) td {
+  background: #f1f1f1;
+}
+
+#upload-attrMappingTable th,
+#upload-attrMappingTable td {
+  vertical-align: middle;
+  border-right: 1px solid #fff;
+  border-left: 1px solid #e8e8e8;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 5px;
+}
+
+#upload-attrMappingTable th {
+  border-top: 1px solid #e8e8e8;
+}
+
+#upload-attrMappingTable .form-group {
+  height: 34px;
+}
+
+#upload-attrMappingTable .form-group,
+#upload-attrMappingTable .selectize-control {
+  margin: 0;
+}
+
+#upload-attrMappingStatus .box, #upload-valueCheckStatus .box {
+  box-shadow: none;
+}
+
+/* Data table */
+
+#summary-inputDataTable {
+  font-size: 12px;
+}
+
+#summary-inputDataTable tr {
+  height: 30px;
+}
+
+#summary-inputDataTable td {
+  text-align: right;
+  padding: 5px;
+  font-size: 11px;
+}
+
+}
+

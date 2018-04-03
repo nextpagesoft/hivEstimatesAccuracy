@@ -1,0 +1,68 @@
+---
+name: "Multiple Imputations (mice) Intermediate"
+author: "HIV Estimates Accuracy tool"
+title: "Multiple Imputations (mice)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_fragment:
+    number_sections: no
+    smart: yes
+    fig_caption: yes
+params:
+  InputData: NA    
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+```
+
+```{r, results='asis'}
+cat(sprintf("# %d. Multiple Imputations (mice)", params$InputData$RunIdx))
+```
+
+Run completed.
+
+```{r, results='asis'}
+femaleAllXCols <- params$InputData$Artifacts$F$X_COLS$All
+femaleKeptXCols <- params$InputData$Artifacts$F$X_COLS$Kept
+maleAllXCols <- params$InputData$Artifacts$M$X_COLS$All
+maleKeptXCols <- params$InputData$Artifacts$M$X_COLS$Kept
+ 
+femaleRemovedXCols <- setdiff(femaleAllXCols, femaleKeptXCols)
+maleRemovedXCols <- setdiff(maleAllXCols, maleKeptXCols)
+
+femaleAllYCols <- params$InputData$Artifacts$F$Y_COLS$All
+femaleKeptYCols <- params$InputData$Artifacts$F$Y_COLS$Kept
+maleAllYCols <- params$InputData$Artifacts$M$Y_COLS$All
+maleKeptYCols <- params$InputData$Artifacts$M$Y_COLS$Kept
+ 
+femaleRemovedYCols <- setdiff(femaleAllYCols, femaleKeptYCols)
+maleRemovedYCols <- setdiff(maleAllYCols, maleKeptYCols)
+
+if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 | 
+    length(maleRemovedXCols) > 0 | length(maleRemovedYCols) > 0) {
+  cat("<p>Some attributes in the input data have not been processed with this adjustment due to insufficient data:</p>",
+      "<ul>")
+  if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0) {
+    cat("<li>Female gender<ul>")
+    if (length(femaleRemovedXCols) > 0) {
+      cat("<li>Covariates: ", femaleRemovedXCols, "</li>")
+    }
+    if (length(femaleRemovedYCols) > 0) {
+      cat("<li>Imputed outputs: ", femaleRemovedYCols, "</li>")
+    }
+    cat("</ul></li>")
+  }
+  if (length(maleRemovedXCols) > 0 | length(maleRemovedYCols) > 0) {
+    cat("<li>Male gender<ul>")
+    if (length(maleRemovedXCols) > 0) {
+      cat("<li>Covariates: ", maleRemovedXCols, "</li>")
+    }
+    if (length(maleRemovedYCols) > 0) {
+      cat("<li>Imputed outputs: ", maleRemovedYCols, "</li>")
+    }
+    cat("</ul></li>")
+  }
+  cat("</ul>")
+}
+```

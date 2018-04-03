@@ -1,0 +1,177 @@
+Version 0.8.11 (2018/03/04)
+------------------------------------------------------------------------------
+
+* Allow providing default values for non-mapped attributes.
+* Read all text data as character and convert to proper column types afterwards.
+* Hide summary plots and tables if input data is not uploaded.
+* Compute all missingness pattern details using own code, not port from VIM package.
+* Recreate missingness pattern using ggplot2.
+* Align all summary plots with ECDC house style (colours).
+
+
+Version 0.8.10 (2018/01/24)
+------------------------------------------------------------------------------
+
+* Fix missing template for Word report.
+* Labels for tables in Multiple Imputations report updated.
+
+
+Version 0.8.9 (2018/01/24)
+------------------------------------------------------------------------------
+
+* Multiple Imputations report updated.
+
+
+Version 0.8.8 (2018/01/23)
+------------------------------------------------------------------------------
+
+* Multiple Imputations report updated to have non-fixed column names in tables (support for dummy
+  data set).
+
+
+Version 0.8.7 (2018/01/22)
+------------------------------------------------------------------------------
+
+* Reporting delays adjustment returns proper data with columns "VarT", "Stratum" and
+  "Weight" appended.
+* MI report, figures 6 and 7 have y axis title changed to "Median CD4 cell count (cells/microL)".
+* MI (mice) and MI (jomo) parameter nsdf specified as a slider input with minimum 3 and maximum 5.
+* MI (mice) and MI (jomo) adjustments run in parallel fixed - extra functions exported to
+  computation nodes.
+* MI (mice) implements same checks on data the jomo version does.
+* Experimental support for uploading zipped csv, txt, xls and xlsx files.
+
+
+Version 0.8.6 (2018/01/21)
+------------------------------------------------------------------------------
+
+* Reporting delays adjustment corrected and generalized.
+* Allow exporting intermediate data as stata file.
+
+
+Version 0.8.5 (2018/01/18)
+------------------------------------------------------------------------------
+
+* Multiple imputations (jomo) adjustment filters out covariates columns if less
+  than two distinct values are present in those columns.
+* Multiple imputations (jomo) adjustment filters out outcome columns if they
+  contain only NAs.
+* Intermediate reports headers styling updated.
+* Intermediate report for "Multiple imputations (jomo)" shows information on
+  covariate and imputed columns filtered out due to data not sufficient.
+
+
+Version 0.8.4 (2018/01/18)
+------------------------------------------------------------------------------
+
+* All data sets tested against every adjustment.
+* Reporting delays adjustment updated to support empty data sets (ES) and
+  dealing with missing data (SE).
+* Plots for reporting delay densities ("Summary" page) are implemented using
+  ggplot2. This fixes error "need at least 2 points to select a bandwidth automatically" on
+  ES data.
+* Mean delay plot ("Summary" page) is produced with NotificationTime == NA filtered out.
+  This fixes error "'delta' must be finite and > 0" on ES and SE data.
+* "Summary" page plots are not printed if the input data does not support them.
+* "Summary" page includes pre-processed input data table.
+* Attribute "FirstCD4Count" automatically mapped to "cd4_num" if such column exists
+  in the provided input data.
+
+
+Version 0.8.3 (2018/01/15)
+------------------------------------------------------------------------------
+
+* Variable "Stage" removed from the attributes mapping.
+* Fixed printing stratified plots in the Reporting Delays adjustment artifacts
+  report.
+* Reporting Delays adjustment updated to support input data after Multiple
+  Imputations.
+* Specify stratifaction columns for the reporting delay adjustment by checkboxes
+  (columns "Gender", "Transmission" and "Migr" allowed for selection).
+
+
+Version 0.8.2 (2018/01/11)
+------------------------------------------------------------------------------
+
+* Support data with only one value for AIDS column
+  (function PreProcessInputData adjusted).
+* Support data with NotificationTime equal DiagnosisTime
+  (function GetDataSummaryArtifacts adjusted)
+
+
+Version 0.8.1 (2018/01/11)
+------------------------------------------------------------------------------
+
+* Updated reporting delay adjustment to support stratification (optional).
+* Input data value check moved to page "Data upload".
+* Interface of "Adjustments" and "Reports" pages updated to new design (headers
+  background white, collapsible boxes, inactive elements not visible).
+* Disable adjustment runs without input data uploaded.
+* Multiple imputations report adjusted with dynamic limits for CD4 plots and
+  order of Transmission labels corrected.
+* Increase maximum file upload size to 70MB.
+* Fix report "Multiple Imputations" - show proper year in Table 1 and 3 instead
+  of index.
+
+
+Version 0.8.0 (2018/01/08)
+------------------------------------------------------------------------------
+
+* Issue #23: Argument "endQrt" added to reporting delays adjustment.
+* Issue #24: Stratified reporting delay adjustment added.
+* Issue #25: Displaying reporting delay summary.
+
+
+Version 0.7.8 (2018/01/04)
+------------------------------------------------------------------------------
+
+* Updated functionality and styling of page "Data upload"
+* Reporting delays adjustment script updated to the version submitted by Magda on 2018/01/03.
+
+
+Version 0.7.7 (2017/12/21)
+------------------------------------------------------------------------------
+
+* Fixing output of the multiple imputations adjustment using mice package to
+  make it compatible with the multiple imputations report.
+
+
+Version 0.7.6 (2017/12/12)
+------------------------------------------------------------------------------
+
+* Input data mapping to required columns
+* Intermediate reports
+* Reporting delays adjustment (initial implementation)
+* Multiple imputations adjustment using mice package
+
+
+Version 0.7.5 (2017/12/03)
+------------------------------------------------------------------------------
+
+* Fixed path to diagnosis reports
+
+
+Version 0.7.4
+------------------------------------------------------------------------------
+
+* Framework for running diagnosis implemented
+
+
+Version 0.7.3
+------------------------------------------------------------------------------
+
+* Styling in reports adjusted
+
+
+Version 0.7.2
+------------------------------------------------------------------------------
+
+* Missingness plot added.
+* Fixed plots 6 and 7 in the standard report.
+* Better styling of tables in the report.
+
+
+Version 0.7.1
+------------------------------------------------------------------------------
+
+* First release of deployment procedure.

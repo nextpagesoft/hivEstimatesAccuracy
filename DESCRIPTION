@@ -1,0 +1,37 @@
+Package: hivEstimatesAccuracy
+Type: Package
+Title: Improves Accuracy of HIV Estimates in EU/EEA Countries
+Version: 0.8.11
+Authors@R: c(
+  person("Daniel", "Lewandowski", email = "daniel@nextpagesoft.net", role = c("aut", "cre")),
+  person("Nikos", "Pantazis", email = "npantaz@med.uoa.gr", role = c("aut")),
+  person("Magdalena", "Rosińska", email = "mrosinska@pzh.gov.pl", role = c("aut", "cph")),
+  person("Janusz", "Janiec", email = "jjaniec@pzh.gov.pl", role = c("aut", "ctb")))
+Maintainer: Daniel Lewandowski <daniel@nextpagesoft.net>
+Description: Improves the accuracy of HIV estimates in EU/EEA countries.
+License: GPL-3
+Depends: R (>= 3.1.0)
+Imports:
+  coda (>= 0.19-1),
+  data.table (>= 1.10.4-3),
+  foreign (>= 0.8-0),
+  grid (>= 3.0.0),
+  ggplot2 (>= 2.2.1),
+  graphics (>= 3.0.0),
+  jomo (>= 2.5-1),
+  knitr (>= 1.17),
+  mice (>= 2.46.0),
+  mitools (>= 2.3),
+  readxl (>= 1.0.0), 
+  rmarkdown (>= 1.6),
+  shiny (>= 1.0.5), 
+  shinycssloaders (>= 0.2.0),
+  shinydashboard (>= 0.6.1),
+  shinyjs (>= 0.9.1),
+  stats (>= 3.0.0),
+  quantreg (>= 5.33),
+  yaml (>= 2.1.14)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Suggests: testthat
