@@ -13,7 +13,10 @@ originalData <- ReadDataFile(inputDataFilePath)
 defaultValues <- GetPreliminaryDefaultValues()
 
 attrMapping <- GetPreliminaryAttributesMapping(originalData)
-attrMapping[["FirstCD4Count"]] <- "cd4_num"
+if (is.null(attrMapping[["FirstCD4Count"]])) {
+  attrMapping[["FirstCD4Count"]] <- "cd4_num"
+}
+
 attrMappingStatus <- GetAttrMappingStatus(attrMapping)
 
 if (attrMappingStatus$Valid) {
@@ -35,9 +38,9 @@ summaryArtifacts <- GetDataSummaryArtifacts(inputData)
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
-  GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"])
+  GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
   # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
-  # GetListObject(adjustmentFilePaths["Reporting Delays"])
+  GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
 # Run diagnostic (on the first adjustment only, this is for illustration)
@@ -54,6 +57,7 @@ for (adjustmentSpec in adjustmentSpecs) {
 # Run adjustments
 adjustedData <- RunAdjustments(data = inputData,
                                adjustmentSpecs = adjustmentSpecs)
+
 intermReport <- ""
 for (i in seq_len(length(adjustmentSpecs))) {
   intermReport <- paste(intermReport,
@@ -63,17 +67,10 @@ for (i in seq_len(length(adjustmentSpecs))) {
 }
 print(HTML(intermReport))
 
-# Take the last adjustment output as final data
-finalData <- adjustedData[[length(adjustedData)]]
-
-# Write output
-outputDataFilePath <- CreateOutputFileName(inputDataFilePath,
-                                           suffix = paste0("_", GetTimeStamp()))
-WriteDataFile(finalData$Table, outputDataFilePath)
-
 # Create report
 reportFilePaths <- GetReportFileNames()
-params <- list(AdjustedData = finalData)
+params <- list(AdjustedData = adjustedData)
+
 reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputations"],
                                      format = "html_fragment",
                                      params = params)
@@ -89,3 +86,11 @@ reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputa
 reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputations"],
                                      format = "word_document",
                                      params = params)
+
+# Take the last adjustment output as final data
+finalData <- adjustedData[[length(adjustedData)]]
+
+# Write output
+outputDataFilePath <- CreateOutputFileName(inputDataFilePath,
+                                           suffix = paste0("_", GetTimeStamp()))
+WriteDataFile(finalData$Table, outputDataFilePath)

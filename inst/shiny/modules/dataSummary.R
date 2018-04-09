@@ -38,7 +38,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["missPlotDiv"]] <- renderUI({
-    if (appStatus$InputDataUploaded) {
+    if (appStatus$AttributeMappingValid) {
       missPlot <- artifacts()$MissPlot
       if (!is.null(missPlot)) {
         tagList(
@@ -56,17 +56,20 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["delayDensityOutput"]] <- renderUI({
-    if (appStatus$InputDataUploaded) {
+    if (appStatus$AttributeMappingValid) {
       delayDensFullPlot <- artifacts()$DelayDensFullPlot
       delayDensShortPlot <- artifacts()$DelayDensFullPlot
       if (!is.null(delayDensShortPlot) & !is.null(delayDensShortPlot)) {
-        tagList(
-          h3("2. Observed delay density"),
-          plotOutput(ns("delayDensityPlot"))
-        )
+        elem <- plotOutput(ns("delayDensityPlot"))
       } else {
-        p("This plot cannot be created due to missingness in the provided diagnosis and notification times.")
+        elem <- p("This plot cannot be created due to missingness in the provided diagnosis and notification times.")
       }
+      tagList(
+        h3("2. Observed delay density"),
+        elem
+      )
+    } else {
+      return(NULL)
     }
   })
 
@@ -79,16 +82,20 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["meanDelayOutput"]] <- renderUI({
-    if (appStatus$InputDataUploaded) {
+    if (appStatus$AttributeMappingValid) {
       meanDelayPlot <- artifacts()$MeanDelayPlot
       if (!is.null(meanDelayPlot)) {
-        tagList(
-          h3("3. Observed delay by notification time"),
-          plotOutput(ns("meanDelayPlot"))
-        )
+        elem <- plotOutput(ns("meanDelayPlot"))
       } else {
-        p("This plot cannot be created due to missingness in the provided diagnosis and notification times.")
+        elem <- p("This plot cannot be created due to missingness in the provided diagnosis and notification times.")
       }
+      tagList(
+        h3("3. Observed delay by notification time"),
+        elem
+      )
+
+    } else {
+      return(NULL)
     }
   })
 
@@ -97,7 +104,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["inputDataTableBox"]] <- renderUI({
-    if (appStatus$InputDataUploaded) {
+    if (appStatus$AttributeMappingValid) {
       box(
         width = 12,
         title = "Input data records pre-processed",

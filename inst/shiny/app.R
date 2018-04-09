@@ -65,7 +65,8 @@ ui <- tagList(
 # Define application server logic
 server <- function(input, output, session)
 {
-  appStatus <- reactiveValues(InputDataUploaded = FALSE)
+  appStatus <- reactiveValues(InputDataUploaded = FALSE,
+                              AttributeMappingValid = FALSE)
 
   inputData <- callModule(inputDataUpload, "upload", appStatus)
   callModule(dataSummary, "summary", appStatus, inputData)

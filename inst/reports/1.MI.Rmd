@@ -199,9 +199,16 @@ mimediqrcd4 <- function(vvar, data, byvar, digits = 0, colNamesMapping = NULL) {
   return(list(pred, wide))
 }
 
-data <- copy(params[["AdjustedData"]]$Table)
-cd4Present <- any(!is.na(data$SqCD4))
-nsdf <- params[["AdjustedData"]]$Parameters$nsdf
+data <- copy(params$AdjustedData[[length(params)]]$Table)
+cd4Present <- data[, any(!is.na(SqCD4))]
+
+# Determine last MI adjustment, if any, to get "nsdf" parameter
+adjTypes <- sapply(params$AdjustedData, "[[", "Type")
+miAdjName <- tail(names(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]), 1)
+nsdf <- params$AdjustedData[[miAdjName]]$Parameters$nsdf
+if (is.null(nsdf)) {
+  nsdf <- 5L
+}
 
 if (!"Weight" %in% colnames(data)) {
   data[, Weight := 1]

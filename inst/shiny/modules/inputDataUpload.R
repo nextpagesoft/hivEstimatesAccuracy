@@ -100,6 +100,7 @@ inputDataUpload <- function(input, output, session, appStatus)
     }
 
     appStatus$InputDataUploaded <- TRUE
+    appStatus$AttributeMappingValid <- FALSE
 
     return(originalData)
   }, ignoreNULL = TRUE)
@@ -326,10 +327,13 @@ inputDataUpload <- function(input, output, session, appStatus)
                  vals$AttrMappingStatus$Valid), {
     if (is.null(vals$AttrMappingStatus) | is.null(vals$InputDataTestStatus)) {
       inputData(NULL)
+      appStatus$AttributeMappingValid <- FALSE
     } else if (vals$AttrMappingStatus$Valid & vals$InputDataTestStatus$Valid) {
       inputData(inputDataTest())
+      appStatus$AttributeMappingValid <- TRUE
     } else {
       inputData(NULL)
+      appStatus$AttributeMappingValid <- FALSE
     }
   })
 
