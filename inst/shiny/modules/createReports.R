@@ -138,7 +138,7 @@ createReports <- function(input, output, session, adjustedData)
                      reportFileContent <- ReadStringFromFile(simpleHtmlFileName)
                      setProgress(0.9)
 
-                     file.remove(simpleHtmlFileName)
+                     unlink(simpleHtmlFileName)
                      report <- HTML(reportFileContent)
                      setProgress(1)
                    })

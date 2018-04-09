@@ -43,7 +43,8 @@ adjustmentSpecs <- list(
   GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
-# Run diagnostic (on the first adjustment only, this is for illustration)
+# Run diagnostic
+# adjustmentSpec <- adjustmentSpecs[[1]]
 for (adjustmentSpec in adjustmentSpecs) {
   parameters <- GetParamInfoFromAdjustSpec(adjustmentSpec$Parameters,
                                            infoType = "value")
