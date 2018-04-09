@@ -404,5 +404,5 @@ dataAdjust <- function(input, output, session, inputData)
     })
   })
 
-  return(finalData)
+  return(adjustedData)
 }
