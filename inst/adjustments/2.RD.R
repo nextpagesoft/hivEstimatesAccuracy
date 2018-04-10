@@ -195,6 +195,8 @@ list(
     artifacts <- list(OutputPlotTotal = totalPlot,
                       OutputPlotStrat = stratPlotList)
 
+    cat("No adjustment specific text outputs.\n")
+
     return(list(Table = outputData,
                 Artifacts = artifacts))
   }

@@ -23,10 +23,9 @@ dataAdjustUI <- function(id)
       p(""),
       div(id = ns("adjustmentList")),
       actionButton(ns("runAdjustBtn"), "Run")),
-    uiOutput(ns("diagReport")),
+    # uiOutput(ns("diagReport")),
     uiOutput(ns("intermReport")),
-    uiOutput(ns("runLog")),
-    uiOutput(ns("dataDetails"))
+    uiOutput(ns("runLog"))
   )
 }
 
@@ -39,8 +38,14 @@ dataAdjust <- function(input, output, session, inputData)
   # Store reactive values
   finalData <- reactiveVal(NULL)
   adjustedData <- reactiveVal(NULL)
+  # vals <- reactiveValues(runLog = "",
+  #                        diagReport = "",
+  #                        intermReport = "",
+  #                        adjustmentSpecs = list(),
+  #                        lastAdjustmentWidgetIndex = 0L,
+  #                        editedAdjustmentKey = "",
+  #                        editedAdjustmentParamsWidgets = list())
   vals <- reactiveValues(runLog = "",
-                         diagReport = "",
                          intermReport = "",
                          adjustmentSpecs = list(),
                          lastAdjustmentWidgetIndex = 0L,
@@ -57,7 +62,7 @@ dataAdjust <- function(input, output, session, inputData)
     deleteBtnId    <- paste0("deleteBtn", key)
     adjustSelectId <- paste0("adjustSelect", key)
     editParamBtnId <- paste0("adjustParamBtn", key)
-    runDiagBtnId   <- paste0("runDiagBtn", key)
+    # runDiagBtnId   <- paste0("runDiagBtn", key)
     downloadCsvBtnId  <- paste0("downloadCsvBtn", key)
     downloadStataBtnId  <- paste0("downloadStataBtn", key)
 
@@ -71,7 +76,7 @@ dataAdjust <- function(input, output, session, inputData)
                             choices = adjustmentSpecFileNames)),
       # Edit parameters button
       column(2, actionLink(ns(editParamBtnId), "Edit parameters"), style = "padding-top: 7px"),
-      column(2, actionLink(ns(runDiagBtnId), "Run diagnostic"), style = "padding-top: 7px"),
+      # column(2, actionLink(ns(runDiagBtnId), "Run diagnostic"), style = "padding-top: 7px"),
       column(1, shinyjs::hidden(downloadLink(ns(downloadCsvBtnId), "Download csv")), style = "padding-top: 7px"),
       column(1, shinyjs::hidden(downloadLink(ns(downloadStataBtnId), "Download Stata")), style = "padding-top: 7px"))
 
@@ -98,45 +103,45 @@ dataAdjust <- function(input, output, session, inputData)
       vals$editedAdjustmentKey <- key
     })
 
-    # EVENT: Button "Run diagnostic" clicked
-    observeEvent(input[[runDiagBtnId]], {
-      inputData <- inputData()
-      if (!is.null(inputData)) {
-        withProgress(
-          message = "Running diagnostic",
-          detail = "The report will be displayed shortly.",
-          value = 0, {
-            # Define parameters
-            adjustmentSpec <- vals$adjustmentSpecs[[key]]
-            diagReportFileName <-
-              system.file(file.path("reports/diagnostic",
-                                    paste0(tools::file_path_sans_ext(basename(adjustmentSpec$FileName)),
-                                           "_diagnostic.Rmd")),
-                          package = "hivEstimatesAccuracy")
-
-            parameters <- GetParamInfoFromAdjustSpec(adjustmentSpec$Parameters, infoType = "value")
-
-            setProgress(0.1)
-
-            diagHtmlFileName <- RenderReportToFile(filePath = diagReportFileName,
-                                                   format = "html_fragment",
-                                                   params = list(InputData = list(Table = inputData,
-                                                                                  Parameters = parameters)))
-
-            setProgress(0.8)
-
-            diagReportFileContent <- ReadStringFromFile(diagHtmlFileName)
-            setProgress(0.9)
-
-            file.remove(diagHtmlFileName)
-            diagReport <- HTML(diagReportFileContent)
-            setProgress(1)
-          }
-        )
-
-        vals$diagReport <- diagReport
-      }
-    })
+    # # EVENT: Button "Run diagnostic" clicked
+    # observeEvent(input[[runDiagBtnId]], {
+    #   inputData <- inputData()
+    #   if (!is.null(inputData)) {
+    #     withProgress(
+    #       message = "Running diagnostic",
+    #       detail = "The report will be displayed shortly.",
+    #       value = 0, {
+    #         # Define parameters
+    #         adjustmentSpec <- vals$adjustmentSpecs[[key]]
+    #         diagReportFileName <-
+    #           system.file(file.path("reports/diagnostic",
+    #                                 paste0(tools::file_path_sans_ext(basename(adjustmentSpec$FileName)),
+    #                                        "_diagnostic.Rmd")),
+    #                       package = "hivEstimatesAccuracy")
+    #
+    #         parameters <- GetParamInfoFromAdjustSpec(adjustmentSpec$Parameters, infoType = "value")
+    #
+    #         setProgress(0.1)
+    #
+    #         diagHtmlFileName <- RenderReportToFile(filePath = diagReportFileName,
+    #                                                format = "html_fragment",
+    #                                                params = list(InputData = list(Table = inputData,
+    #                                                                               Parameters = parameters)))
+    #
+    #         setProgress(0.8)
+    #
+    #         diagReportFileContent <- ReadStringFromFile(diagHtmlFileName)
+    #         setProgress(0.9)
+    #
+    #         file.remove(diagHtmlFileName)
+    #         diagReport <- HTML(diagReportFileContent)
+    #         setProgress(1)
+    #       }
+    #     )
+    #
+    #     vals$diagReport <- diagReport
+    #   }
+    # })
 
     # Store for next adjustment selection widget addition
     vals$lastAdjustmentWidgetIndex <- index
@@ -277,7 +282,7 @@ dataAdjust <- function(input, output, session, inputData)
       adjustedData(NULL)
       vals$runLog <- ""
       vals$intermReport <- ""
-      vals$diagReport <- ""
+      # vals$diagReport <- ""
       startTime <- Sys.time()
       withProgress({
         tryCatch({
@@ -286,7 +291,7 @@ dataAdjust <- function(input, output, session, inputData)
                                            adjustmentSpecs = vals$adjustmentSpecs)
 
             interimReport <- ""
-            for (i in seq_len(length(vals$adjustmentSpecs))) {
+            for (i in seq_along(vals$adjustmentSpecs)) {
               interimReport <- paste(interimReport,
                                      RenderReportForAdjSpec(vals$adjustmentSpecs[[i]],
                                                             "intermediate",
@@ -314,22 +319,22 @@ dataAdjust <- function(input, output, session, inputData)
     }
   })
 
-  # Output report when it has changed
-  output[["diagReport"]] <- renderUI({
-    if (vals$diagReport != "") {
-      diagReportHTML <- box(
-        width = 12,
-        title = "Diagnostic report",
-        solidHeader = FALSE,
-        collapsible = TRUE,
-        status = "warning",
-        vals$diagReport
-      )
-    } else {
-      diagReportHTML <- NULL
-    }
-    return(diagReportHTML)
-  })
+  # # Output report when it has changed
+  # output[["diagReport"]] <- renderUI({
+  #   if (vals$diagReport != "") {
+  #     diagReportHTML <- box(
+  #       width = 12,
+  #       title = "Diagnostic report",
+  #       solidHeader = FALSE,
+  #       collapsible = TRUE,
+  #       status = "warning",
+  #       vals$diagReport
+  #     )
+  #   } else {
+  #     diagReportHTML <- NULL
+  #   }
+  #   return(diagReportHTML)
+  # })
 
   # Output intermediate report when it has changed
   output[["intermReport"]] <- renderUI({
@@ -337,7 +342,7 @@ dataAdjust <- function(input, output, session, inputData)
       intermReportHTML <- box(
         class = "intermReport",
         width = 12,
-        title = "Adjustments outputs report",
+        title = "Intermediate outputs of adjustments",
         solidHeader = FALSE,
         collapsible = TRUE,
         status = "warning",
@@ -375,33 +380,6 @@ dataAdjust <- function(input, output, session, inputData)
     } else {
       finalData(NULL)
     }
-  })
-
-  # Output adjusted data details when they have changed
-  output[["dataDetails"]] <- renderUI({
-    # Respond to adjustedData change
-    finalData <- finalData()$Table
-
-    isolate({
-      if (!is.null(finalData)) {
-        # Get adjusted data details
-        finalDataDetailsHTML <-
-          box(
-            width = 12,
-            title = "Adjusted data details",
-            solidHeader = FALSE,
-            collapsible = TRUE,
-            status = "warning",
-            div(
-              p(strong("Number of records:"), nrow(finalData)),
-              p(strong("Column names:"), paste(names(finalData), collapse = ", ")))
-          )
-      } else {
-        finalDataDetailsHTML <- NULL
-      }
-
-      return(finalDataDetailsHTML)
-    })
   })
 
   return(adjustedData)

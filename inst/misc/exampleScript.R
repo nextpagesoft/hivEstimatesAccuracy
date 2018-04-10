@@ -33,13 +33,12 @@ if (attrMappingStatus$Valid) {
 
 inputData <- PreProcessInputData(inputData)
 
-summaryArtifacts <- PlotMissingness(inputData)
 summaryArtifacts <- GetDataSummaryArtifacts(inputData)
 
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
-  GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
+  # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
   # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
   GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
@@ -61,13 +60,13 @@ adjustedData <- RunAdjustments(data = inputData,
                                adjustmentSpecs = adjustmentSpecs)
 
 intermReport <- ""
-for (i in seq_len(length(adjustmentSpecs))) {
+for (i in seq_along(adjustmentSpecs)) {
   intermReport <- paste(intermReport,
                         RenderReportForAdjSpec(adjustmentSpec = adjustmentSpecs[[i]],
                                                fileNameSuffix = "intermediate",
                                                params = adjustedData[[i]]))
 }
-print(HTML(intermReport))
+intermReport <- HTML(intermReport)
 
 # Create report
 reportFilePaths <- GetReportFileNames()

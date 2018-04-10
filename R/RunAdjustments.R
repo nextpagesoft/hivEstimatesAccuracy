@@ -29,19 +29,22 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
   for (adjustmentSpec in adjustmentSpecs) {
     i <- i + 1
 
+    caption <- paste(i, adjustmentSpec$Name, sep = ".")
     if (!"Key" %in% names(adjustmentSpec)) {
-      adjustmentSpec$Key <- paste(i, adjustmentSpec$Name, sep = ".")
+      adjustmentSpec$Key <- caption
     }
 
-    adjustmentCaption <- paste0(i, ": ", adjustmentSpec$Name)
-    message("Executing adjustment ", adjustmentCaption)
+    cat("--------------------------------------------------------------------------------\n")
+    cat("### Executing adjustment: ", caption, "\n\n", sep = "")
 
     # Extract parameters for better visibility.
     parameters <- GetParamInfoFromAdjustSpec(adjustmentSpec$Parameters,
                                              infoType = "value")
 
-    cat("Parameters:\n")
+    cat("## Parameters:\n")
     print(parameters)
+
+    cat("## Adjustment text output:\n")
 
     # Run adjustment function
     output <- adjustmentSpec$AdjustmentFunction(inputData = data$Table,
@@ -57,7 +60,7 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
     # Store intermediate results for later reference
     results[[adjustmentSpec$Key]] <- data
 
-    message("Done with adjustment ", adjustmentCaption)
+    cat("\nDone with adjustment:", caption, "\n\n")
   }
 
   return(results)

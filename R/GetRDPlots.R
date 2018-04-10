@@ -22,7 +22,7 @@ GetRDPlots <- function(
   stratum = NULL,
   plotData,
   isOriginalData = TRUE,
-  colorPalette = c("#AAAAAA", "#E69F00", "#000000", "#56B4E9"))
+  colorPalette = c("#d9d9d9", "#69b023", "#7bbcc0", "#56B4E9"))
 {
   if (!is.null(stratum)) {
     localPlotData <- plotData[Stratum == stratum]
@@ -42,9 +42,16 @@ GetRDPlots <- function(
                 alpha = 0.4) +
     scale_fill_manual("Bounds", values = colorPalette[1]) +
     geom_line(data = localConfBoundsPlotData,
-              aes(x = DateOfDiagnosisYear, y = EstCount, color = "Estimated total"), size = 0.5) +
-    geom_line(aes(y = Count, group = Source, color = Source), size = 0.2) +
+              aes(x = DateOfDiagnosisYear, y = EstCount, color = "Estimated total"), size = 1) +
+    geom_line(aes(y = Count, group = Source, color = Source), size = 1) +
     scale_colour_manual("Counts", values = colorPalette[2:4]) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    theme_classic() +
+    theme(text = element_text(size = 14),
+          panel.grid = element_blank(),
+          axis.line = element_line(colour = "#888888"),
+          axis.ticks = element_line(colour = "#888888")) +
     xlab("Diagnosis year") +
     ylab("Count of HIV cases")
 

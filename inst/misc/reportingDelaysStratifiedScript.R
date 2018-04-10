@@ -3,86 +3,6 @@ library(hivEstimatesAccuracy)
 library(data.table)
 library(ggplot2)
 
-# Helper functions
-GetRDPlotData <- function(data, by) {
-  # Number of imputations in the data (at least one - original data)
-  nimp <- data[, length(unique(Imputation)) - 1]
-
-  # Aggregate
-  data <- data[, .(Count = sum(Count),
-                   EstCount = sum(EstCount),
-                   EstCountVar = sum(EstCountVar)),
-               by = by]
-
-  # Prepare records for reported data
-  dataRep <- data[Source == "Reported"]
-  dataRep[, Imputation := NULL]
-
-  # Combine estimates obtained for each imputation
-  dataImp <- data[Source == "Imputed",
-                  .(Count = mean(Count),
-                    EstCount = mean(EstCount),
-                    EstCountVarWi = mean(EstCountVar),
-                    EstCountVarBe = na.zero(var(EstCount))),
-                  by = setdiff(by, "Imputation")]
-  dataImp[, ":="(
-    EstCountVar = EstCountVarWi + (1 + 1/nimp) * EstCountVarBe,
-    EstCountVarWi = NULL,
-    EstCountVarBe = NULL
-  )]
-
-  # Combine both data sets again
-  data <- rbind(dataRep,
-                dataImp,
-                use.names = TRUE)
-  data[, ":="(
-    LowerEstCount = EstCount - 1.96 * sqrt(EstCountVar),
-    UpperEstCount = EstCount + 1.96 * sqrt(EstCountVar)
-  )]
-
-  return(data)
-}
-
-GetRDPlots <- function(stratum = NULL, plotData = NULL, isOriginalData = TRUE,
-                       colorPalette = c("#AAAAAA", "#E69F00", "#000000", "#56B4E9")) {
-  if (!is.null(stratum)) {
-    localPlotData <- plotData[Stratum == stratum]
-  } else {
-    localPlotData <- plotData
-  }
-
-  localPlotData <- droplevels(localPlotData)
-
-  localConfBoundsPlotData <- localPlotData[Source == ifelse(isOriginalData,
-                                                            "Reported",
-                                                            "Imputed")]
-  plot <-
-    ggplot(data = localPlotData, aes(x = DateOfDiagnosisYear)) +
-    geom_ribbon(data = localConfBoundsPlotData,
-                aes(ymin = pmin(pmax(LowerEstCount, 0), max(EstCount)),
-                    ymax = pmin(pmax(UpperEstCount, 0), max(EstCount)),
-                    fill = "95% confidence interval\nfor estimated total count"),
-                alpha = 0.4) +
-    scale_fill_manual("Bounds", values = colorPalette[1]) +
-    geom_line(data = localConfBoundsPlotData,
-              aes(x = DateOfDiagnosisYear, y = EstCount, color = "Estimated total"), size = 0.5) +
-    geom_line(aes(y = Count, group = Source, color = Source), size = 0.2) +
-    scale_colour_manual("Counts", values = colorPalette[2:4]) +
-    xlab("Diagnosis year") +
-    ylab("Count of HIV cases")
-
-  if (!is.null(stratum)) {
-    plot <- plot +
-      ggtitle(paste("Reported and estimated total count of cases, by", stratum)) +
-      facet_wrap(~ StratumValue, ncol = 2)
-  } else {
-    plot <- plot +
-      ggtitle("Reported and estimated total count of cases")
-  }
-
-  return(plot)
-}
-
 # Settings
 
 # Separator used for creating a composite of stratum columns. Should not occur in the stratum values.
@@ -99,7 +19,7 @@ startYear <- 2000L
 endQrt <- 2017.25
 
 # Input data path
-inputDataFilePath <- "e:/csv_pilot/ALL.zip"
+inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/dummy_miss1.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
 # A) READ INPUT DATA ------------------------------------------------------------------------------
@@ -116,7 +36,6 @@ attrMapping[["FirstCD4Count"]] <- "cd4_num"
 
 # Pre-process data
 inputData <- ApplyAttributesMapping(originalData, attrMapping)
-inputDataValidityInfo <- ValidateInputData(inputData)
 outputData <- PreProcessInputData(inputData)
 
 

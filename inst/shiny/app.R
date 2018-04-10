@@ -20,11 +20,13 @@ library(hivEstimatesAccuracy)
 
 # Load application modules
 modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
+source(file.path(modulesPath, "introduction.R"))
 source(file.path(modulesPath, "inputDataUpload.R"))
 source(file.path(modulesPath, "dataSummary.R"))
 source(file.path(modulesPath, "dataAdjust.R"))
 source(file.path(modulesPath, "createReports.R"))
 source(file.path(modulesPath, "settings.R"))
+source(file.path(modulesPath, "outputs.R"))
 
 # App globals
 titleString <- paste0("HIV Estimate Accuracy v.", packageVersion("hivEstimatesAccuracy"))
@@ -38,10 +40,12 @@ ui <- tagList(
                     titleWidth = 300),
     dashboardSidebar(
       sidebarMenu(
-        menuItem("Input data upload",  tabName = "upload",      icon = icon("database")),
-        menuItem("Input data summary", tabName = "summary",     icon = icon("table")),
+        menuItem("Introduction",       tabName = "intro",       icon = icon("home")),
+        menuItem("Input data upload",  tabName = "upload",      icon = icon("upload")),
+        menuItem("Input data summary", tabName = "summary",     icon = icon("bar-chart")),
         menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
-        menuItem("Reports",            tabName = "reports",     icon = icon("book"))
+        menuItem("Reports",            tabName = "reports",     icon = icon("book")),
+        menuItem("Outputs",            tabName = "outputs",     icon = icon("download"))
       )
     ),
     dashboardBody(
@@ -49,14 +53,12 @@ ui <- tagList(
         tags$link(rel = "stylesheet", type = "text/css", href = "./css/style.css")
       ),
       tabItems(
-        tabItem(tabName = "upload",
-                fluidRow(inputDataUploadUI("upload"))),
-        tabItem(tabName = "summary",
-                fluidRow(dataSummaryUI("summary"))),
-        tabItem(tabName = "adjustments",
-                fluidRow(dataAdjustUI("adjustments"))),
-        tabItem(tabName = "reports",
-                fluidRow(createReportsUI("reports")))
+        tabItem(tabName = "intro",       fluidRow(introductionUI("intro"))),
+        tabItem(tabName = "upload",      fluidRow(inputDataUploadUI("upload"))),
+        tabItem(tabName = "summary",     fluidRow(dataSummaryUI("summary"))),
+        tabItem(tabName = "adjustments", fluidRow(dataAdjustUI("adjustments"))),
+        tabItem(tabName = "reports",     fluidRow(createReportsUI("reports"))),
+        tabItem(tabName = "outputs",     fluidRow(outputsUI("outputs")))
       )
     )
   )
@@ -68,11 +70,13 @@ server <- function(input, output, session)
   appStatus <- reactiveValues(InputDataUploaded = FALSE,
                               AttributeMappingValid = FALSE)
 
+  callModule(introduction, "intro")
   inputData <- callModule(inputDataUpload, "upload", appStatus)
   callModule(dataSummary, "summary", appStatus, inputData)
   adjustedData <- callModule(dataAdjust, "adjustments", inputData)
   callModule(createReports, "reports", adjustedData)
   callModule(settings, "settings")
+  callModule(outputs, "outputs")
 
   if (!isServer) {
     session$onSessionEnded(stopApp)
