@@ -30,7 +30,7 @@ GetMissingnessPlots <- function(
 
   getRelFreq <- function(x) sum(x) / length(x)
   isMissing <- function(x) as.integer(is.na(x))
-  percent_format <- function(x, decim = 0) sprintf(paste("%.", decim, "f%%"), x * 100)
+  percent_format <- function(x, decim = 0L) sprintf(paste0("%.", decim, "f%%"), x * 100)
 
   missData <- inputData[, ..columnNames]
   missData[, c(columnNames) := lapply(.SD, isMissing), .SDcols = columnNames]
