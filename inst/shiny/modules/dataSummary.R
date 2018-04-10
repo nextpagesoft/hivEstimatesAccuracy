@@ -39,11 +39,11 @@ dataSummary <- function(input, output, session, appStatus, inputData)
 
   output[["missPlotDiv"]] <- renderUI({
     if (appStatus$AttributeMappingValid) {
-      missPlot <- artifacts()$MissPlot
-      if (!is.null(missPlot)) {
+      missPlots <- artifacts()$MissPlots
+      if (!is.null(missPlots)) {
         tagList(
           h3("1. Missing data summary"),
-          plotOutput(ns("missPlot"))
+          plotOutput(ns("missPlots"))
         )
       }
     } else {
@@ -51,8 +51,10 @@ dataSummary <- function(input, output, session, appStatus, inputData)
     }
   })
 
-  output[["missPlot"]] <- renderPlot({
-    artifacts()$MissPlot
+  output[["missPlots"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlots,
+                       cols = 3,
+                       widths = c(3, 3, 2))
   })
 
   output[["delayDensityOutput"]] <- renderUI({

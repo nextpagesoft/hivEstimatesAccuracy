@@ -43,7 +43,6 @@ RenderReportToFile <- function(filePath, format = "html_fragment", ...)
       unlink(file.path(dirname(tempReportFilePath), "resources"),
              recursive = TRUE)
     })
-
   }
 
   reportFileName <- rmarkdown::render(input = tempReportFilePath,

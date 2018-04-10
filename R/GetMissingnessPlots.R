@@ -1,4 +1,4 @@
-#' PlotMissingness
+#' GetMissingnessPlots
 #'
 #' Create plot with overview of missing data.
 #'
@@ -16,7 +16,7 @@
 #' }
 #'
 #' @export
-PlotMissingness <- function(
+GetMissingnessPlots <- function(
   inputData,
   columnNames = c("Transmission", "Migr", "Gender", "Age", "FirstCD4Count"),
   labels = c("Transm.", "Migrant", "Gender", "Age", "CD4"))
@@ -114,11 +114,5 @@ PlotMissingness <- function(
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
 
-  PlotMultipleCharts(plots = list(relFreqPlot, missPatternPlot, missHistPlot),
-                     cols = 3,
-                     widths = c(3, 3, 2))
-
-  missPlot <- grDevices::recordPlot()
-
-  invisible(missPlot)
+  invisible(list(relFreqPlot, missPatternPlot, missHistPlot))
 }

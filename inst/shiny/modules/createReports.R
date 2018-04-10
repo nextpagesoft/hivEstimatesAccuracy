@@ -204,8 +204,7 @@ createReports <- function(input, output, session, adjustedData)
           RenderReportToFile(reportFileNames[vals$selectedReportName],
                              format = format,
                              params = params,
-                             output_file = file,
-                             envir = new.env(parent = globalenv()))
+                             output_file = file)
           setProgress(1)
         })
       }

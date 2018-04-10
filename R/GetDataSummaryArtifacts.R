@@ -25,7 +25,7 @@ GetDataSummaryArtifacts <- function(inputData)
 
   inputData <- copy(inputData)
 
-  missPlot <- PlotMissingness(inputData)
+  missPlots <- GetMissingnessPlots(inputData)
 
   # New stuff
   inputData[, ":="(
@@ -127,7 +127,7 @@ GetDataSummaryArtifacts <- function(inputData)
     meanDelayPlot <- NULL
   }
 
-  return(list(MissPlot = missPlot,
+  return(list(MissPlots = missPlots,
               DelayDensFullPlot = delayDensFullPlot,
               DelayDensShortPlot = delayDensShortPlot,
               MeanDelayPlot = meanDelayPlot))

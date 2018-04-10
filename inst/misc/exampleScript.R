@@ -33,6 +33,7 @@ if (attrMappingStatus$Valid) {
 
 inputData <- PreProcessInputData(inputData)
 
+summaryArtifacts <- PlotMissingness(inputData)
 summaryArtifacts <- GetDataSummaryArtifacts(inputData)
 
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
