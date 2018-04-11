@@ -13,7 +13,7 @@ params:
 ---
 ```{r setup, include = FALSE}
 require(hivEstimatesAccuracy, quietly = TRUE)
-knitr::opts_chunk$set(echo = FALSE, results = "markup", message = FALSE, warning = FALSE, include = TRUE, fig.height = 5, fig.width = 12)
+knitr::opts_chunk$set(echo = FALSE, results = "markup", message = FALSE, warning = FALSE, include = TRUE, fig.height = 4, fig.width = 10)
 ```
 
 ```{r, results='asis'}
