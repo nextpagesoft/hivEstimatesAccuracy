@@ -110,7 +110,8 @@ list(
     }
 
     # 1. Preprocess data for mice specifically
-    inputData <- PreProcessInputDataForMice(inputData)
+    preProcData <- PreProcessInputDataForMice(inputData)
+    inputData <- preProcData$Table
 
     # 2. Save original order for later
     inputData[, OrigSort := .I]
@@ -151,6 +152,7 @@ list(
     # 6. Combine all data sets
     table <- rbindlist(lapply(outputData, "[[", "Table"))
     artifacts <- lapply(outputData, "[[", "Artifacts")
+    artifacts <- modifyList(artifacts, preProcData$Artifacts)
 
     # 7. Restore original order per Imputation
     setorder(table, Imputation, OrigSort)
