@@ -20,8 +20,6 @@ knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.heig
 cat(sprintf("# %d. Multiple Imputations (jomo)", params$InputData$RunIdx))
 ```
 
-Run completed.
-
 ```{r, results='asis'}
 femaleAllXCols <- params$InputData$Artifacts$F$X_COLS$All
 femaleKeptXCols <- params$InputData$Artifacts$F$X_COLS$Kept
@@ -66,3 +64,28 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
   cat("</ul>")
 }
 ```
+
+## Female
+
+**Figure 1. Trace plot**<br />
+```{r}
+PlotMCMCDiagnostic(params$InputData$Artifacts$F$Beta, plotType = "trace")
+```
+
+**Figure 2. Autocorrelation plot**<br />
+```{r}
+PlotMCMCDiagnostic(params$InputData$Artifacts$F$Covariance, plotType = "autocorrelation")
+```
+
+## Male
+
+**Figure 3. Trace plot**<br />
+```{r}
+PlotMCMCDiagnostic(params$InputData$Artifacts$M$Beta, plotType = "trace")
+```
+
+**Figure 4. Autocorrelation plot**<br />
+```{r}
+PlotMCMCDiagnostic(params$InputData$Artifacts$M$Covariance, plotType = "autocorrelation")
+```
+
