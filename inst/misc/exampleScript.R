@@ -38,22 +38,22 @@ summaryArtifacts <- GetDataSummaryArtifacts(inputData)
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
-  # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
+  GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"])
   # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
-  GetListObject(adjustmentFilePaths["Reporting Delays"])
+  # GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
-# Run diagnostic
-# adjustmentSpec <- adjustmentSpecs[[1]]
-for (adjustmentSpec in adjustmentSpecs) {
-  parameters <- GetParamInfoFromAdjustSpec(adjustmentSpec$Parameters,
-                                           infoType = "value")
-
-  print(RenderReportForAdjSpec(adjustmentSpec = adjustmentSpec,
-                               fileNameSuffix = "diagnostic",
-                               params = list(Table = inputData,
-                                             Parameters = parameters)))
-}
+# # Run diagnostic
+# # adjustmentSpec <- adjustmentSpecs[[1]]
+# for (adjustmentSpec in adjustmentSpecs) {
+#   parameters <- GetParamInfoFromAdjustSpec(adjustmentSpec$Parameters,
+#                                            infoType = "value")
+#
+#   print(RenderReportForAdjSpec(adjustmentSpec = adjustmentSpec,
+#                                fileNameSuffix = "diagnostic",
+#                                params = list(Table = inputData,
+#                                              Parameters = parameters)))
+# }
 
 # Run adjustments
 adjustedData <- RunAdjustments(data = inputData,
