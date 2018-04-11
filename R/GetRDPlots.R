@@ -8,7 +8,7 @@
 #' @param isOriginalData Logical indicating that \code{plotData} is based on data before any other
 #'   adjustment. Optional. Default = TRUE.
 #' @param colorPalette Character vector of length 4 with colors for plotted series. Optional.
-#'   Default = \code{c("#AAAAAA", "#E69F00", "#000000", "#56B4E9")}.
+#'   Default = \code{c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce")}.
 #'
 #' @return Data table object
 #'
@@ -22,7 +22,7 @@ GetRDPlots <- function(
   stratum = NULL,
   plotData,
   isOriginalData = TRUE,
-  colorPalette = c("#d9d9d9", "#69b023", "#7bbcc0", "#56B4E9"))
+  colorPalette = c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"))
 {
   if (!is.null(stratum)) {
     localPlotData <- plotData[Stratum == stratum]
@@ -48,7 +48,10 @@ GetRDPlots <- function(
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +
-    theme(text = element_text(size = 14),
+    theme(plot.title = element_text(size = 13),
+          axis.title.x =  element_text(size = 10),
+          axis.title.y =  element_text(size = 10),
+          text = element_text(size = 11),
           panel.grid = element_blank(),
           axis.line = element_line(colour = "#888888"),
           axis.ticks = element_line(colour = "#888888")) +
