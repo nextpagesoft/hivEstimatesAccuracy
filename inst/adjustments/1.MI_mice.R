@@ -45,7 +45,12 @@ list(
 
     # Perform imputations per data set.
     # This is the actual worker function.
-    workerFunction <- function(dataSet, nit, nimp, nsdf) {
+    workerFunction <- function(i, nit, nimp, nsdf) {
+
+      cat("\n")
+      cat(sprintf("Processing gender: %s\n", names(dataSets)[i]))
+
+      dataSet <- dataSets[[i]]
 
       artifacts <- list()
 
@@ -77,29 +82,40 @@ list(
       intercept <- 1L
 
       # Define covariates of joint imputation model
-      X <- cbind(dataSet[, ..xColNames],
-                 Intercept = intercept,
+      X <- cbind(Intercept = intercept,
                  splineBasisMatrix)
-      # Define outcomes of joint imputation model
-      Y <- dataSet[, ..yColNames]
+      if (length(xColNames) > 0) {
+        X <- cbind(dataSet[, ..xColNames],
+                   X)
+      }
 
-      # Workaround for jomo bug:
-      # Not used levels must be removed
-      X <- droplevels(X)
-      Y <- droplevels(Y)
+      if (length(yColNames) > 0) {
+        # Define outcomes of joint imputation model
+        Y <- dataSet[, ..yColNames]
 
-      # Run model
-      imp <- mice::mice(cbind(Y, X),
-                        m = nimp,
-                        maxit = nit)
-      imp <- setDT(mice::complete(imp, action = "long", include = TRUE))
-      setnames(imp, old = c(".imp", ".id"), new = c("Imputation", "id"))
+        # Not used levels must be removed
+        X <- droplevels(X)
+        Y <- droplevels(Y)
+
+        # Run model
+        cat("Performing imputation.\n")
+        imp <- mice::mice(cbind(Y, X),
+                          m = nimp,
+                          maxit = nit)
+        imp <- setDT(mice::complete(imp, action = "long", include = TRUE))
+        setnames(imp, old = c(".imp", ".id"), new = c("Imputation", "id"))
+
+      } else {
+        imp <- data.table(Imputation = 0L,
+                          id = seq_len(nrow(Y)))
+      }
 
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
       dataSetColNames <- setdiff(colnames(dataSet), yColNames)
 
-      mi <- cbind(imp[, ..impColNames], dataSet[, ..dataSetColNames])
+      mi <- cbind(imp[, ..impColNames],
+                  dataSet[, ..dataSetColNames])
 
       setcolorder(mi, union(indexColNames, names(dataSet)))
 
@@ -128,13 +144,13 @@ list(
       cl <- parallel::makeCluster(2)
       parallel::clusterExport(cl, c("libPaths", "mice.impute.pmm", "mice.impute.pmm",
                                     "mice.impute.polyreg", "mice.impute.logreg",
-                                    "ConvertDataTableColumns"))
+                                    "ConvertDataTableColumns", "dataSets"))
       parallel::clusterEvalQ(cl, {
 				.libPaths(libPaths)
         library(data.table)
       })
       outputData <- parallel::parLapply(cl,
-                                        dataSets,
+                                        seq_along(dataSets),
                                         workerFunction,
                                         nit = parameters$nit,
                                         nimp = parameters$nimp,
@@ -142,7 +158,7 @@ list(
       parallel::stopCluster(cl)
     } else {
       # Run sequentially
-      outputData <- lapply(dataSets,
+      outputData <- lapply(seq_along(dataSets),
                            workerFunction,
                            nit = parameters$nit,
                            nimp = parameters$nimp,
@@ -150,6 +166,7 @@ list(
     }
 
     # 6. Combine all data sets
+    names(outputData) <- names(dataSets)
     table <- rbindlist(lapply(outputData, "[[", "Table"))
     artifacts <- lapply(outputData, "[[", "Artifacts")
     artifacts <- modifyList(artifacts, preProcData$Artifacts)

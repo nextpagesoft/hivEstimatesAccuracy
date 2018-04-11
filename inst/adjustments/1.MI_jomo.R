@@ -50,7 +50,12 @@ list(
 
     # Perform imputations per data set.
     # This is the actual worker function.
-    workerFunction <- function(dataSet, nburn, nbetween, nimp, nsdf) {
+    workerFunction <- function(i, nburn, nbetween, nimp, nsdf) {
+
+      cat("\n")
+      cat(sprintf("Processing gender: %s\n", names(dataSets)[i]))
+
+      dataSet <- dataSets[[i]]
 
       artifacts <- list()
 
@@ -85,10 +90,11 @@ list(
       X <- cbind(Intercept = intercept,
                  splineBasisMatrix)
       if (length(xColNames) > 0) {
-        X <- cbind(dataSet[, ..xColNames], X)
+        X <- cbind(dataSet[, ..xColNames],
+                   X)
       }
 
-      if (length(yColNames)) {
+      if (length(yColNames) > 0) {
         # Define outcomes of joint imputation model
         Y <- dataSet[, ..yColNames]
 
@@ -98,11 +104,20 @@ list(
         Y <- droplevels(Y)
 
         # Run model
+        cat("Running MCMC sampler.\n\n")
+        mcmc <- jomo::jomo.MCMCchain(Y = Y, X = X, nburn = nburn, output = 0)
+
+        artifacts[["Beta"]] <- mcmc$collectbeta
+        artifacts[["Covariance"]] <- mcmc$collectomega
+
+        cat("\nPerforming imputation.\n\n")
         imp <- setDT(jomo::jomo(Y = Y,
                                 X = X,
                                 nburn = nburn,
                                 nbetween = nbetween,
                                 nimp = nimp,
+                                beta.start = mcmc$collectbeta[, , nburn],
+                                l1cov.start = mcmc$collectomega[, , nburn],
                                 out.iter = 100))
       } else {
         imp <- data.table(Imputation = 0L,
@@ -138,13 +153,13 @@ list(
     if (parameters$runInParallel) {
       # Run in parallel
       cl <- parallel::makeCluster(2)
-      parallel::clusterExport(cl, c("libPaths", "ConvertDataTableColumns"))
+      parallel::clusterExport(cl, c("libPaths", "ConvertDataTableColumns", "dataSets"))
       parallel::clusterEvalQ(cl, {
 				.libPaths(libPaths)
         library(data.table)
       })
       outputData <- parallel::parLapply(cl,
-                                        dataSets,
+                                        seq_along(dataSets),
                                         workerFunction,
                                         nburn = parameters$nburn,
                                         nbetween = parameters$nbetween,
@@ -153,7 +168,7 @@ list(
       parallel::stopCluster(cl)
     } else {
       # Run sequentially
-      outputData <- lapply(dataSets,
+      outputData <- lapply(seq_along(dataSets),
                            workerFunction,
                            nburn = parameters$nburn,
                            nbetween = parameters$nbetween,
@@ -162,6 +177,7 @@ list(
     }
 
     # 5. Combine all data sets
+    names(outputData) <- names(dataSets)
     table <- rbindlist(lapply(outputData, "[[", "Table"))
     artifacts <- lapply(outputData, "[[", "Artifacts")
 
