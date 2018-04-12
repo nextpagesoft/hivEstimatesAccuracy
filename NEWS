@@ -1,3 +1,11 @@
+Version 0.9.1 (2018/04/)
+------------------------------------------------------------------------------
+
+* "Multiple Imputations" report name changed to "Main Report". Generalization
+  of the report to handle all possible scenarios and ECDC styling applied.
+
+
+
 Version 0.9.0 (2018/04/10)
 ------------------------------------------------------------------------------
 

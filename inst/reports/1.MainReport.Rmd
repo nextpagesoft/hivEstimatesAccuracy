@@ -38,7 +38,7 @@ require(ggplot2)
 require(mitools)
 require(quantreg)
 
-colorPalette = c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce")
+colorPalette = c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce")
 
 # C. Functions definitions ---
 
@@ -302,8 +302,9 @@ ggplot(temp_data_orig_gender) +
   geom_point() +
   geom_line() +
   labs(x = "Year", y = "Number of diagnoses")  +
-  scale_color_discrete(name = "Gender", labels = c("Female", "Male")) + 
-  scale_colour_manual("Gender", values = colorPalette[2:4]) +
+  scale_colour_manual(name = "Gender", 
+                      labels = c("Female", "Male"), 
+                      values = colorPalette) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()
@@ -325,9 +326,10 @@ ggplot(data_orig) +
   stat_summary(fun.y = "median", na.rm = TRUE, geom = "line") + 
   stat_summary(fun.y = "median", na.rm = TRUE, geom = "point") + 
   labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-  scale_color_discrete(name = "Gender", labels = c("Female", "Male")) + 
   coord_cartesian(ylim = c(0, cd4YLim)) +
-  scale_colour_manual("Gender", values = colorPalette[2:4]) +
+  scale_colour_manual(name = "Gender", 
+                      labels = c("Female", "Male"), 
+                      values = colorPalette) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()
@@ -354,8 +356,9 @@ ggplot(temp_data_orig_transmission) +
   geom_point() +
   geom_line() +
   labs(x = "Year", y = "Number of diagnoses") +
-  scale_color_discrete(name = "Transmission\ncategory", labels = c("Hetero", "IDU", "MSM", "Missing")) +
-  scale_colour_manual("Transmission\ncategory", values = colorPalette[2:6]) +
+  scale_colour_manual(name = "Transmission\ncategory", 
+                      labels = c("Hetero", "IDU", "MSM", "Missing"), 
+                      values = colorPalette) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()
@@ -374,10 +377,10 @@ ggplot(data_orig) +
   stat_summary(fun.y = "median", na.rm = TRUE, geom = "line") + 
   stat_summary(fun.y = "median", na.rm = TRUE, geom = "point") + 
   labs(x = "Year", y = "Median CD4 cell count (cells/microL)")  +
-  scale_color_discrete(name = "Transmission\ncategory", 
-                       labels = c("Hetero", "IDU","MSM", "Missing")) + 
   coord_cartesian(ylim = c(0, cd4YLim)) +
-  scale_colour_manual("Transmission\ncategory", values = colorPalette[2:6]) +
+  scale_colour_manual(name = "Transmission\ncategory", 
+                      labels = c("Hetero", "IDU","MSM", "Missing"),
+                      values = colorPalette) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()
@@ -444,8 +447,9 @@ ggplot(pred) +
   geom_point() +
   geom_line() +
   labs(x = "Year", y = "Number of diagnoses") +
-  scale_color_discrete(name = "Transmission \ncategory", labels = c("Hetero", "IDU", "MSM")) +
-  scale_colour_manual("Transmission\ncategory", values = colorPalette[2:5]) +
+  scale_colour_manual(name = "Transmission\ncategory", 
+                      labels = c("Hetero", "IDU", "MSM"),
+                      values = colorPalette) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()
@@ -463,9 +467,10 @@ ggplot(res.list.gender[[1]]) +
   geom_point() +
   geom_line() +
   labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-  scale_color_discrete(name = "Gender", labels = c("Female", "Male")) +
   coord_cartesian(ylim = c(0, cd4YLim)) +
-  scale_colour_manual("Gender", values = colorPalette[2:6]) +
+  scale_colour_manual(name = "Gender", 
+                      labels = c("Female", "Male"), 
+                      values = colorPalette[2:6]) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()
@@ -481,9 +486,10 @@ ggplot(res.list.trans[[1]]) +
   geom_point() +
   geom_line() +
   labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-  scale_color_discrete(name = "Transmission\ncategory", labels = c("Hetero", "IDU","MSM")) +
   coord_cartesian(ylim = c(0, cd4YLim)) +
-  scale_colour_manual("Transmission\ncategory", values = colorPalette[2:6]) +
+  scale_colour_manual(name = "Transmission\ncategory", 
+                      labels = c("Hetero", "IDU","MSM"), 
+                      values = colorPalette) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_classic()

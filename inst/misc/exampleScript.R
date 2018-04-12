@@ -38,9 +38,9 @@ summaryArtifacts <- GetDataSummaryArtifacts(inputData)
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
-  # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"])
-  GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
-  # GetListObject(adjustmentFilePaths["Reporting Delays"])
+  # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
+  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
+  GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
 # Run adjustments
