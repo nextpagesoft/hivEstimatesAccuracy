@@ -13,7 +13,7 @@ params:
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 12)
 ```
 
 ```{r, results='asis'}
@@ -69,23 +69,23 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 
 **Figure 1. Trace plot**<br />
 ```{r}
-PlotMCMCDiagnostic(params$InputData$Artifacts$F$Beta, plotType = "trace")
+print(GetMCMCBetasPlot(params$InputData$Artifacts$F$Beta))
 ```
 
 **Figure 2. Autocorrelation plot**<br />
 ```{r}
-PlotMCMCDiagnostic(params$InputData$Artifacts$F$Covariance, plotType = "autocorrelation")
+print(GetMCMCAutoCorrelationPlot(params$InputData$Artifacts$F$Covariance))
 ```
 
 ## Male
 
 **Figure 3. Trace plot**<br />
 ```{r}
-PlotMCMCDiagnostic(params$InputData$Artifacts$M$Beta, plotType = "trace")
+print(GetMCMCBetasPlot(params$InputData$Artifacts$M$Beta))
 ```
 
 **Figure 4. Autocorrelation plot**<br />
 ```{r}
-PlotMCMCDiagnostic(params$InputData$Artifacts$M$Covariance, plotType = "autocorrelation")
+print(GetMCMCAutoCorrelationPlot(params$InputData$Artifacts$M$Covariance))
 ```
 

@@ -5,7 +5,7 @@
 \title{GetRDPlots}
 \usage{
 GetRDPlots(stratum = NULL, plotData, isOriginalData = TRUE,
-  colorPalette = c("#AAAAAA", "#E69F00", "#000000", "#56B4E9"))
+  colorPalette = c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"))
 }
 \arguments{
 \item{stratum}{String denoting for which value of Stratum column in \code{plotData} to make plots.
@@ -17,7 +17,7 @@ If not specifed, then plots are created for total. Optional. Default = \code{NUL
 adjustment. Optional. Default = TRUE.}
 
 \item{colorPalette}{Character vector of length 4 with colors for plotted series. Optional.
-Default = \code{c("#AAAAAA", "#E69F00", "#000000", "#56B4E9")}.}
+Default = \code{c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce")}.}
 }
 \value{
 Data table object

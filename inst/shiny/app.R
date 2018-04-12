@@ -29,7 +29,7 @@ source(file.path(modulesPath, "settings.R"))
 source(file.path(modulesPath, "outputs.R"))
 
 # App globals
-titleString <- paste0("HIV Estimate Accuracy v.", packageVersion("hivEstimatesAccuracy"))
+titleString <- paste0("HIV Estimates Accuracy v.", packageVersion("hivEstimatesAccuracy"))
 
 # Define application user interface
 ui <- tagList(
