@@ -61,13 +61,19 @@ GetMissingnessPlots <- function(
 
   patternData <- missData[, .(Percentage = .N / nrow(missData)), by = columnNames]
   setorder(patternData, Percentage)
-  patternData[, Combination := do.call(paste, c(.SD, sep = ":")), .SDcols = columnNames]
+  patternData[, Combination := do.call(paste, c(.SD, sep = ":")),
+              .SDcols = columnNames]
 
   missPatternData <- melt(patternData,
                           id.vars = c("Percentage", "Combination"),
                           variable.name = "Attribute",
                           variable.factor = FALSE,
                           value.name = "Value")
+
+  missPatternData[, ":="(
+    Attribute = factor(Attribute, levels = relFreqData$Attribute),
+    Combination = factor(Combination, levels = rev(patternData$Combination))
+  )]
 
   missPatternPlot <- ggplot(data = missPatternData,
                             aes(x = Attribute,
@@ -90,15 +96,13 @@ GetMissingnessPlots <- function(
     ylab("Missing data patterns")
 
   missHistData <- patternData[, .(Combination, Percentage, CombinationId = .I)]
-  missHistData[, MissingCategory := grepl("1", Combination)]
+  missHistData[, MissingCategory := ifelse(grepl("1", Combination), "Missing", "Present")]
 
   missHistPlot <- ggplot(data = missHistData,
                          aes(x = CombinationId, y = Percentage, fill = MissingCategory)) +
     geom_col() +
     coord_flip() +
-    scale_fill_manual("",
-                      values = colors,
-                      labels = c("Present", "Missing")) +
+    scale_fill_manual("", values = setNames(colors, c("Present", "Missing"))) +
     theme_minimal() +
     scale_x_reverse(expand = c(0, 0),
                     position = "top",

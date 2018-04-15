@@ -21,7 +21,7 @@ dataSummaryUI <- function(id)
           uiOutput(ns("meanDelayOutput"))
         ),
         type = 7,
-        proxy.height = "50px")
+        proxy.height = "40px")
     ),
     uiOutput(ns("inputDataTableBox"))
   )

@@ -4,7 +4,7 @@ library(shiny)
 library(ggplot2)
 
 # Define input data path
-inputDataFilePath <- "D:/Drive/Projects/19. PZH/Scripts/Received/20180111/dummy_miss1.csv"
+inputDataFilePath <- "D:/Drive/Projects/19. PZH/Scripts/Received/20180111/DE.csv"
 
 # Read input data
 originalData <- ReadDataFile(inputDataFilePath)
