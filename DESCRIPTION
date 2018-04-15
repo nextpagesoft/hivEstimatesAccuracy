@@ -12,7 +12,6 @@ Description: Improves the accuracy of HIV estimates in EU/EEA countries.
 License: GPL-3
 Depends: R (>= 3.1.0)
 Imports:
-  coda (>= 0.19-1),
   data.table (>= 1.10.4-3),
   foreign (>= 0.8-0),
   grid (>= 3.0.0),
@@ -29,6 +28,7 @@ Imports:
   shinydashboard (>= 0.6.1),
   shinyjs (>= 0.9.1),
   stats (>= 3.0.0),
+  utils (>= 3.0.0),
   quantreg (>= 5.33),
   yaml (>= 2.1.14)
 Encoding: UTF-8

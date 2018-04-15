@@ -4,10 +4,10 @@ devtools::test()
 devtools::check()
 
 # Build source and binary versions
-repoPath <- "d:/_REPOSITORIES/hivEstimatesAccuracy_deploy/"
+repoPath <- "d:/_REPOSITORIES/hivEstimatesAccuracy_deploy"
 dir.create(repoPath, showWarnings = FALSE, recursive = TRUE)
 devtools::build(path = repoPath, binary = FALSE)
-devtools::build(path = repoPath, binary = TRUE)
+devtools::build(path = repoPath, binary = TRUE, args = c('--preclean'))
 
 # Read new version string
 descr <- as.data.frame(read.dcf(file = "DESCRIPTION"))

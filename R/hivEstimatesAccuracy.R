@@ -16,8 +16,9 @@
 #'
 #' @import data.table
 #' @import graphics
-#' @importFrom stats setNames lowess quantile sd var
+#' @importFrom stats setNames lowess quantile sd var acf
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
+#' @importFrom utils unzip
 #'
 NULL
 
