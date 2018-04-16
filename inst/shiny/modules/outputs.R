@@ -18,7 +18,7 @@ outputsUI <- function(id)
 }
 
 # Server logic
-outputs <- function(input, output, session)
+outputs <- function(input, output, session, adjustedData)
 {
 
 }

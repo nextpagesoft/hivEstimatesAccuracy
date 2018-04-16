@@ -23,7 +23,6 @@ dataAdjustUI <- function(id)
       p(""),
       div(id = ns("adjustmentList")),
       actionButton(ns("runAdjustBtn"), "Run")),
-    # uiOutput(ns("diagReport")),
     uiOutput(ns("intermReport")),
     uiOutput(ns("runLog"))
   )
@@ -36,7 +35,7 @@ dataAdjust <- function(input, output, session, inputData)
   ns <- session$ns
 
   # Store reactive values
-  finalData <- reactiveVal(NULL)
+  # finalData <- reactiveVal(NULL)
   adjustedData <- reactiveVal(NULL)
   # vals <- reactiveValues(runLog = "",
   #                        diagReport = "",
@@ -63,8 +62,8 @@ dataAdjust <- function(input, output, session, inputData)
     adjustSelectId <- paste0("adjustSelect", key)
     editParamBtnId <- paste0("adjustParamBtn", key)
     # runDiagBtnId   <- paste0("runDiagBtn", key)
-    downloadCsvBtnId  <- paste0("downloadCsvBtn", key)
-    downloadStataBtnId  <- paste0("downloadStataBtn", key)
+    # downloadCsvBtnId  <- paste0("downloadCsvBtn", key)
+    # downloadStataBtnId  <- paste0("downloadStataBtn", key)
 
     # Get widget html
     widget <- fluidRow(
@@ -75,10 +74,11 @@ dataAdjust <- function(input, output, session, inputData)
                             label = NULL,
                             choices = adjustmentSpecFileNames)),
       # Edit parameters button
-      column(2, actionLink(ns(editParamBtnId), "Edit parameters"), style = "padding-top: 7px"),
+      column(2, actionLink(ns(editParamBtnId), "Edit parameters"), style = "padding-top: 7px")
       # column(2, actionLink(ns(runDiagBtnId), "Run diagnostic"), style = "padding-top: 7px"),
-      column(1, shinyjs::hidden(downloadLink(ns(downloadCsvBtnId), "Download csv")), style = "padding-top: 7px"),
-      column(1, shinyjs::hidden(downloadLink(ns(downloadStataBtnId), "Download Stata")), style = "padding-top: 7px"))
+      # column(1, shinyjs::hidden(downloadLink(ns(downloadCsvBtnId), "Download csv")), style = "padding-top: 7px"),
+      # column(1, shinyjs::hidden(downloadLink(ns(downloadStataBtnId), "Download Stata")), style = "padding-top: 7px")
+      )
 
     # EVENT: Adjustment selection changed
     observeEvent(input[[adjustSelectId]], {
@@ -151,7 +151,7 @@ dataAdjust <- function(input, output, session, inputData)
 
   # Reactive values observers
   observeEvent(vals$adjustmentSpecs, {
-    finalData(NULL)
+    # finalData(NULL)
     adjustedData(NULL)
   })
 
@@ -163,46 +163,46 @@ dataAdjust <- function(input, output, session, inputData)
              ui = widget)
   })
 
-  # EVENT: Button "Download csv/stata data" clicked
-  DownloadIntermediateData <- function(key, format) {
-    adjustedData <- adjustedData()
-    if (key %in% names(adjustedData)) {
-      intermediateData <- adjustedData[[key]]$Table
-    } else {
-      intermediateData <- NULL
-    }
+  # # EVENT: Button "Download csv/stata data" clicked
+  # DownloadIntermediateData <- function(key, format) {
+  #   adjustedData <- adjustedData()
+  #   if (key %in% names(adjustedData)) {
+  #     intermediateData <- adjustedData[[key]]$Table
+  #   } else {
+  #     intermediateData <- NULL
+  #   }
+  #
+  #   downloadHandler(
+  #     filename = function() {
+  #       fileName <- paste("data", format, sep = ".")
+  #       return(fileName)
+  #     },
+  #     content = function(file) {
+  #       withProgress(message = "Creating intermediate data output file",
+  #                    detail = "The file will be available for download shortly.",
+  #                    value = 0, {
+  #                      setProgress(0)
+  #                      WriteDataFile(intermediateData, file)
+  #                      setProgress(1)
+  #                    })
+  #       return(NULL)
+  #     })
+  # }
 
-    downloadHandler(
-      filename = function() {
-        fileName <- paste("data", format, sep = ".")
-        return(fileName)
-      },
-      content = function(file) {
-        withProgress(message = "Creating intermediate data output file",
-                     detail = "The file will be available for download shortly.",
-                     value = 0, {
-                       setProgress(0)
-                       WriteDataFile(intermediateData, file)
-                       setProgress(1)
-                     })
-        return(NULL)
-      })
-  }
-
-  EnableIntermediateDataDownloadLinks <- function() {
-    for (adjustmentSpec in vals$adjustmentSpecs) {
-      key <- adjustmentSpec$Key
-      downloadCsvBtnId  <- paste0("downloadCsvBtn", key)
-      downloadStataBtnId  <- paste0("downloadStataBtn", key)
-
-      # Define download handler
-      output[[downloadCsvBtnId]] <- DownloadIntermediateData(key, "csv")
-      output[[downloadStataBtnId]] <- DownloadIntermediateData(key, "dta")
-      # Show download link
-      shinyjs::show(downloadCsvBtnId)
-      shinyjs::show(downloadStataBtnId)
-    }
-  }
+  # EnableIntermediateDataDownloadLinks <- function() {
+  #   for (adjustmentSpec in vals$adjustmentSpecs) {
+  #     key <- adjustmentSpec$Key
+  #     downloadCsvBtnId  <- paste0("downloadCsvBtn", key)
+  #     downloadStataBtnId  <- paste0("downloadStataBtn", key)
+  #
+  #     # Define download handler
+  #     output[[downloadCsvBtnId]] <- DownloadIntermediateData(key, "csv")
+  #     output[[downloadStataBtnId]] <- DownloadIntermediateData(key, "dta")
+  #     # Show download link
+  #     shinyjs::show(downloadCsvBtnId)
+  #     shinyjs::show(downloadStataBtnId)
+  #   }
+  # }
 
   # Populate adjustment parameter widgets in the editing dialog
   output[["adjustmentList"]] <- renderUI({
@@ -278,7 +278,7 @@ dataAdjust <- function(input, output, session, inputData)
     inputData <- inputData()
     if (!is.null(inputData)) {
       # Run adjustments
-      finalData(NULL)
+      # finalData(NULL)
       adjustedData(NULL)
       vals$runLog <- ""
       vals$intermReport <- ""
@@ -372,15 +372,15 @@ dataAdjust <- function(input, output, session, inputData)
   })
 
   # Observe change in adjustedData object
-  observeEvent(adjustedData(), {
-    adjustedData <- adjustedData()
-    if (length(adjustedData) > 0) {
-      finalData(adjustedData[[length(adjustedData)]])
-      EnableIntermediateDataDownloadLinks()
-    } else {
-      finalData(NULL)
-    }
-  })
+  # observeEvent(adjustedData(), {
+  #   adjustedData <- adjustedData()
+  #   if (length(adjustedData) > 0) {
+  #     finalData(adjustedData[[length(adjustedData)]])
+  #     # EnableIntermediateDataDownloadLinks()
+  #   } else {
+  #     finalData(NULL)
+  #   }
+  # })
 
   return(adjustedData)
 }

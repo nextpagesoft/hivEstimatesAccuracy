@@ -75,8 +75,7 @@ server <- function(input, output, session)
   callModule(dataSummary, "summary", appStatus, inputData)
   adjustedData <- callModule(dataAdjust, "adjustments", inputData)
   callModule(createReports, "reports", adjustedData)
-  callModule(settings, "settings")
-  callModule(outputs, "outputs")
+  callModule(outputs, "outputs", adjustedData)
 
   if (!isServer) {
     session$onSessionEnded(stopApp)
