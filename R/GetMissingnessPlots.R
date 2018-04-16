@@ -96,13 +96,14 @@ GetMissingnessPlots <- function(
     ylab("Missing data patterns")
 
   missHistData <- patternData[, .(Combination, Percentage, CombinationId = .I)]
-  missHistData[, MissingCategory := ifelse(grepl("1", Combination), "Missing", "Present")]
-
+  missHistData[, MissingCategory := factor(ifelse(grepl("1", Combination), "Missing", "Present"),
+                                           levels = c("Missing", "Present"))]
   missHistPlot <- ggplot(data = missHistData,
-                         aes(x = CombinationId, y = Percentage, fill = MissingCategory)) +
+                         aes(x = CombinationId, y = Percentage,
+                             fill = MissingCategory)) +
     geom_col() +
     coord_flip() +
-    scale_fill_manual("", values = setNames(colors, c("Present", "Missing"))) +
+    scale_fill_manual(name = "", values = setNames(colors, c("Present", "Missing")), drop = FALSE) +
     theme_minimal() +
     scale_x_reverse(expand = c(0, 0),
                     position = "top",
