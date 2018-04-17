@@ -29,6 +29,7 @@ source(file.path(modulesPath, "outputs.R"))
 
 # App globals
 titleString <- "HIV Estimates Accuracy"
+versionString <- sprintf("v. %s", as.character(packageVersion("hivEstimatesAccuracy")))
 
 # Define application user interface
 ui <- tagList(
@@ -38,7 +39,7 @@ ui <- tagList(
     dashboardHeader(title = titleString,
                     titleWidth = 600,
                     .list = tagList(tags$li(tags$a(href = "#",
-                                                   span(sprintf("v. %s", as.character(packageVersion("hivEstimatesAccuracy"))))),
+                                                   span(versionString)),
                                             class = "dropdown"))),
     dashboardSidebar(
       sidebarMenu(
@@ -54,7 +55,6 @@ ui <- tagList(
         tags$link(rel = "stylesheet", type = "text/css", href = "./css/style.css")
       ),
       tabItems(
-        tabItem(tabName = "intro",       fluidRow(introductionUI("intro"))),
         tabItem(tabName = "upload",      fluidRow(inputDataUploadUI("upload"))),
         tabItem(tabName = "summary",     fluidRow(dataSummaryUI("summary"))),
         tabItem(tabName = "adjustments", fluidRow(dataAdjustUI("adjustments"))),
