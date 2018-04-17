@@ -218,13 +218,25 @@ inputDataUpload <- function(input, output, session, appStatus)
 
   # Respond to "Apply mapping" button click
   observeEvent(input[["applyMappingBtn"]], {
-    originalData <- originalData()
-    inputDataTest <- ApplyAttributesMapping(originalData,
-                                            vals$AttrMapping,
-                                            vals$DefaultValues)
-    inputDataTest <- PreProcessInputData(inputDataTest)
-    vals$AttrMappingStatus <- GetAttrMappingStatus(vals$AttrMapping)
-    vals$InputDataTestStatus <- GetInputDataValidityStatus(inputDataTest)
+    withProgress(message = "Attributes mapping",
+                 value = 0, {
+                   originalData <- originalData()
+                   setProgress(0.1, detail = "Applying mapping")
+
+                   inputDataTest <- ApplyAttributesMapping(originalData,
+                                                           vals$AttrMapping,
+                                                           vals$DefaultValues)
+                   setProgress(0.4, detail = "Pre-processing data")
+
+                   inputDataTest <- PreProcessInputData(inputDataTest)
+                   setProgress(0.9, detail = "Checking data validity")
+
+                   vals$AttrMappingStatus <- GetAttrMappingStatus(vals$AttrMapping)
+                   vals$InputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
+
+                   setProgress(1, detail = "Done")
+                 })
+
     inputDataTest(inputDataTest)
   })
 
