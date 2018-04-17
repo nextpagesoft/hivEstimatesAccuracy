@@ -190,17 +190,20 @@ dataAdjust <- function(input, output, session, inputData)
       withProgress({
         tryCatch({
           runLog <- capture.output({
-            adjustedData <- RunAdjustments(inputData,
+            adjustedData <- RunAdjustments(inputData$Table,
                                            adjustmentSpecs = vals$adjustmentSpecs)
 
-            interimReport <- ""
+            intermReport <- RenderReportToHTML(
+              filePath = system.file("reports/intermediate/0.PreProcess.Rmd",
+                                     package = "hivEstimatesAccuracy"),
+              params = list(InputData = inputData))
             for (i in seq_along(vals$adjustmentSpecs)) {
-              interimReport <- paste(interimReport,
-                                     RenderReportForAdjSpec(vals$adjustmentSpecs[[i]],
-                                                            "intermediate",
-                                                            adjustedData[[i]]))
+              intermReport <- paste(intermReport,
+                                    RenderReportForAdjSpec(vals$adjustmentSpecs[[i]],
+                                                           "intermediate",
+                                                           adjustedData[[i]]))
             }
-            vals$intermReport <- HTML(interimReport)
+            vals$intermReport <- HTML(intermReport)
           })
           vals$runLog <- paste(runLog, collapse = "\n")
         }, error = function(err) {

@@ -14,23 +14,10 @@ params:
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
-
-percent_format <- function(x, decim = 2L) sprintf(paste0("%.", decim, "f%%"), x * 100)
 ```
 
 ```{r, results='asis'}
 cat(sprintf("# %d. Multiple Imputations (mice)\n", params$InputData$RunIdx))
-
-numRecords <- nrow(params$InputData$Table)
-missGenderReplaced <- params$InputData$Artifacts$MissGenderReplaced
-missGenderImputed <- params$InputData$Artifacts$MissGenderImputed
-cat(
-  sprintf("<p>%d (and %s of total records) of missing gender cases were replaced with ``Male`` because transmission was
-          reported as ``MSM``.</br>", missGenderReplaced, percent_format(missGenderReplaced / numRecords)),
-  sprintf("%d (and %s of total records) cases with missing gender were imputed through single imputation as this is required 
-          for the main multiple imputations procedures.<p>", missGenderImputed, percent_format(missGenderImputed / numRecords)),
-  sep = ""
-)
 
 femaleAllXCols <- params$InputData$Artifacts$F$X_COLS$All
 femaleKeptXCols <- params$InputData$Artifacts$F$X_COLS$Kept

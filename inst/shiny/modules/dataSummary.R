@@ -34,7 +34,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   ns <- session$ns
 
   artifacts <- reactive({
-    GetDataSummaryArtifacts(inputData())
+    GetDataSummaryArtifacts(inputData()$Table)
   })
 
   output[["missPlotDiv"]] <- renderUI({

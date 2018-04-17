@@ -125,20 +125,16 @@ list(
                   Artifacts = artifacts))
     }
 
-    # 1. Preprocess data for mice specifically
-    preProcData <- PreProcessInputDataForMice(inputData)
-    inputData <- preProcData$Table
-
-    # 2. Save original order for later
+    # 1. Save original order for later
     inputData[, OrigSort := .I]
 
-    # 3. Measures years from earlier diagnosis year
+    # 2. Measures years from earlier diagnosis year
     inputData[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
 
-    # 4. Split by gender to data sets
+    # 3. Split by gender to data sets
     dataSets <- split(inputData, by = c("Gender"))
 
-    # 5. Execute the worker function per data set
+    # 4. Execute the worker function per data set
     if (parameters$runInParallel) {
       # Run in parallel
       cl <- parallel::makeCluster(2)
@@ -165,13 +161,12 @@ list(
                            nsdf = parameters$nsdf)
     }
 
-    # 6. Combine all data sets
+    # 5. Combine all data sets
     names(outputData) <- names(dataSets)
     table <- rbindlist(lapply(outputData, "[[", "Table"))
     artifacts <- lapply(outputData, "[[", "Artifacts")
-    artifacts <- modifyList(artifacts, preProcData$Artifacts)
 
-    # 7. Restore original order per Imputation
+    # 6. Restore original order per Imputation
     setorder(table, Imputation, OrigSort)
 
     return(

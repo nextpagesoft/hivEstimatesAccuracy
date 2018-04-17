@@ -1,0 +1,33 @@
+---
+name: "Pre Process"
+author: "HIV Estimates Accuracy tool"
+title: "Multiple Imputations (mice)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_fragment:
+    number_sections: no
+    smart: yes
+    fig_caption: yes
+params:
+  InputData: NA    
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+percent_format <- function(x, decim = 2L) sprintf(paste0("%.", decim, "f%%"), x * 100)
+```
+
+# Pre-processing of input data
+
+```{r, results='asis'}
+numRecords <- nrow(params$InputData$Table)
+missGenderReplaced <- params$InputData$Artifacts$MissGenderReplaced
+missGenderImputed <- params$InputData$Artifacts$MissGenderImputed
+cat(
+  sprintf("<p>%d (and %s of total records) of missing gender cases were replaced with ``Male`` because transmission was
+          reported as ``MSM``.</br>", missGenderReplaced, percent_format(missGenderReplaced / numRecords)),
+  sprintf("%d (and %s of total records) cases with missing gender were imputed through single imputation as this is required 
+          for the main multiple imputations procedures.<p>", missGenderImputed, percent_format(missGenderImputed / numRecords)),
+  sep = ""
+)
+```

@@ -4,7 +4,8 @@ library(shiny)
 library(ggplot2)
 
 # Define input data path
-inputDataFilePath <- "D:/Drive/Projects/19. PZH/Scripts/Received/20180111/DE.csv"
+# inputDataFilePath <- "G:/My Drive/Projects/19. PZH/Scripts/Received/PLtest.csv"
+inputDataFilePath <- "G:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/dummy_miss1.csv"
 
 # Read input data
 originalData <- ReadDataFile(inputDataFilePath)
@@ -21,7 +22,8 @@ attrMappingStatus <- GetAttrMappingStatus(attrMapping)
 
 if (attrMappingStatus$Valid) {
   inputDataTest <- ApplyAttributesMapping(originalData, attrMapping, defaultValues)
-  inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest)
+  inputDataTest <- PreProcessInputData(inputDataTest)
+  inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
   if (inputDataTestStatus$Valid) {
     inputData <- inputDataTest
   } else {
@@ -31,23 +33,26 @@ if (attrMappingStatus$Valid) {
   inputData <- NULL
 }
 
-inputData <- PreProcessInputData(inputData)
-
-summaryArtifacts <- GetDataSummaryArtifacts(inputData)
+summaryArtifacts <- GetDataSummaryArtifacts(inputData$Table)
 
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
   # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
-  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
+  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"]),
   GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
+# adjustmentSpecs[[1]]$Parameters$stratTrans$value <- TRUE
+
 # Run adjustments
-adjustedData <- RunAdjustments(data = inputData,
+adjustedData <- RunAdjustments(data = inputData$Table,
                                adjustmentSpecs = adjustmentSpecs)
 
-intermReport <- ""
+intermReport <- RenderReportToHTML(
+  filePath = system.file("reports/intermediate/0.PreProcess.Rmd",
+                         package = "hivEstimatesAccuracy"),
+  params = list(InputData = inputData))
 for (i in seq_along(adjustmentSpecs)) {
   intermReport <- paste(intermReport,
                         RenderReportForAdjSpec(adjustmentSpec = adjustmentSpecs[[i]],
@@ -60,19 +65,19 @@ intermReport <- HTML(intermReport)
 reportFilePaths <- GetReportFileNames()
 params <- list(AdjustedData = adjustedData)
 
-reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputations"],
+reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "html_fragment",
                                      params = params)
 
-reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputations"],
+reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "html_document",
                                      params = params)
 
-reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputations"],
+reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "pdf_document",
                                      params = params)
 
-reportFileName <- RenderReportToFile(filePath = reportFilePaths["Multiple Imputations"],
+reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "word_document",
                                      params = params)
 
