@@ -56,8 +56,10 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
                  Artifacts = output$Artifacts,
                  Parameters = parameters,
                  RunIdx = i,
+                 Name = adjustmentSpec$Name,
                  Type = adjustmentSpec$Type,
-                 SubType = adjustmentSpec$SubType)
+                 SubType = adjustmentSpec$SubType,
+                 TimeStamp = GetTimeStamp())
 
     # Store intermediate results for later reference
     results[[adjustmentSpec$Key]] <- data
