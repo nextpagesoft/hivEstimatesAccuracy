@@ -131,15 +131,9 @@ createReports <- function(input, output, session, adjustedData)
 
                      setProgress(0.1)
 
-                     simpleHtmlFileName <- RenderReportToFile(reportFileNames[vals$selectedReportName],
-                                                              params = params)
-                     setProgress(0.8)
+                     report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
+                                                  params = params)
 
-                     reportFileContent <- ReadStringFromFile(simpleHtmlFileName)
-                     setProgress(0.9)
-
-                     unlink(simpleHtmlFileName)
-                     report <- HTML(reportFileContent)
                      setProgress(1)
                    })
 

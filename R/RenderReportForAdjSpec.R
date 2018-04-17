@@ -28,16 +28,8 @@ RenderReportForAdjSpec <- function(adjustmentSpec, fileNameSuffix = "", params =
     system.file(file.path("reports", fileNameSuffix, reportFileName),
                 package = "hivEstimatesAccuracy")
 
-  htmlFileName <- RenderReportToFile(filePath = reportFilePath,
-                                     format = "html_fragment",
-                                     params = list(InputData = params))
-
-  on.exit({
-    unlink(htmlFileName)
-  })
-
-  reportFileContent <- ReadStringFromFile(htmlFileName)
-  report <- HTML(reportFileContent)
+  report <- RenderReportToHTML(filePath = reportFilePath,
+                               params = list(InputData = params))
 
   return(report)
 }
