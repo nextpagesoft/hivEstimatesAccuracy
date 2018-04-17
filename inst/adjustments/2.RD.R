@@ -190,6 +190,8 @@ list(
                                 GetRDPlots,
                                 plotData = stratPlotData,
                                 isOriginalData = isOriginalData)
+
+        names(stratPlotList) <- stratVarNames
       }
     }
     artifacts <- list(OutputPlotTotal = totalPlot,

@@ -5,7 +5,8 @@
 \title{GetRDPlots}
 \usage{
 GetRDPlots(stratum = NULL, plotData, isOriginalData = TRUE,
-  colorPalette = c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"))
+  colorPalette = c(Bounds = "#c7c7c7", `Estimated total` = "#69b023", Reported
+  = "#7bbcc0", Imputed = "#9d8b56"))
 }
 \arguments{
 \item{stratum}{String denoting for which value of Stratum column in \code{plotData} to make plots.

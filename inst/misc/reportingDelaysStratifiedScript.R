@@ -9,8 +9,7 @@ library(ggplot2)
 stratSep <- "_"
 
 # Stratifiation columns
-# stratVarNames <- c("Gender", "Transmission", "Migr")
-stratVarNames <- c()
+stratVarNames <- c("Gender", "Transmission", "Migr")
 
 # Start year
 startYear <- 2000L
@@ -19,7 +18,7 @@ startYear <- 2000L
 endQrt <- 2017.25
 
 # Input data path
-inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/dummy_miss1.csv"
+inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
 # A) READ INPUT DATA ------------------------------------------------------------------------------
@@ -125,10 +124,6 @@ if (nrow(outputData) > 0) {
                    fitStratum,
                    on = c("VarT", "Stratum"))
 
-  # Merge fit data
-  # agregat <- fitStratum[agregat,
-  #                       on = .(VarT, Stratum)]
-
   # Compute estimated count and its variance
   agregat[, ":="(
     EstCount = Count / P,
@@ -170,6 +165,7 @@ if (nrow(outputData) > 0) {
                             GetRDPlots,
                             plotData = stratPlotData,
                             isOriginalData = isOriginalData)
+    names(stratPlotList) <- stratVarNames
   }
 }
 

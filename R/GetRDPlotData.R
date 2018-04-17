@@ -49,5 +49,9 @@ GetRDPlotData <- function(data, by) {
     UpperEstCount = EstCount + 1.96 * sqrt(EstCountVar)
   )]
 
+  data[, ":="(
+    Source = factor(Source, levels = c("Reported", "Imputed"))
+  )]
+
   return(data)
 }

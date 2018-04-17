@@ -22,7 +22,11 @@ GetRDPlots <- function(
   stratum = NULL,
   plotData,
   isOriginalData = TRUE,
-  colorPalette = c("#c7c7c7", "#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"))
+  colorPalette = c("Bounds" = "#c7c7c7",
+                   "Estimated total" = "#69b023",
+                   "Reported" = "#7bbcc0",
+                   "Imputed" = "#9d8b56")
+)
 {
   if (!is.null(stratum)) {
     localPlotData <- plotData[Stratum == stratum]
@@ -40,11 +44,11 @@ GetRDPlots <- function(
                     ymax = pmin(pmax(UpperEstCount, 0), max(EstCount)),
                     fill = "95% confidence interval\nfor estimated total count"),
                 alpha = 0.4) +
-    scale_fill_manual("Bounds", values = colorPalette[1]) +
+    scale_fill_manual("Bounds", values = colorPalette[["Bounds"]]) +
     geom_line(data = localConfBoundsPlotData,
               aes(x = DateOfDiagnosisYear, y = EstCount, color = "Estimated total"), size = 1) +
     geom_line(aes(y = Count, group = Source, color = Source), size = 1) +
-    scale_colour_manual("Counts", values = colorPalette[2:4]) +
+    scale_colour_manual("Counts", values = colorPalette) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +
@@ -53,15 +57,21 @@ GetRDPlots <- function(
           axis.title.y =  element_text(size = 10),
           text = element_text(size = 11),
           panel.grid = element_blank(),
+          panel.spacing = unit(2, "lines"),
           axis.line = element_line(colour = "#888888"),
-          axis.ticks = element_line(colour = "#888888")) +
+          axis.ticks = element_line(colour = "#888888"),
+          strip.background = element_rect(fill = "#e9e9e9",
+                                          linetype = "blank"),
+          strip.placement = "outside",
+          strip.text = element_text(size = 8)) +
     xlab("Diagnosis year") +
     ylab("Count of HIV cases")
 
   if (!is.null(stratum)) {
-    plot <- plot +
+    plot <-
+      plot +
       ggtitle(paste("Reported and estimated total count of cases, by", stratum)) +
-      facet_wrap(~ StratumValue, ncol = 2)
+      facet_wrap(~StratumValue, ncol = 2, drop = FALSE, shrink = FALSE, scales = "free_y")
   } else {
     plot <- plot +
       ggtitle("Reported and estimated total count of cases")
