@@ -24,52 +24,6 @@ outputs <- function(input, output, session, adjustedData)
   # Get namespace
   ns <- session$ns
 
-  output[["downloadLinks"]] <- renderUI({
-    adjustedData <- adjustedData()
-    widget <- tagList()
-
-    isolate({
-      if (!is.null(adjustedData)) {
-
-        runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
-        for (runIdx in runIndices) {
-          key <- names(runIndices)[runIdx]
-          name <- adjustedData[[key]]$Name
-          downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
-          downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
-
-          widget[[runIdx]] <- fluidRow(
-            id = ns(runIdx),
-            column(3, sprintf("%d. %s", runIdx, name)),
-            column(2, downloadLink(ns(downloadCsvBtnId), "Download csv")),
-            column(2, downloadLink(ns(downloadStataBtnId), "Download Stata"))
-          )
-        }
-
-        EnableIntermediateDataDownloadLinks()
-      } else {
-        widget <- p("Please, run adjustments first.")
-      }
-    })
-
-    return(widget)
-  })
-
-  EnableIntermediateDataDownloadLinks <- function() {
-
-    adjustedData <- adjustedData()
-
-    runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
-    for (runIdx in runIndices) {
-      key <- names(runIndices)[runIdx]
-      downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
-      downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
-
-      output[[downloadCsvBtnId]] <- DownloadIntermediateData(key, "csv")
-      output[[downloadStataBtnId]] <- DownloadIntermediateData(key, "dta")
-    }
-  }
-
   # EVENT: Button "Download csv/stata data" clicked
   DownloadIntermediateData <- function(key, format) {
     adjustedData <- adjustedData()
@@ -100,4 +54,54 @@ outputs <- function(input, output, session, adjustedData)
       }
     )
   }
+
+  EnableIntermediateDataDownloadLinks <- function() {
+
+    adjustedData <- adjustedData()
+
+    runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
+    for (runIdx in runIndices) {
+      key <- names(runIndices)[runIdx]
+      downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
+      downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
+
+      output[[downloadCsvBtnId]] <- DownloadIntermediateData(key, "csv")
+      output[[downloadStataBtnId]] <- DownloadIntermediateData(key, "dta")
+    }
+  }
+
+  output[["downloadLinks"]] <- renderUI({
+    adjustedData <- adjustedData()
+
+    widget <- list()
+
+    isolate({
+      if (!is.null(adjustedData)) {
+
+        widget[["Header"]] <- p("Download links below provide access to data after each adjustment.")
+
+        runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
+        for (runIdx in runIndices) {
+          key <- names(runIndices)[runIdx]
+          name <- adjustedData[[key]]$Name
+          downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
+          downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
+
+          widget[[as.character(runIdx)]] <- fluidRow(
+            id = ns(runIdx),
+            column(3, sprintf("%d. %s", runIdx, name)),
+            column(2, downloadLink(ns(downloadCsvBtnId), "Download as csv file")),
+            column(2, downloadLink(ns(downloadStataBtnId), "Download as Stata file"))
+          )
+        }
+
+        EnableIntermediateDataDownloadLinks()
+      } else {
+        widget <- p("Please, run adjustments first.")
+      }
+    })
+
+    return(tagList(widget))
+  })
+
 }
