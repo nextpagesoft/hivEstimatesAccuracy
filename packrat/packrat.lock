@@ -84,8 +84,8 @@ Hash: 08eed0c80510af29bb15f840ccfe37ce
 
 Package: digest
 Source: CRAN
-Version: 0.6.12
-Hash: e53fb8c58673df868183697e39a6a4d6
+Version: 0.6.15
+Hash: 1f202ebd812ac7192be3739245746a13
 
 Package: evaluate
 Source: CRAN
@@ -254,13 +254,9 @@ Hash: db7226b8ea11d02510f74d6a397959d6
 Requires: Rcpp, plyr, stringr
 
 Package: rlang
-Source: github
-Version: 0.1.4.9000
-Hash: 0ed8de413e531873e59c1284002cf713
-GithubRepo: rlang
-GithubUsername: tidyverse
-GithubRef: master
-GithubSha1: 7b1565f92afed5e3ed360dbacf64351a42d41975
+Source: CRAN
+Version: 0.2.0
+Hash: 647e2e50a72557d1a770dcd6701e562b
 
 Package: rmarkdown
 Source: CRAN
@@ -325,8 +321,8 @@ Requires: glue, magrittr, stringi
 
 Package: testthat
 Source: CRAN
-Version: 1.0.2
-Hash: 88d5291104227f9dc2e7c7c1d0eb6c74
+Version: 2.0.0
+Hash: 537114b476376c5773bf3c557f5bbd19
 Requires: R6, crayon, digest, magrittr, praise, rlang, withr, cli
 
 Package: tibble
@@ -347,8 +343,8 @@ Hash: 78bb072c4f9e729a283d4c40ec93f9c6
 
 Package: withr
 Source: CRAN
-Version: 2.1.1
-Hash: a86856ae0b4a7c3daf9a3ef0097a403b
+Version: 2.1.2
+Hash: d534108bcd5f34ec73e9eb523751ba20
 
 Package: xtable
 Source: CRAN
