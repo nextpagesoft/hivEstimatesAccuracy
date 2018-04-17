@@ -4,43 +4,6 @@
   src: url("../fonts/MetaPro-Bold_30244.ttf") format('truetype'); /* Safari, Android, iOS */
 }
 
-@font-face {
-  font-family: 'Material Icons';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Material Icons'),
-    local('MaterialIcons-Regular'),
-    url("../fonts/MaterialIcons-Regular.woff2") format("woff2"),
-    url("../fonts/MaterialIcons-Regular.woff") format("woff"),
-    url("../fonts/MaterialIcons-Regular.ttf") format("truetype");
-}
-
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 40px;  /* Preferred icon size */
-  vertical-align: middle;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-
-  /* Support for all WebKit browsers. */
-  -webkit-font-smoothing: antialiased;
-  /* Support for Safari and Chrome. */
-  text-rendering: optimizeLegibility;
-
-  /* Support for Firefox. */
-  -moz-osx-font-smoothing: grayscale;
-
-  /* Support for IE. */
-  font-feature-settings: 'liga';
-}
-
 /* Tags */
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -71,18 +34,31 @@ pre {
 
 /* Header  */
 .main-header {
-  background-color: #e1efd3;
+  background-image: url("../images/ECDC_logo.svg");
+  background-repeat: no-repeat;
+  background-size: 110px;
+  background-position: left 15px center;
+  max-height: 120px;
+  height: 120px;
 }
 
 .main-header .sidebar-toggle {
-  padding: 14px 15px;
+  display: none;
+}
+
+.left-side, .main-sidebar {
+  padding-top: 120px;
 }
 
 .skin-blue .main-header .logo,
+.skin-blue .main-header .logo:hover,
 .skin-blue .main-header .navbar
 {
-  background-color: transparent;
-  font-size: 16px;
+  background-color: transparent !important;
+  line-height: 120px;
+  height: 120px;
+  padding-left: 125px;
+  font-size: 32pt;
   font-weight: bold;
   color: rgb(51, 51, 51);
   font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
@@ -106,9 +82,16 @@ pre {
   color: rgb(51, 51, 51);
 }
 
-.skin-blue .main-header .navbar .navbar-custom-menu
+.skin-blue .main-header .navbar .navbar-custom-menu,
+.skin-blue .main-header .navbar .navbar-custom-menu:hover,
+.skin-blue .main-header .navbar .nav>li>a,
+.skin-blue .main-header .navbar .nav>li>a:active,
+.skin-blue .main-header .navbar .nav>li>a:hover
 {
   font-size: 14px;
+  color: rgb(51, 51, 51);
+  background: white;
+  cursor: default;
 }
 
 /* Sidebar */

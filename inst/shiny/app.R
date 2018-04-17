@@ -20,7 +20,6 @@ library(hivEstimatesAccuracy)
 
 # Load application modules
 modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
-source(file.path(modulesPath, "introduction.R"))
 source(file.path(modulesPath, "inputDataUpload.R"))
 source(file.path(modulesPath, "dataSummary.R"))
 source(file.path(modulesPath, "dataAdjust.R"))
@@ -29,7 +28,7 @@ source(file.path(modulesPath, "settings.R"))
 source(file.path(modulesPath, "outputs.R"))
 
 # App globals
-titleString <- paste0("HIV Estimates Accuracy v.", packageVersion("hivEstimatesAccuracy"))
+titleString <- "HIV Estimates Accuracy"
 
 # Define application user interface
 ui <- tagList(
@@ -37,10 +36,12 @@ ui <- tagList(
 
   dashboardPage(
     dashboardHeader(title = titleString,
-                    titleWidth = 300),
+                    titleWidth = 600,
+                    .list = tagList(tags$li(tags$a(href = "#",
+                                                   span(sprintf("v. %s", as.character(packageVersion("hivEstimatesAccuracy"))))),
+                                            class = "dropdown"))),
     dashboardSidebar(
       sidebarMenu(
-        menuItem("Introduction",       tabName = "intro",       icon = icon("home")),
         menuItem("Input data upload",  tabName = "upload",      icon = icon("upload")),
         menuItem("Input data summary", tabName = "summary",     icon = icon("bar-chart")),
         menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
@@ -70,7 +71,6 @@ server <- function(input, output, session)
   appStatus <- reactiveValues(InputDataUploaded = FALSE,
                               AttributeMappingValid = FALSE)
 
-  callModule(introduction, "intro")
   inputData <- callModule(inputDataUpload, "upload", appStatus)
   callModule(dataSummary, "summary", appStatus, inputData)
   adjustedData <- callModule(dataAdjust, "adjustments", inputData)
