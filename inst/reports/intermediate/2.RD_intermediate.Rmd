@@ -14,7 +14,7 @@ params:
 ```{r setup, include = FALSE}
 require(hivEstimatesAccuracy, quietly = TRUE)
 knitr::opts_chunk$set(echo = FALSE, results = "markup", message = FALSE, warning = FALSE, include = TRUE)
-calcFigHeight <- function(stratum) ((length(unique(params$InputData$Table[[stratum]])) + 1) %/% 2) * 2
+calcFigHeight <- function(stratum) ((length(unique(params$InputData$Table[[stratum]])) + 1) %/% 2) * 3
 ```
 
 ```{r, results='asis'}
