@@ -182,7 +182,14 @@ createReports <- function(input, output, session, adjustedData)
                             "txt")
 
     downloadHandler(
-      filename = function() { paste(vals$selectedReportName, fileExtension, sep = ".") },
+      filename = function() {
+        fileName <- sprintf("%s_%s.%s",
+                            vals$selectedReportName,
+                            GetTimeStamp(),
+                            fileExtension)
+        return(fileName)
+      },
+
       content = function(file) {
         withProgress(message = "Creating report",
                      detail = "The report file will be available for download shortly.",
