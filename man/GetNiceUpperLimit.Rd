@@ -10,13 +10,14 @@ GetNiceUpperLimit(val)
 \item{val}{Vector of numeric values. Required.}
 }
 \value{
-numbeic nice number
+numeric nice number
 }
 \description{
 Generates a "nice" large number.
 }
 \examples{
 GetNiceUpperLimit(val = 8)
-GetNiceUpperLimit(val = c(8, 13))
+GetNiceUpperLimit(val = -8)
+GetNiceUpperLimit(val = c(8, 13, 1158, -13232))
 
 }
