@@ -1,3 +1,17 @@
+Version 0.9.3 (2018/04/18)
+------------------------------------------------------------------------------
+
+* Width of navigation panel reduced to 180px in order to maximize content area.
+* Regression "missing success and warning icons in the mapping overview" fixed.
+* Regression "missing input data table in the summary page" fixed.
+* Plots have all years printed.
+* Plots start from 0.
+* Upper bound for the main report plots fixed.
+* Adjusted styling of input data table in the summary page.
+* Introduction text added.
+* Main report adjusted to support reporting delays count adjustment and smoothing.
+
+
 Version 0.9.2 (2018/04/17)
 ------------------------------------------------------------------------------
 
