@@ -5,6 +5,23 @@ inputDataUploadUI <- function(id)
 
   tagList(
     div(style = "margin-top: 15px"),
+    div(
+      id = ns("introductionBox"),
+      box(
+        width = 12,
+        fluidRow(
+          column(
+            offset = 2,
+            width = 8,
+            style = "text-align: center; font-weight: bold",
+            p("The ECDC HIV Estimates Accuracy Tool is an application that uses advanced statistical methods to correct for missing values in key HIV surveillance variables as well as for reporting delay."),
+            p("The tool accepts case based HIV surveillance data prepared in a specific format."),
+            p("The outputs include results from pre-defined analyses in the form of a report containing tables and graphs, and datasets, in which the adjustments have been incorporated and which may be exported for further analysis.",
+              style = "margin-bottom: 0")
+          )
+        )
+      )
+    ),
     box(
       width = 12,
       title = "Input data",
@@ -42,7 +59,7 @@ inputDataUploadUI <- function(id)
           ),
           actionButton(ns("applyMappingBtn"),
                        label = "Apply mapping",
-                       style = "margin-bottom: 15px"),
+                       style = "margin-bottom: 15px; background-color: #7cbdc1; color: white"),
           fluidRow(
             column(8,
                    uiOutput(ns("attrMappingTableDiv"))),
@@ -109,9 +126,11 @@ inputDataUpload <- function(input, output, session, appStatus)
   observe({
     originalData <- originalData()
     if (is.null(originalData)) {
-      shinyjs::hide("attrMappingBox")
+      shinyjs::hide("attrMappingBox", anim = TRUE, animType = "fade")
+      # shinyjs::show("introductionBox")
     } else {
       shinyjs::show("attrMappingBox")
+      # shinyjs::hide("introductionBox", anim = TRUE, animType = "slide", time = 2)
     }
   })
 
@@ -255,14 +274,14 @@ inputDataUpload <- function(input, output, session, appStatus)
       textColor <- NULL
       if (attrMappingStatus$Valid) {
         textColor <- "seagreen"
-        headerHTML <- p(tags$i(class = "material-icons", "check"),
-                        "Assignement of input data columns to attributes is valid.",
-                        style = paste("color:", textColor))
+        headerHTML <- span(icon("check"),
+                           "Assignement of input data columns to attributes is valid.",
+                           style = paste("color:", textColor))
       } else {
         textColor <- "red"
-        headerHTML <- p(tags$i(class = "material-icons", "error_outline"),
-                        "Assignement of input data columns to attributes is not valid.",
-                        style = paste("color:", textColor))
+        headerHTML <- span(icon("exclamation"),
+                           "Assignement of input data columns to attributes is not valid.",
+                           style = paste("color:", textColor))
       }
 
       multiMappedStatusHTML <- NULL
@@ -304,14 +323,14 @@ inputDataUpload <- function(input, output, session, appStatus)
       textColor <- NULL
       if (inputDataTestStatus$Valid) {
         textColor <- "seagreen"
-        headerHTML <- p(tags$i(class = "material-icons", "check"),
-                        "Input data values are valid.",
-                        style = paste("color:", textColor))
+        headerHTML <- span(icon("check"),
+                           "Input data values are valid.",
+                           style = paste("color:", textColor))
       } else {
         textColor <- "red"
-        headerHTML <- p(tags$i(class = "material-icons", "error_outline"),
-                        HTML("Input data values are not valid."),
-                        style = paste("color:", textColor))
+        headerHTML <- span(icon("exclamation"),
+                           HTML("Input data values are not valid."),
+                           style = paste("color:", textColor))
       }
 
       wrongValuesHTML <- NULL
