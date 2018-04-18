@@ -49,7 +49,7 @@ GetDataSummaryArtifacts <- function(inputData)
                y = -Inf,
                hjust = 0,
                vjust = -1) +
-      coord_cartesian(xlim = c(0, max(30, ceiling(quant99)))) +
+      expand_limits(x = c(0, max(30, ceiling(quant99)))) +
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
@@ -74,7 +74,7 @@ GetDataSummaryArtifacts <- function(inputData)
                y = -Inf,
                hjust = 0,
                vjust = -1) +
-      coord_cartesian(xlim = c(0, max(30, ceiling(quant99)))) +
+      expand_limits(x = c(0, max(30, ceiling(quant99)))) +
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
@@ -112,13 +112,15 @@ GetDataSummaryArtifacts <- function(inputData)
       scale_linetype_manual("Datasets",
                             values = c("Smoothed mean reporting delay" = "solid",
                                        "Expected upper bound" = "dotted")) +
-      scale_x_continuous(expand = c(0, 0)) +
+      scale_x_continuous(expand = c(0, 0), breaks = meanDelay[, sort(unique(round(NotificationTime)))]) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
       theme(text = element_text(size = 14),
             panel.grid = element_blank(),
             axis.line = element_line(colour = "#888888"),
-            axis.ticks = element_line(colour = "#888888")) +
+            axis.ticks = element_line(colour = "#888888"),
+            axis.text.x = element_text(size = 11),
+            axis.text.y = element_text(size = 11)) +
       ggtitle("Reporting delay by notification quarter") +
       xlab("Notification time in quarters of the year") +
       ylab("Mean reporting delay [quarter]")

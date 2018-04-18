@@ -49,12 +49,13 @@ GetRDPlots <- function(
               aes(x = DateOfDiagnosisYear, y = EstCount, color = "Estimated total"), size = 1) +
     geom_line(aes(y = Count, group = Source, color = Source), size = 1) +
     scale_colour_manual("Counts", values = colorPalette) +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0), breaks = localPlotData[, sort(unique(DateOfDiagnosisYear))]) +
     scale_y_continuous(expand = c(0, 0)) +
+    expand_limits(y = 0) +
     theme_classic() +
-    theme(plot.title = element_text(size = 13),
-          axis.title.x =  element_text(size = 10),
-          axis.title.y =  element_text(size = 10),
+    theme(plot.title = element_text(size = 11),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10),
           text = element_text(size = 11),
           panel.grid = element_blank(),
           panel.spacing = unit(2, "lines"),
@@ -63,7 +64,9 @@ GetRDPlots <- function(
           strip.background = element_rect(fill = "#e9e9e9",
                                           linetype = "blank"),
           strip.placement = "outside",
-          strip.text = element_text(size = 8)) +
+          strip.text = element_text(size = 8),
+          axis.text.x = element_text(size = 8),
+          axis.text.y = element_text(size = 8)) +
     xlab("Diagnosis year") +
     ylab("Count of HIV cases")
 
