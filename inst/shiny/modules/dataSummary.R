@@ -118,12 +118,13 @@ dataSummary <- function(input, output, session, appStatus, inputData)
     }
   })
 
-  output[["inputDataTable"]] <- renderDataTable(inputData(),
-                                                     options = list(
-                                                       autoWidth = FALSE,
-                                                       pageLength = 10,
-                                                       scrollX = TRUE,
-                                                       deferRender = TRUE,
-                                                       serverSide = TRUE,
-                                                       scroller = FALSE))
+  output[["inputDataTable"]] <- renderDataTable(inputData()$Table,
+                                                options = list(
+                                                  dom = '<"top">lirt<"bottom">p',
+                                                  autoWidth = FALSE,
+                                                  pageLength = 25,
+                                                  scrollX = TRUE,
+                                                  deferRender = TRUE,
+                                                  serverSide = TRUE,
+                                                  scroller = FALSE))
 }
