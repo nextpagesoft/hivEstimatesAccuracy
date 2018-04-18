@@ -18,7 +18,9 @@ knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.heig
 
 ```{r, results='asis'}
 cat(sprintf("# %d. Multiple Imputations (mice)\n", params$InputData$RunIdx))
+```
 
+```{r, results='asis'}
 femaleAllXCols <- params$InputData$Artifacts$F$X_COLS$All
 femaleKeptXCols <- params$InputData$Artifacts$F$X_COLS$Kept
 maleAllXCols <- params$InputData$Artifacts$M$X_COLS$All
@@ -60,5 +62,7 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
     cat("</ul></li>")
   }
   cat("</ul>")
+} else {
+  p("No adjustment specific intermediate results.")
 }
 ```
