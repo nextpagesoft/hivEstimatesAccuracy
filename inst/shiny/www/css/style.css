@@ -212,8 +212,12 @@ div.box-body .shiny-input-container h3 {
 }
 
 /* Main Report */
-#reportDiv h1 {
+#reportDiv h1, #adjustments-intermReport h1 {
   font-size: 20px;
+}
+
+#reportDiv h2, #adjustments-intermReport h2 {
+  font-size: 18px;
 }
 
 #reportDiv table {
@@ -230,6 +234,10 @@ div.box-body .shiny-input-container h3 {
 #reportDiv table th {
   background-color: #e1efd3;
   text-align: right;
+}
+
+#reports-reportParams .shiny-input-container {
+  width: 570px;
 }
 
 /* Intermediate report  */
@@ -298,10 +306,18 @@ div.box-body .shiny-input-container h3 {
   box-shadow: none;
 }
 
+#upload-valueCheckStatusBox ol {
+  margin: 0;
+}
+
 /* Data table */
 
 #summary-inputDataTable {
   font-size: 12px;
+}
+
+#summary-inputDataTable table {
+  white-space: nowrap;
 }
 
 #summary-inputDataTable tr {
@@ -313,6 +329,3 @@ div.box-body .shiny-input-container h3 {
   padding: 5px;
   font-size: 11px;
 }
-
-}
-
