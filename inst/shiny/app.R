@@ -48,7 +48,8 @@ ui <- tagList(
         menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
         menuItem("Reports",            tabName = "reports",     icon = icon("book")),
         menuItem("Outputs",            tabName = "outputs",     icon = icon("download"))
-      )
+      ),
+      width = 180
     ),
     dashboardBody(
       tags$head(
