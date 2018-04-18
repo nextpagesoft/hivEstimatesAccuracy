@@ -18,8 +18,9 @@ startYear <- 2000L
 endQrt <- 2017.25
 
 # Input data path
-inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/PLtest.csv"
+# inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
+inputDataFilePath <- "G:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/dummy_miss1.csv"
 
 # A) READ INPUT DATA ------------------------------------------------------------------------------
 
@@ -35,7 +36,7 @@ attrMapping[["FirstCD4Count"]] <- "cd4_num"
 
 # Pre-process data
 inputData <- ApplyAttributesMapping(originalData, attrMapping)
-outputData <- PreProcessInputData(inputData)
+outputData <- PreProcessInputData(inputData)$Table
 
 
 # outputData <- outputData[ReportingCountry == "AD"]

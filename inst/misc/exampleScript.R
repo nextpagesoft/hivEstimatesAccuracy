@@ -33,14 +33,14 @@ if (attrMappingStatus$Valid) {
   inputData <- NULL
 }
 
-summaryArtifacts <- GetDataSummaryArtifacts(inputData$Table)
+summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
 
 # Read adjustment specifications. Take a specific one, "Multiple imputation"
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
   # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
-  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"]),
-  GetListObject(adjustmentFilePaths["Reporting Delays"])
+  GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
+  # GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
 # adjustmentSpecs[[1]]$Parameters$stratTrans$value <- TRUE
@@ -63,7 +63,8 @@ intermReport <- HTML(intermReport)
 
 # Create report
 reportFilePaths <- GetReportFileNames()
-params <- list(AdjustedData = adjustedData)
+params <- list(AdjustedData = adjustedData,
+               ReportOption = 2)
 
 reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "html_fragment",
