@@ -14,7 +14,21 @@ outputsUI <- function(id)
       solidHeader = FALSE,
       collapsible = TRUE,
       status = "primary",
-      uiOutput(ns("downloadLinks")))
+      uiOutput(ns("downloadLinks")),
+      br(),
+      p("Data saved as R file (extension 'rds') are lists with the following attributes:"),
+      tags$ol(
+        tags$li("Table: data.frame with the adjusted data"),
+        tags$li("Artifacts: list with artifact objects (data.frames, plots) produced during the adjustment"),
+        tags$li("Parameters: list with the parameters applied"),
+        tags$li("RunIdx: Order of the adjustment"),
+        tags$li("Name: Name of the adjustment"),
+        tags$li("Type: Type of the adjustment"),
+        tags$li("SubType: Sub-type of the adjustment"),
+        tags$li("TimeStamp: Adjustment execution end time in format 'YYYYMMDDhhmmss'")
+      ),
+      p("Data saved as csv (extension 'csv') or Stata (extension 'dta') file contain only the adjusted data.")
+    )
   )
 }
 
@@ -28,7 +42,13 @@ outputs <- function(input, output, session, adjustedData)
   DownloadIntermediateData <- function(key, format) {
     adjustedData <- adjustedData()
     if (key %in% names(adjustedData)) {
-      intermediateData <- adjustedData[[key]]$Table
+      if (format %in% c("csv", "dta")) {
+        intermediateData <- adjustedData[[key]]$Table
+      } else if (format %in% c("rds")) {
+        intermediateData <- adjustedData[[key]]
+      } else {
+        intermediateData <- NULL
+      }
     } else {
       intermediateData <- NULL
     }
@@ -62,9 +82,11 @@ outputs <- function(input, output, session, adjustedData)
     runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
     for (runIdx in runIndices) {
       key <- names(runIndices)[runIdx]
+      downloadRdsBtnId  <- paste0("downloadRdsBtn", runIdx)
       downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
       downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
 
+      output[[downloadRdsBtnId]] <- DownloadIntermediateData(key, "rds")
       output[[downloadCsvBtnId]] <- DownloadIntermediateData(key, "csv")
       output[[downloadStataBtnId]] <- DownloadIntermediateData(key, "dta")
     }
@@ -84,12 +106,14 @@ outputs <- function(input, output, session, adjustedData)
         for (runIdx in runIndices) {
           key <- names(runIndices)[runIdx]
           name <- adjustedData[[key]]$Name
+          downloadRdsBtnId  <- paste0("downloadRdsBtn", runIdx)
           downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
           downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
 
           widget[[as.character(runIdx)]] <- fluidRow(
             id = ns(runIdx),
             column(3, sprintf("%d. %s", runIdx, name)),
+            column(2, downloadLink(ns(downloadRdsBtnId), "Download as R file")),
             column(2, downloadLink(ns(downloadCsvBtnId), "Download as csv file")),
             column(2, downloadLink(ns(downloadStataBtnId), "Download as Stata file"))
           )

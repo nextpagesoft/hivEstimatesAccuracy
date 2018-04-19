@@ -5,7 +5,7 @@
 #'
 #' @param data data.table object to save. Required.
 #' @param fileName Name of the saved file. Required.
-#' @param ... Additional parameters passed to \code{\link{ReadTextFile}}. Optional.
+#' @param ... Additional parameters passed to worker functions. Optional.
 #'
 #' @return NULL (invisibly)
 #'
@@ -26,7 +26,7 @@ WriteDataFile <- function(data, fileName, ...)
     fileExtension <- "csv"
   }
 
-  switch (fileExtension,
+  switch(fileExtension,
     "csv" = {
       # Default separator
       defSep <- ifelse(Sys.localeconv()[["decimal_point"]] == ",", ";", ",")
@@ -52,7 +52,10 @@ WriteDataFile <- function(data, fileName, ...)
       }
     },
     "dta" = {
-      WriteStataFile(data, fileName)
+      WriteStataFile(data, fileName, ...)
+    },
+    "rds" = {
+      WriteRdsFile(data, fileName, ...)
     },
     {stop("Unsupported file extension")}
   )

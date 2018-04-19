@@ -11,7 +11,7 @@ WriteDataFile(data, fileName, ...)
 
 \item{fileName}{Name of the saved file. Required.}
 
-\item{...}{Additional parameters passed to \code{\link{ReadTextFile}}. Optional.}
+\item{...}{Additional parameters passed to worker functions. Optional.}
 }
 \value{
 NULL (invisibly)
