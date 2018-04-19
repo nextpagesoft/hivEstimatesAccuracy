@@ -6,7 +6,7 @@ isServer <- Sys.info()[["nodename"]] == "ShinyServer"
 
 # Server specific code
 if (isServer) {
-  .libPaths(c("/home/daniel/R/devel/hivEstimatesAccuracy/packrat/lib/x86_64-pc-linux-gnu/3.4.3"))
+  # .libPaths(c("/home/daniel/R/devel/hivEstimatesAccuracy/packrat/lib/x86_64-pc-linux-gnu/3.4.3"))
 }
 
 # Load standard libraries

@@ -39,15 +39,23 @@ summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
   # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
-  GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
-  # GetListObject(adjustmentFilePaths["Reporting Delays"])
+  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
+  GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 
-# adjustmentSpecs[[1]]$Parameters$stratTrans$value <- TRUE
+adjustmentSpecs[[1]]$Parameters$stratTrans$value <- TRUE
 
 # Run adjustments
 adjustedData <- RunAdjustments(data = inputData$Table,
                                adjustmentSpecs = adjustmentSpecs)
+
+# Render intermediate report to file and open it in external browser
+intermReportFilePath <- RenderReportToFile(
+  filePath = system.file("reports/intermediate/2.RD_intermediate.Rmd",
+                         package = "hivEstimatesAccuracy"),
+  params = list(InputData = adjustedData[[2]]))
+browseURL(intermReportFilePath)
+unlink(intermReportFilePath)
 
 intermReport <- RenderReportToHTML(
   filePath = system.file("reports/intermediate/0.PreProcess.Rmd",
@@ -64,11 +72,13 @@ intermReport <- HTML(intermReport)
 # Create report
 reportFilePaths <- GetReportFileNames()
 params <- list(AdjustedData = adjustedData,
-               ReportOption = 2)
+               ReportingDelay = 0,
+               Smoothing = 0)
 
 reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "html_fragment",
                                      params = params)
+browseURL(reportFileName)
 
 reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],
                                      format = "html_document",
