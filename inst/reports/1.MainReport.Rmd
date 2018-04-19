@@ -532,102 +532,109 @@ ggplot(data_orig) +
 
 # Adjusted data
 
-```{r}
-if (miPresent) {
-  
-  cat("<p>The following tables and graphs are on the adjusted for missingness (by Multiple Imputations) data.
-  Data stratified by gender are not shown since there were no missing data on gender thus one could 
-  refer to Table 1 and Figure 1 of the unadjusted data.
-  </p>")
-  
-  cat("<p>Calculations use imputed values of transmission category and CD4 counts in cases where they were 
-  missing in the original data.
-  </p>")
-  
-  result <- tryCatch({
-    ModelTransmissionData(data = temp_data_mi_transmission)
-  }, error = function(e) {
-    cat("<p>Due to numeric instabilities only transmission categories Hetero, IDU and MSM are kept in the adjusted data.</p>")
-    ModelTransmissionData(data = temp_data_mi_transmission[Transmission %in% c("HETERO", "IDU", "MSM")])
-  })
-  
-  wide <- result$Wide
-  pred <- result$Pred
-  
-  cat("## Number of diagnoses after adjustment")
-     
-  outputIdx <- outputIdx + 1
-  # ftab_mi will calculate row percentages and totals
-  table5 <- ftab_mi(wide, digits = 2, 
-                    colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
-                                        HETERO = "Hetero"))
-  cat(sprintf("**Table %d. Number of diagnoses per year by transmission category and overall**<br />", outputIdx))
-  knitr::kable(table5, align = rep("r", ncol(table5)))
-  
-  cat(sprintf("**Figure %d. Number of diagnoses per year by transmission category**<br />", outputIdx))
-  ggplot(pred) +
-    aes(x = DateOfDiagnosisYear, y = linpred, color = Transmission) +
-    geom_point() +
-    geom_line() +
-    labs(x = "Year", y = "Number of diagnoses") +
-    scale_colour_manual("Transmission\ncategory", 
-                        values = colorPalette, 
-                        labels = c(HETERO = "Hetero")) +
-    scale_x_continuous(expand = c(0, 0), breaks = pred[, sort(unique(DateOfDiagnosisYear))]) +
-    scale_y_continuous(expand = c(0, 0)) +
-    expand_limits(y = 0) +
-    theme_classic() +
-    theme(axis.text.x = element_text(size = 8),
-          axis.text.y = element_text(size = 8))
+```{r, eval = miPresent}
+cat("<p>The following tables and graphs are on the adjusted for missingness (by Multiple Imputations) data.
+Data stratified by gender are not shown since there were no missing data on gender thus one could 
+refer to Table 1 and Figure 1 of the unadjusted data.</p>")
 
-  if (cd4Present) {
-    cat("## Median CD4 after adjustment")  
-    
-    outputIdx <- outputIdx + 1
-    table6 <- res.list.gender[[2]]
-    cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by gender**<br />", outputIdx))
-    knitr::kable(table6, row.names = FALSE, align = rep("r", ncol(table6)),
-                 col.names = c("Year of diagnosis", "Female", "Male"))
-    
-    cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by gender**<br />", outputIdx))
-    ggplot(res.list.gender[[1]]) +
-      aes(x = DateOfDiagnosisYear, y = median, color = Gender) +
-      geom_point() +
-      geom_line() +
-      labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-      expand_limits(y = c(0, cd4YLim)) +
-      scale_colour_manual("Gender", 
-                          values = colorPalette,
-                          labels = c("Female", "Male")) +
-      scale_x_continuous(expand = c(0, 0), breaks = res.list.gender[[1]][, sort(unique(DateOfDiagnosisYear))]) +
-      scale_y_continuous(expand = c(0, 0)) +
-      theme_classic() +
-      theme(axis.text.x = element_text(size = 8),
-            axis.text.y = element_text(size = 8))
-    
-    outputIdx <- outputIdx + 1
-    cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
-    table7 <- res.list.trans[[2]]
-    knitr::kable(table7, row.names = FALSE, align = rep("r", ncol(table7)),
-                 col.names = c("Year of diagnosis", "Hetero", "IDU","MSM"))
-    
-    cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
-    ggplot(res.list.trans[[1]]) +
-      aes(x = DateOfDiagnosisYear, y = median, color = Transmission) +
-      geom_point() +
-      geom_line() +
-      labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-      expand_limits(y = c(0, cd4YLim)) +
-      scale_colour_manual("Transmission\ncategory", 
-                          values = colorPalette,
-                          labels = c("Hetero", "IDU","MSM")) +
-      scale_x_continuous(expand = c(0, 0), breaks = res.list.trans[[1]][, sort(unique(DateOfDiagnosisYear))]) +
-      scale_y_continuous(expand = c(0, 0)) +
-      theme_classic() +
-      theme(axis.text.x = element_text(size = 8),
-            axis.text.y = element_text(size = 8))
-  }
-} else {
-  cat("Multiple Imputations adjustment has not been performed, threfore no outputs are presented in this section.")
-}
+cat("<p>Calculations use imputed values of transmission category and CD4 counts in cases where they were 
+missing in the original data.</p>")
+```
+
+```{r, eval = miPresent}
+result <- tryCatch({
+  ModelTransmissionData(data = temp_data_mi_transmission)
+}, error = function(e) {
+  cat("<p>Due to numeric instabilities only transmission categories Hetero, IDU and MSM are kept in the adjusted data.</p>")
+  ModelTransmissionData(data = temp_data_mi_transmission[Transmission %in% c("HETERO", "IDU", "MSM")])
+})
+
+wide <- result$Wide
+pred <- result$Pred
+```
+
+```{r, eval = miPresent}
+cat("## Number of diagnoses after adjustment")
+```
+
+```{r, eval = miPresent}
+outputIdx <- outputIdx + 1
+# ftab_mi will calculate row percentages and totals
+table5 <- ftab_mi(wide, digits = 2, 
+                  colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
+                                      HETERO = "Hetero"))
+cat(sprintf("**Table %d. Number of diagnoses per year by transmission category and overall**", outputIdx))
+knitr::kable(table5, align = rep("r", ncol(table5)))
+
+cat(sprintf("**Figure %d. Number of diagnoses per year by transmission category**<br />", outputIdx))
+ggplot(pred) +
+  aes(x = DateOfDiagnosisYear, y = linpred, color = Transmission) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Year", y = "Number of diagnoses") +
+  scale_colour_manual("Transmission\ncategory", 
+                      values = colorPalette, 
+                      labels = c(HETERO = "Hetero")) +
+  scale_x_continuous(expand = c(0, 0), breaks = pred[, sort(unique(DateOfDiagnosisYear))]) +
+  scale_y_continuous(expand = c(0, 0)) +
+  expand_limits(y = 0) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
+```
+
+```{r, eval = miPresent & cd4Present}
+cat("## Median CD4 after adjustment")  
+```
+
+```{r, eval = miPresent & cd4Present}
+outputIdx <- outputIdx + 1
+table6 <- res.list.gender[[2]]
+cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by gender**", outputIdx))
+knitr::kable(table6, row.names = FALSE, align = rep("r", ncol(table6)),
+             col.names = c("Year of diagnosis", "Female", "Male"))
+
+cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by gender**<br />", outputIdx))
+ggplot(res.list.gender[[1]]) +
+  aes(x = DateOfDiagnosisYear, y = median, color = Gender) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
+  expand_limits(y = c(0, cd4YLim)) +
+  scale_colour_manual("Gender", 
+                      values = colorPalette,
+                      labels = c("Female", "Male")) +
+  scale_x_continuous(expand = c(0, 0), breaks = res.list.gender[[1]][, sort(unique(DateOfDiagnosisYear))]) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
+```
+
+```{r, eval = miPresent & cd4Present}
+outputIdx <- outputIdx + 1
+cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**", outputIdx))
+table7 <- res.list.trans[[2]]
+knitr::kable(table7, row.names = FALSE, align = rep("r", ncol(table7)),
+             col.names = c("Year of diagnosis", "Hetero", "IDU","MSM"))
+
+cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
+ggplot(res.list.trans[[1]]) +
+  aes(x = DateOfDiagnosisYear, y = median, color = Transmission) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
+  expand_limits(y = c(0, cd4YLim)) +
+  scale_colour_manual("Transmission\ncategory", 
+                      values = colorPalette,
+                      labels = c("Hetero", "IDU","MSM")) +
+  scale_x_continuous(expand = c(0, 0), breaks = res.list.trans[[1]][, sort(unique(DateOfDiagnosisYear))]) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
+```
+
+```{r, eval = !miPresent}
+cat("Multiple Imputations adjustment has not been performed, threfore no outputs are presented in this section.")
 ```
