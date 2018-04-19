@@ -108,7 +108,9 @@ list(
     outputData <- outputData[VarXs > VarTs]
 
     totalPlot <- NULL
+    totalPlotData <- NULL
     stratPlotList <- NULL
+    stratPlotListData <- NULL
     if (nrow(outputData) > 0) {
 
       # Create a stratum variable - will be used to merge with the estimations,
@@ -183,19 +185,21 @@ list(
                             variable.name = "Stratum",
                             value.name = "StratumValue")
 
-        stratPlotData <- GetRDPlotData(data = agregatLong,
-                                       by = c("Source", "Imputation", "DateOfDiagnosisYear", "Stratum",
-                                              "StratumValue"))
+        stratPlotListData <- GetRDPlotData(data = agregatLong,
+                                           by = c("Source", "Imputation", "DateOfDiagnosisYear",
+                                                  "Stratum", "StratumValue"))
         stratPlotList <- lapply(stratVarNames,
                                 GetRDPlots,
-                                plotData = stratPlotData,
+                                plotData = stratPlotListData,
                                 isOriginalData = isOriginalData)
 
         names(stratPlotList) <- stratVarNames
       }
     }
     artifacts <- list(OutputPlotTotal = totalPlot,
-                      OutputPlotStrat = stratPlotList)
+                      OutputPlotTotalData = totalPlotData,
+                      OutputPlotStrat = stratPlotList,
+                      OutputPlotStratData = stratPlotListData)
 
     cat("No adjustment specific text outputs.\n")
 

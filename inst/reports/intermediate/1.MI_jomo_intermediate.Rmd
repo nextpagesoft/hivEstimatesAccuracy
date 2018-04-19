@@ -8,8 +8,8 @@ output:
     number_sections: no
     smart: yes
     fig_caption: yes
-# params:
-#   InputData: NA
+params:
+  InputData: NA
 ---
 
 ```{r setup, include = FALSE}
