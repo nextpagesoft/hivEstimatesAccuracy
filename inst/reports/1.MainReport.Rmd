@@ -24,16 +24,16 @@ output:
     fig_width: 7
     fig_height: 4
     toc: yes
-# params:
-#   AdjustedData: NA
-#   ReportingDelay:
-#     label: "Adjust count of cases for reporting delay"
-#     value: 0
-#     input: checkbox
-#   Smoothing:
-#     label: "Apply plot curves smoothing"
-#     value: 0
-#     input: checkbox
+params:
+  AdjustedData: NA
+  ReportingDelay:
+    label: "Adjust count of cases for reporting delay"
+    value: 0
+    input: checkbox
+  Smoothing:
+    label: "Apply plot curves smoothing"
+    value: 0
+    input: checkbox
 ---
 
 ```{r setup, include = FALSE}

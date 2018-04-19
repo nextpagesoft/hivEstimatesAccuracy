@@ -2,6 +2,16 @@ Version 0.9.4 (2018/04/19)
 ------------------------------------------------------------------------------
 
 * Main report parameters split into two - count correction and smoothing.
+* Show reporting delays diagnostic plot under caption.
+* Remove redundant "Parameters" member of data list.
+* jomo intermediate report updated to have plots ordered alphabetically.
+* Add table to RD intermediate report.
+* Styling of tables in intermediate reports made consistent with the main report.
+* Allow saving data as R rds file.
+* Completely reimplemented main report.
+* Allow running the main report only with RD adjustment carried out.
+* Handle 100% missing CD4 in the main report.
+* Allow any count of transmission categories in the main report.
 
 
 Version 0.9.3 (2018/04/18)
