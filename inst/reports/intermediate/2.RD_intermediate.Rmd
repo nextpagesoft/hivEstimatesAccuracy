@@ -13,20 +13,20 @@ params:
 ---
 ```{r setup, include = FALSE}
 require(hivEstimatesAccuracy, quietly = TRUE)
-knitr::opts_chunk$set(echo = FALSE, results = "markup", message = FALSE, warning = FALSE, include = TRUE)
+knitr::opts_chunk$set(echo = FALSE, results = "asis", message = FALSE, warning = FALSE, include = TRUE)
 calcFigHeight <- function(stratum) ((length(unique(params$InputData$Table[[stratum]])) + 1) %/% 2) * 3
 ```
 
-```{r, results='asis'}
+```{r}
 cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
 ```
 
-**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**
 ```{r, fig.height = 4, fig.width = 10}
+cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**<br />")
 params$InputData$Artifacts$OutputPlotTotal
 ```
 
-```{r, results = "asis", eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat)}}
+```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat)}}
 cat("**Figure 2. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year and stratum.**")
 ```
 
