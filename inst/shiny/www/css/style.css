@@ -220,30 +220,27 @@ div.box-body .shiny-input-container h3 {
   font-size: 18px;
 }
 
-#reportDiv table {
+#reportDiv table, #adjustments-intermReport table {
     border-spacing: 0;
     border-collapse: separate;
     font-size: 13px;
 }
 
-#reportDiv table td, #reportDiv table th {
+#reportDiv table td,
+#reportDiv table th,
+#adjustments-intermReport table td,
+#adjustments-intermReport table th {
     padding: 3px 20px;
     border-bottom: 1px solid #eeeeee;
 }
 
-#reportDiv table th {
+#reportDiv table th, #adjustments-intermReport table th {
   background-color: #e1efd3;
   text-align: right;
 }
 
 #reports-reportParams .shiny-input-container {
   width: 570px;
-}
-
-/* Intermediate report  */
-.intermReport h1 {
-  font-size: 18px;
-  color: #3c8dbc;
 }
 
 /* Pages */
