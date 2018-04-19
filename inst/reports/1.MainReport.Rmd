@@ -26,16 +26,14 @@ output:
     toc: yes
 params:
   AdjustedData: NA
-  ReportOption:
-    label: "Count correction and smoothing:"
-    value: 1
-    input: radio
-    choiceNames:
-      [Correction of count for reporting delay and smoothed calendar time., 
-      Correction of count for reporting delay and original calendar time., 
-      Original count and smoothed calendar time., 
-      Original count and original calendar time.]
-    choiceValues: [1, 2, 3, 4]
+  ReportingDelay:
+    label: "Adjust count of cases for reporting delay"
+    value: 0
+    input: checkbox
+  Smoothing:
+    label: "Apply plot curves smoothing"
+    value: 0
+    input: checkbox
 ---
 
 ```{r setup, include = FALSE}
@@ -192,7 +190,7 @@ mimediqrcd4 <- function(vvar, data, byvar, digits = 0, colNamesMapping = NULL) {
   for (tau in seq(0.25, 0.75, by = 0.25)) {
     nam <- paste0("pred.", tau)
     
-    if (reportOption %in% c(1, 3)) {
+    if (optSmoothing) {
       models <- with(data.list, 
                      rq(formula = vv ~ bv * splines::ns(DY, df = nsdf), 
                         tau = tau, 
@@ -244,7 +242,9 @@ mimediqrcd4 <- function(vvar, data, byvar, digits = 0, colNamesMapping = NULL) {
 
 ```{r, eval = TRUE, include = FALSE}
 adjTypes <- sapply(params$AdjustedData, "[[", "Type")
-reportOption <- as.integer(params$ReportOption)
+optReportingDelay <- as.logical(params$ReportingDelay)
+optSmoothing <- as.logical(params$Smoothing)
+
 data <- copy(params$AdjustedData[[length(params$AdjustedData)]]$Table)
 cd4Present <- data[, any(!is.na(SqCD4))]
 miPresent <- length(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]) > 0
@@ -263,7 +263,7 @@ if (!miPresent) {
   data[, Imputation := 0L]
 }
 
-if (rdPresent & reportOption %in% c(1, 2)) {
+if (rdPresent & optReportingDelay) {
   data[, ModelWeight := Weight]
 } else {
   data[, ModelWeight := 1.0]
@@ -285,12 +285,16 @@ if (rdPresent) {
   cat("<p>Reporting Delays adjustment not performed.</p>")  
 }
 
-cat(sprintf("<p>Report option: %s</p>", 
-            switch(reportOption, 
-                   "1" = "Correction of count for reporting delay and smoothed version of calendar time.", 
-                   "2" = "Correction of count for reporting delay and original calendar time.", 
-                   "3" = "Original count and smoothed version of calendar time.", 
-                   "4" = "Original count and original calendar time.")))
+cat("<p>Selected report options:</p>") 
+cat(sprintf("<p>%s</p>", 
+            switch(optReportingDelay, 
+                   "FALSE" = "Original count of case.", 
+                   "TRUE"  = "Correction of count of cases for reporting delay.")))
+
+cat(sprintf("<p>%s</p>", 
+            switch(optSmoothing, 
+                   "FALSE" = "Original calendar time.", 
+                   "TRUE"  = "Smoothed version of calendar time.")))
 ```
 
 ```{r, eval = TRUE, include = FALSE}
@@ -494,7 +498,7 @@ data.list <- imputationList(split(temp_data_mi_transmission, by = "Imputation"))
 # Main model
 # reportOption %in% c(1L, 3L): smoothed calendar time
 # reportOption %in% c(2L, 4L): unsmoothed calendar time
-if (reportOption %in% c(1L, 3L)) {
+if (optSmoothing) {
   suppressWarnings({
     models <- with(data.list,
                  glm(Count ~ as.factor(Transmission) * splines::ns(DY, df = nsdf),
