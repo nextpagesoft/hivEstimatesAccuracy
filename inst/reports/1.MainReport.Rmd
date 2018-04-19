@@ -2,7 +2,7 @@
 name: "Main Report"
 author: "HIV Estimates Accuracy tool"
 title: "Multiple imputations"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
+date: "`r format(Sys.time(), '%d %B %Y, %H:%M:%S')`"
 output:
   html_fragment:
     number_sections: yes
@@ -24,26 +24,19 @@ output:
     fig_width: 7
     fig_height: 4
     toc: yes
-params:
-  AdjustedData: NA
-  ReportingDelay:
-    label: "Adjust count of cases for reporting delay"
-    value: 0
-    input: checkbox
-  Smoothing:
-    label: "Apply plot curves smoothing"
-    value: 0
-    input: checkbox
+# params:
+#   AdjustedData: NA
+#   ReportingDelay:
+#     label: "Adjust count of cases for reporting delay"
+#     value: 0
+#     input: checkbox
+#   Smoothing:
+#     label: "Apply plot curves smoothing"
+#     value: 0
+#     input: checkbox
 ---
 
 ```{r setup, include = FALSE}
-# PARAMETRIZATION OF REPORT (Adjusted part only - Unadjusted will remain the same)
-# Assumption: RD adjustment requires prior MI!
-# Option 1: MI+RD+Smoothed version of calendar time
-# Option 2: MI+RD+calendar time as factor
-# Option 3: MI+Smoothed version of calendar time
-# Option 4: MI+calendar time as factor
-
 knitr::opts_chunk$set(echo = FALSE, 
                       results = "asis", 
                       message = FALSE, 
@@ -57,6 +50,8 @@ require(mitools)
 require(quantreg)
 
 colorPalette <- c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce", "#b23A48", "#7a5980", "#63372c", "#284b63")
+formatNumbers <- function(x, digits = 0) sprintf(paste0("%.", digits, "f"), x)
+outputIdx <- 0
 ```
 
 ```{r functions, eval = TRUE, include = FALSE}
@@ -65,7 +60,9 @@ mediqr <- function(v, digits = 0) {
   med <- quantile(v, na.rm = TRUE, probs = 0.5)
   q1  <- quantile(v, na.rm = TRUE, probs = 0.25)
   q3  <- quantile(v, na.rm = TRUE, probs = 0.75)
-  res <- paste0(round(med, digits)," (",round(q1, digits),", ",round(q3, digits),")")
+  res <- paste0(formatNumbers(med, digits), " (", 
+                formatNumbers(q1, digits), ", ",
+                formatNumbers(q3, digits),")")
   return(res)
 }
 
@@ -110,19 +107,20 @@ ftab <- function(data,
                  colNamesMapping = NULL,
                  row = TRUE) {
   freqs <- table(data[, c(x, y), with = FALSE])
-  freqs <- rbind(freqs, Total = colSums(freqs))
+  freqs <- rbind(freqs, Total = colSums(freqs, na.rm = TRUE))
+  freqs[is.na(freqs)] <- 0
   rfreqs <- prop.table(freqs, 1 * row + 2 * !row)
   ftable <- data.table(rownames(freqs))
   setnames(ftable, x)
   ftable <-
     cbind(ftable,
           matrix(
-            paste0(freqs, " (", round(rfreqs * 100, digits), ")"),
+            paste0(freqs, " (", formatNumbers(rfreqs * 100, digits), ")"),
             nrow = nrow(freqs),
             ncol = ncol(freqs),
             byrow = FALSE
           ),
-          rowSums(freqs))
+          rowSums(freqs, na.rm = TRUE))
   setnames(ftable, 
            old = seq_len(ncol(ftable))[-1], 
            new = c(colnames(freqs), "Total"))
@@ -139,18 +137,19 @@ ftab <- function(data,
 # 'data' already contains counts from prediction after MI
 ftab_mi <- function(data, digits = 1, row = TRUE, colNamesMapping = NULL) {
   freqs <- as.matrix(data[, -1])
-  freqs <- rbind(freqs, Total = colSums(freqs))
+  freqs <- rbind(freqs, Total = colSums(freqs, na.rm = TRUE))
+  freqs[is.na(freqs)] <- 0
   rfreqs <- prop.table(as.table(freqs), 1 * row + 2 * !row)
   ftable <- rbind(data[, 1], data.table("Total"), use.names = FALSE)
   ftable <-
     cbind(ftable,
           matrix(
-            paste0(round(freqs, digits = 0), " (", round(rfreqs * 100, digits), ")"),
+            paste0(formatNumbers(freqs, digits = 0), " (", formatNumbers(rfreqs * 100, digits), ")"),
             nrow = nrow(freqs),
             ncol = ncol(freqs),
             byrow = FALSE
           ),
-          rowSums(freqs))
+          rowSums(freqs, na.rm = TRUE))
   setnames(ftable, 
            old = seq_len(ncol(ftable))[-1], 
            new = c(colnames(freqs), "Total"))
@@ -238,15 +237,61 @@ mimediqrcd4 <- function(vvar, data, byvar, digits = 0, colNamesMapping = NULL) {
   }
   return(list(pred, wide))
 }
+
+ModelTransmissionData <- function(data) {
+  data <- copy(data)
+  
+  # mitools doesn't like factors with 0 frequency levels
+  data[, Transmission := droplevels(Transmission)]
+  
+  # Fit saturated Poisson model to MI data
+  data.list <- imputationList(split(data, by = "Imputation"))
+  
+  # Main model
+  if (optSmoothing) {
+    suppressWarnings({
+      models <- with(data.list,
+                   glm(Count ~ as.factor(Transmission) * splines::ns(DY, df = nsdf),
+                       data = data,
+                       family = poisson(link = log)))
+    })
+  } else {
+    suppressWarnings({
+      models <- with(data.list,
+                     glm(Count ~ as.factor(Transmission) * as.factor(DY),
+                         data = data,
+                         family = poisson(link = log)))
+    })
+  }
+  
+  # Extract betas and var
+  vars <- MIextract(models, fun = vcov)
+  betas <- MIextract(models, fun = coefficients)
+  # Rubin's rules applied by  MIcombine
+  t <- MIcombine(betas, vars)
+  X <- model.matrix(models[[1]]$formula)
+  
+  # Linear predictor exponentiated to get predicted counts
+  linpred <- exp(X %*% coef(t))
+  # Manipulation to end-up with a wide-format dataframe
+  pred <- cbind(data.list$imputations$`1`, linpred = as.vector(linpred))
+  pred <- pred[, .(DateOfDiagnosisYear, Transmission, linpred)]
+  wide <- dcast(pred, DateOfDiagnosisYear ~ Transmission, value.var = "linpred")
+  
+  return(list(Wide = wide, 
+              Pred = pred))
+}
 ```
 
 ```{r, eval = TRUE, include = FALSE}
-adjTypes <- sapply(params$AdjustedData, "[[", "Type")
 optReportingDelay <- as.logical(params$ReportingDelay)
 optSmoothing <- as.logical(params$Smoothing)
+optFilterRareTransCat <- as.logical(params$FilterRareTransCat)
 
 data <- copy(params$AdjustedData[[length(params$AdjustedData)]]$Table)
+
 cd4Present <- data[, any(!is.na(SqCD4))]
+adjTypes <- sapply(params$AdjustedData, "[[", "Type")
 miPresent <- length(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]) > 0
 rdPresent <- length(adjTypes[adjTypes == "DEPORTING_DELAYS"]) > 0
 
@@ -273,28 +318,39 @@ if (rdPresent & optReportingDelay) {
 # Introduction
 
 ```{r}
-if (miPresent) {
-  cat("<p>Multiple Imputations adjustment performed.</p>")
-} else {
-  cat("<p>Multiple Imputations adjustment not performed.</p>")
-}
-
-if (rdPresent) {
-  cat("<p>Reporting Delays adjustment performed.</p>")  
-} else {
-  cat("<p>Reporting Delays adjustment not performed.</p>")  
-}
+cat("<p>Adjustments:</p>") 
+cat("<ol>")
+cat(sprintf("<li>%s</li>",
+            ifelse(miPresent,
+                   "Multiple Imputations adjustment performed.",
+                   "Multiple Imputations adjustment not performed.")))
+cat(sprintf("<li>%s</li>",
+            ifelse(rdPresent,
+                   "Reporting Delays adjustment performed.",
+                   "Reporting Delays adjustment not performed.")))
+cat("</ol>")
 
 cat("<p>Selected report options:</p>") 
-cat(sprintf("<p>%s</p>", 
-            switch(optReportingDelay, 
-                   "FALSE" = "Original count of case.", 
-                   "TRUE"  = "Correction of count of cases for reporting delay.")))
+cat("<ol>")
+cat(sprintf("<li>%s</li>", 
+            ifelse(optReportingDelay, 
+                   "Correction of count of cases for reporting delay.",
+                   "Original count of case.")))
 
-cat(sprintf("<p>%s</p>", 
-            switch(optSmoothing, 
-                   "FALSE" = "Original calendar time.", 
-                   "TRUE"  = "Smoothed version of calendar time.")))
+cat(sprintf("<li>%s</li>", 
+            ifelse(optSmoothing, 
+                   "Smoothed version of calendar time.",
+                   "Original calendar time.")))
+
+cat(sprintf("<li>%s</li>", 
+            ifelse(optFilterRareTransCat, 
+                  "Adjusted data only with transmission categories Hetero, IDU and MSM is kept.",
+                  "No filtering of adjusted data based on transmission categories.")))
+cat("</ol>")
+
+if (!cd4Present) {
+  cat("<p>CD4 count is missing in the unadjusted and the adjusted data. All CD4 related plots and figures are omitted in this report.</p>")  
+}
 ```
 
 ```{r, eval = TRUE, include = FALSE}
@@ -322,8 +378,13 @@ temp_data_orig_transmission <- data_orig[, .(Count = .N), by = .(DateOfDiagnosis
 temp_data_mi_gender <- data_mi[, .(Count = sum(ModelWeight, na.rm = TRUE)), by = .(Imputation, DateOfDiagnosisYear, Gender)]
 temp_data_mi_transmission <- data_mi[, .(Count = sum(ModelWeight, na.rm = TRUE)), by = .(Imputation, DateOfDiagnosisYear, Transmission)]
 
-temp_data_mi_gender[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
-temp_data_mi_transmission[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
+if (miPresent) {
+  temp_data_mi_gender[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
+  temp_data_mi_transmission[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
+} else {
+  temp_data_mi_gender[, DY := integer()]
+  temp_data_mi_transmission[, DY := integer()]
+}
 
 if (cd4Present) {
   maxOrigGender <- data_orig[, .(MaxMedian = median(CD4, na.rm = TRUE)), 
@@ -350,30 +411,25 @@ if (cd4Present) {
 # Unadjusted data
 
 The following tables and graphs are based on the original (unadjusted) data.
-Table 1 and Figure 1 show number of diagnoses per year stratified by gender. Similarly, Table 3 and
-Figure 3 show number of diagnoses per year stratified by transmission category. Subjects with
-missing information on transmission category are shown as a separate group (labelled Missing).
+Subjects with missing information on transmission category are shown as a separate group (labelled Missing).
 
 ```{r, eval = cd4Present}
-cat("Tables 2 and 4 (and corresponding Figures 2 and 4) show median CD4 cell counts at diagnosis
-    per year stratified by gender and transmission category, respectively. As the data are unadjusted
-    missing CD4 cell counts have been excluded from the calculations.")
+cat("Since the data are unadjusted, missing CD4 cell counts have been excluded from the calculations.")
 ```
 
 ## Unadjusted data by gender
 
 ```{r}
-cat("**Table 1. Number of diagnoses per year by gender and overall**")
+outputIdx <- outputIdx + 1
+cat(sprintf("**Table %d. Number of diagnoses per year by gender and overall**", outputIdx))
 table1 <- ftab(data = data_orig, x = "DateOfDiagnosisYear", y = "Gender", digits = 2,
                colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
                                    F = "Female [N (%)]",
                                    M = "Male [N (%)]",
                                    Total = "Total [N]"))
 knitr::kable(table1, align = rep("r", ncol(table1)))
-```
 
-```{r}
-cat("**Figure 1. Number of diagnoses per year by gender**<br />")
+cat(sprintf("**Figure %d. Number of diagnoses per year by gender**<br />", outputIdx))
 ggplot(temp_data_orig_gender) +
   aes(x = DateOfDiagnosisYear, y = Count, color = Gender) +
   geom_point() +
@@ -390,15 +446,16 @@ ggplot(temp_data_orig_gender) +
         axis.text.y = element_text(size = 8))
 ```
 
-```{r, eval = cd4Present, include = cd4Present}
+```{r, eval = cd4Present}
+outputIdx <- outputIdx + 1
 table2 <- mediqrby(data = data_orig, "CD4", "DateOfDiagnosisYear", "Gender",
                    colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
                                        M = "Male",
                                        F = "Female"))
-cat("**Table 2. Median (IQR) CD4 cell count (cells/microL) by gender**")
+cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by gender**", outputIdx))
 knitr::kable(table2, row.names = FALSE, align = rep("r", ncol(table2)))
 
-cat("**Figure 2. Median CD4 cell count (cells/microL) by gender**<br />")
+cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by gender**<br />", outputIdx))
 ggplot(data_orig) +
   aes(x = DateOfDiagnosisYear, y = CD4, color = Gender) +
   stat_summary(fun.y = "median", na.rm = TRUE, geom = "line") +
@@ -418,7 +475,8 @@ ggplot(data_orig) +
 ## Unadjusted data by transmission
 
 ```{r}
-cat("**Table 3. Number of diagnoses per year by transmission category and overall**<br />")
+outputIdx <- outputIdx + 1
+cat(sprintf("**Table %d. Number of diagnoses per year by transmission category and overall**<br />", outputIdx))
 table3 <- ftab(data_orig, x = "DateOfDiagnosisYear", y = "Transmission", digits = 2,
                colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
                                    HETERO = "Hetero [N (%)]",
@@ -427,10 +485,8 @@ table3 <- ftab(data_orig, x = "DateOfDiagnosisYear", y = "Transmission", digits 
                                    Missing = "Missing [N (%)]",
                                    Total = "Total [N]"))
 knitr::kable(table3, row.names = FALSE, align = rep("r", ncol(table3)))
-```
 
-```{r}
-cat("**Figure 3. Number of diagnoses per year by transmission category**<br />")
+cat(sprintf("**Figure %d. Number of diagnoses per year by transmission category**<br />", outputIdx))
 ggplot(temp_data_orig_transmission) +
   aes(x = DateOfDiagnosisYear, y = Count, color = Transmission) +
   geom_point() +
@@ -448,13 +504,14 @@ ggplot(temp_data_orig_transmission) +
 ```
 
 ```{r, eval = cd4Present}
+outputIdx <- outputIdx + 1
 table4 <- mediqrby(data_orig, "CD4", "DateOfDiagnosisYear", "Transmission",
                    colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
                                        HETERO = "Hetero"))
-cat("**Table 4. Median (IQR) CD4 cell count (cells/microL) by transmission**")
+cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**", outputIdx))
 knitr::kable(table4, row.names = FALSE, align = rep("r", ncol(table4)))
 
-cat("**Figure 4. Median CD4 cell count (cells/microL) by transmission**<br />")
+cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
 ggplot(data_orig) +
   aes(x = DateOfDiagnosisYear, y = CD4, color = Transmission) +
   stat_summary(fun.y = "median", na.rm = TRUE, geom = "line") +
@@ -475,132 +532,102 @@ ggplot(data_orig) +
 
 # Adjusted data
 
-The following tables and graphs are on the adjusted for missingness (by Multiple Imputations) data.
-Table 5 and Figure 5 show number of diagnoses per year stratified by transmission. Data stratified
-by gender are not shown since there were no missing data on gender thus one could refer to Table 1
-and Figure 1 of the unadjusted data.
-
-```{r, eval = cd4Present, include = cd4Present}
-cat("Tables 6 and 7 (and corresponding Figures 6 and 7) show median CD4 cell counts at diagnosis per
-    year stratified by gender and transmission category, respectively. Calculations use imputed
-    values of transmission category and CD4 counts in cases where they were missing in the original
-    data. Year of diagnosis entered through splines in the models used to produce the results of
-    Tables/Figures 6 and 7.")
-```
-
 ```{r}
-# mitools doesn't like factors with 0 frequency levels
-temp_data_mi_transmission[, Transmission := droplevels(Transmission)]
-
-# Fit saturated Poisson model to MI data
-data.list <- imputationList(split(temp_data_mi_transmission, by = "Imputation"))
-
-# Main model
-# reportOption %in% c(1L, 3L): smoothed calendar time
-# reportOption %in% c(2L, 4L): unsmoothed calendar time
-if (optSmoothing) {
-  suppressWarnings({
-    models <- with(data.list,
-                 glm(Count ~ as.factor(Transmission) * splines::ns(DY, df = nsdf),
-                     data = temp_data_mi_transmission,
-                     family = poisson(link = log)))
+if (miPresent) {
+  
+  cat("<p>The following tables and graphs are on the adjusted for missingness (by Multiple Imputations) data.
+  Data stratified by gender are not shown since there were no missing data on gender thus one could 
+  refer to Table 1 and Figure 1 of the unadjusted data.
+  </p>")
+  
+  cat("<p>Calculations use imputed values of transmission category and CD4 counts in cases where they were 
+  missing in the original data.
+  </p>")
+  
+  result <- tryCatch({
+    ModelTransmissionData(data = temp_data_mi_transmission)
+  }, error = function(e) {
+    cat("<p>Due to numeric instabilities only transmission categories Hetero, IDU and MSM are kept in the adjusted data.</p>")
+    ModelTransmissionData(data = temp_data_mi_transmission[Transmission %in% c("HETERO", "IDU", "MSM")])
   })
+  
+  wide <- result$Wide
+  pred <- result$Pred
+  
+  cat("## Number of diagnoses after adjustment")
+     
+  outputIdx <- outputIdx + 1
+  # ftab_mi will calculate row percentages and totals
+  table5 <- ftab_mi(wide, digits = 2, 
+                    colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
+                                        HETERO = "Hetero"))
+  cat(sprintf("**Table %d. Number of diagnoses per year by transmission category and overall**<br />", outputIdx))
+  knitr::kable(table5, align = rep("r", ncol(table5)))
+  
+  cat(sprintf("**Figure %d. Number of diagnoses per year by transmission category**<br />", outputIdx))
+  ggplot(pred) +
+    aes(x = DateOfDiagnosisYear, y = linpred, color = Transmission) +
+    geom_point() +
+    geom_line() +
+    labs(x = "Year", y = "Number of diagnoses") +
+    scale_colour_manual("Transmission\ncategory", 
+                        values = colorPalette, 
+                        labels = c(HETERO = "Hetero")) +
+    scale_x_continuous(expand = c(0, 0), breaks = pred[, sort(unique(DateOfDiagnosisYear))]) +
+    scale_y_continuous(expand = c(0, 0)) +
+    expand_limits(y = 0) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 8),
+          axis.text.y = element_text(size = 8))
+
+  if (cd4Present) {
+    cat("## Median CD4 after adjustment")  
+    
+    outputIdx <- outputIdx + 1
+    table6 <- res.list.gender[[2]]
+    cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by gender**<br />", outputIdx))
+    knitr::kable(table6, row.names = FALSE, align = rep("r", ncol(table6)),
+                 col.names = c("Year of diagnosis", "Female", "Male"))
+    
+    cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by gender**<br />", outputIdx))
+    ggplot(res.list.gender[[1]]) +
+      aes(x = DateOfDiagnosisYear, y = median, color = Gender) +
+      geom_point() +
+      geom_line() +
+      labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
+      expand_limits(y = c(0, cd4YLim)) +
+      scale_colour_manual("Gender", 
+                          values = colorPalette,
+                          labels = c("Female", "Male")) +
+      scale_x_continuous(expand = c(0, 0), breaks = res.list.gender[[1]][, sort(unique(DateOfDiagnosisYear))]) +
+      scale_y_continuous(expand = c(0, 0)) +
+      theme_classic() +
+      theme(axis.text.x = element_text(size = 8),
+            axis.text.y = element_text(size = 8))
+    
+    outputIdx <- outputIdx + 1
+    cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
+    table7 <- res.list.trans[[2]]
+    knitr::kable(table7, row.names = FALSE, align = rep("r", ncol(table7)),
+                 col.names = c("Year of diagnosis", "Hetero", "IDU","MSM"))
+    
+    cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
+    ggplot(res.list.trans[[1]]) +
+      aes(x = DateOfDiagnosisYear, y = median, color = Transmission) +
+      geom_point() +
+      geom_line() +
+      labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
+      expand_limits(y = c(0, cd4YLim)) +
+      scale_colour_manual("Transmission\ncategory", 
+                          values = colorPalette,
+                          labels = c("Hetero", "IDU","MSM")) +
+      scale_x_continuous(expand = c(0, 0), breaks = res.list.trans[[1]][, sort(unique(DateOfDiagnosisYear))]) +
+      scale_y_continuous(expand = c(0, 0)) +
+      theme_classic() +
+      theme(axis.text.x = element_text(size = 8),
+            axis.text.y = element_text(size = 8))
+  }
 } else {
-  suppressWarnings({
-    models <- with(data.list,
-                   glm(Count ~ as.factor(Transmission) * as.factor(DY),
-                       data = temp_data_mi_transmission,
-                       family = poisson(link = log)))
-  })
+  cat("Multiple Imputations adjustment has not been performed, threfore no outputs are presented in this section.")
 }
-
-# Extract betas and var
-vars <- MIextract(models, fun = vcov)
-betas <- MIextract(models, fun = coefficients)
-# Rubin's rules applied by  MIcombine
-t <- MIcombine(betas, vars)
-X <- model.matrix(models[[1]]$formula)
-
-# Linear predictor exponentiated to get predicted counts
-linpred <- exp(X %*% coef(t))
-# Manipulation to end-up with a wide-format dataframe
-pred <- cbind(data.list$imputations$`1`, linpred = as.vector(linpred))
-pred <- pred[, .(DateOfDiagnosisYear, Transmission, linpred)]
-wide <- dcast(pred, DateOfDiagnosisYear ~ Transmission, value.var = "linpred")
-```
-
-## Number of diagnoses after adjustment
-
-```{r}
-# ftab_mi will calculate row percentages and totals
-table5 <- ftab_mi(wide, digits = 2, colNamesMapping = c(DateOfDiagnosisYear = "Year of diagnosis",
-                                                        HETERO = "Hetero"))
-cat("**Table 5. Number of diagnoses per year by transmission category and overall**<br />")
-knitr::kable(table5, align = rep("r", ncol(table5)))
-```
-
-```{r}
-cat("**Figure 5. Number of diagnoses per year by transmission category**<br />")
-ggplot(pred) +
-  aes(x = DateOfDiagnosisYear, y = linpred, color = Transmission) +
-  geom_point() +
-  geom_line() +
-  labs(x = "Year", y = "Number of diagnoses") +
-  scale_colour_manual("Transmission\ncategory", 
-                      values = colorPalette, 
-                      labels = c("Hetero", "IDU", "MSM")) +
-  scale_x_continuous(expand = c(0, 0), breaks = pred[, sort(unique(DateOfDiagnosisYear))]) +
-  scale_y_continuous(expand = c(0, 0)) +
-  expand_limits(y = 0) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8))
-```
-
-## Median CD4 after adjustment
-
-```{r eval = cd4Present, include = cd4Present}
-table6 <- res.list.gender[[2]]
-cat("**Table 6.  Median (IQR) CD4 cell count (cells/microL) by gender**<br />")
-knitr::kable(table6, row.names = FALSE, align = rep("r", ncol(table6)),
-             col.names = c("Year of diagnosis", "Female", "Male"))
-
-cat("**Figure 6. Median CD4 cell count (cells/microL) by gender**<br />")
-ggplot(res.list.gender[[1]]) +
-  aes(x = DateOfDiagnosisYear, y = median, color = Gender) +
-  geom_point() +
-  geom_line() +
-  labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-  expand_limits(y = c(0, cd4YLim)) +
-  scale_colour_manual("Gender", 
-                      values = colorPalette,
-                      labels = c("Female", "Male")) +
-  scale_x_continuous(expand = c(0, 0), breaks = res.list.gender[[1]][, sort(unique(DateOfDiagnosisYear))]) +
-  scale_y_continuous(expand = c(0, 0)) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8))
-```
-
-```{r eval = cd4Present, include = cd4Present}
-cat("**Table 7.  Median (IQR) CD4 cell count (cells/microL) by transmission**<br />")
-table7 <- res.list.trans[[2]]
-knitr::kable(table7, row.names = FALSE, align = rep("r", ncol(table7)),
-             col.names = c("Year of diagnosis", "Hetero", "IDU","MSM"))
-
-cat("**Figure 7. Median CD4 cell count (cells/microL) by transmission**<br />")
-ggplot(res.list.trans[[1]]) +
-  aes(x = DateOfDiagnosisYear, y = median, color = Transmission) +
-  geom_point() +
-  geom_line() +
-  labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-  expand_limits(y = c(0, cd4YLim)) +
-  scale_colour_manual("Transmission\ncategory", 
-                      values = colorPalette,
-                      labels = c("Hetero", "IDU","MSM")) +
-  scale_x_continuous(expand = c(0, 0), breaks = res.list.trans[[1]][, sort(unique(DateOfDiagnosisYear))]) +
-  scale_y_continuous(expand = c(0, 0)) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8))
 ```
