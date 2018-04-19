@@ -8,12 +8,12 @@ output:
     number_sections: no
     smart: yes
     fig_caption: yes
-params:
-  InputData: NA    
+# params:
+#   InputData: NA
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 12)
+knitr::opts_chunk$set(echo = FALSE, results = "asis", include = TRUE, fig.height = 10, fig.width = 12)
 ```
 
 ```{r, results='asis'}
@@ -72,9 +72,35 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 print(GetMCMCBetasPlot(params$InputData$Artifacts$F$Beta))
 ```
 
+Legend:<br />
+```{r}
+colNames <- colnames(params$InputData$Artifacts$F$Beta[, , 1])
+categoricalNames <- grep("\\.", colNames, value = TRUE)
+continuousNames <- setdiff(colNames, categoricalNames)
+
+rowNames <- row.names(params$InputData$Artifacts$F$Beta[, , 1])
+coefNames <- grep("(Intercept|SplineKnot)", rowNames, value = TRUE)
+covariateNames <- setdiff(rowNames, coefNames)
+
+cat(sprintf("Continuous outcomes: %s<br />", paste(continuousNames, collapse = ", ")))
+cat(sprintf("Categorical outcomes (latent normal variables): %s<br />", paste(categoricalNames, collapse = ", ")))
+cat(sprintf("Covariate variables: %s<br />", paste(covariateNames, collapse = ", ")))
+cat(sprintf("Cubic spline coefficients and intercept: %s<br />", paste(coefNames, collapse = ", ")))
+```
+
 **Figure 2. Autocorrelation plot**<br />
 ```{r}
 print(GetMCMCAutoCorrelationPlot(params$InputData$Artifacts$F$Covariance))
+```
+
+Legend:<br />
+```{r}
+colNames <- colnames(params$InputData$Artifacts$F$Covariance[, , 1])
+categoricalNames <- grep("\\.", colNames, value = TRUE)
+continuousNames <- setdiff(colNames, categoricalNames)
+
+cat(sprintf("Continuous outcomes: %s<br />", paste(continuousNames, collapse = ", ")))
+cat(sprintf("Categorical outcomes (latent normal variables): %s<br />", paste(categoricalNames, collapse = ", ")))
 ```
 
 ## Diagnostic plots for Gender = \"Male\"
@@ -84,8 +110,34 @@ print(GetMCMCAutoCorrelationPlot(params$InputData$Artifacts$F$Covariance))
 print(GetMCMCBetasPlot(params$InputData$Artifacts$M$Beta))
 ```
 
+Legend:<br />
+```{r}
+colNames <- colnames(params$InputData$Artifacts$M$Beta[, , 1])
+categoricalNames <- grep("\\.", colNames, value = TRUE)
+continuousNames <- setdiff(colNames, categoricalNames)
+
+rowNames <- row.names(params$InputData$Artifacts$M$Beta[, , 1])
+coefNames <- grep("(Intercept|SplineKnot)", rowNames, value = TRUE)
+covariateNames <- setdiff(rowNames, coefNames)
+
+cat(sprintf("Continuous outcomes: %s<br />", paste(continuousNames, collapse = ", ")))
+cat(sprintf("Categorical outcomes (latent normal variables): %s<br />", paste(categoricalNames, collapse = ", ")))
+cat(sprintf("Covariate variables: %s<br />", paste(covariateNames, collapse = ", ")))
+cat(sprintf("Cubic spline coefficients and intercept: %s<br />", paste(coefNames, collapse = ", ")))
+```
+
+
 **Figure 4. Autocorrelation plot**<br />
 ```{r}
 print(GetMCMCAutoCorrelationPlot(params$InputData$Artifacts$M$Covariance))
 ```
 
+Legend:<br />
+```{r}
+colNames <- colnames(params$InputData$Artifacts$M$Covariance[, , 1])
+categoricalNames <- grep("\\.", colNames, value = TRUE)
+continuousNames <- setdiff(colNames, categoricalNames)
+
+cat(sprintf("Continuous outcomes: %s<br />", paste(continuousNames, collapse = ", ")))
+cat(sprintf("Categorical outcomes (latent normal variables): %s<br />", paste(categoricalNames, collapse = ", ")))
+```

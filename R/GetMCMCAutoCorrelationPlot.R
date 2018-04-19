@@ -20,6 +20,8 @@ GetMCMCAutoCorrelationPlot <- function(covariance)
                                                     responseName = "Value"))
   setnames(plotData, c("Row", "Column", "Sample", "Covariance"))
   plotData[, ":="(
+    Row = as.character(Row),
+    Column = as.character(Column),
     Sample = as.integer(Sample)
   )]
 

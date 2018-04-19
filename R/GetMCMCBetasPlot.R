@@ -18,17 +18,21 @@ GetMCMCBetasPlot <- function(betas)
 
   plotData <- data.table::setDT(as.data.frame.table(betas, responseName = "Value"))
   setnames(plotData, c("Row", "Column", "Sample", "Beta"))
+
   plotData[, ":="(
+    Row = as.character(Row),
+    Column = as.character(Column),
     Sample = as.integer(Sample),
-    Element = paste(Row, Column, sep = " / ")
+    Element = paste(Row, Column, sep = " - ")
   )]
+  setorderv(plotData, c("Column", "Row"))
 
   betasPlot <- ggplot(plotData, aes(x = Sample)) +
     geom_line(aes(y = Beta), colour = "#69b023") +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
-    ylab("Betas") +
+    ylab("Beta coefficients") +
     facet_wrap(~Element,
                scales = "free_y",
                strip.position = "top",
