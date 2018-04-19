@@ -20,8 +20,7 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
   # Data table performs many operations by reference.
   # We make a copy of the data to make sure the input object is not changed by the adjustment
   # procedures.
-  data <- list(Table = copy(data),
-               Parameters = list())
+  data <- list(Table = copy(data))
 
   results <- list()
   # Process adjustments
