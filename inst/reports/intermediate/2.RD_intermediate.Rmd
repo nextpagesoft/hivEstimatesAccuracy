@@ -23,36 +23,6 @@ cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
 ```
 
 ```{r, fig.height = 4, fig.width = 10}
-cat("**Table 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year**<br />")
-fullTableData <- params$InputData$Artifacts$OutputPlotTotalData[, -("EstCountVar")]
-reportedTableData <- fullTableData[Source == "Reported", .(DateOfDiagnosisYear, Reported = Count, EstCount, LowerEstCount, UpperEstCount)]
-reportedTableData[, ":="(
-  Reported = formatNumbers(Reported),
-  EstCount = formatNumbers(EstCount),
-  LowerEstCount = formatNumbers(LowerEstCount),
-  UpperEstCount = formatNumbers(UpperEstCount)
-)]
-imputedTableData <- fullTableData[Source == "Imputed", .(DateOfDiagnosisYear, Imputed = Count)]
-imputedTableData[, ":="(
-  Imputed = formatNumbers(Imputed)
-)]
-
-if (nrow(imputedTableData) > 0) {
-  tableData <- merge(reportedTableData,
-                     imputedTableData,
-                     by = c("DateOfDiagnosisYear"),
-                     all.x = TRUE)
-  setcolorder(tableData, c("DateOfDiagnosisYear", "Reported", "Imputed", "EstCount", "LowerEstCount", "UpperEstCount"))
-  tableColNames <- c("Diagnosis<br />year", "Reported", "Imputed", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
-} else {
-  tableData <- reportedTableData
-  tableColNames <- c("Diagnosis<br />year", "Reported", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
-}
-
-knitr::kable(tableData,
-             align = rep("r", ncol(tableData)),
-             col.names = tableColNames)
-
 cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**<br />")
 params$InputData$Artifacts$OutputPlotTotal
 ```

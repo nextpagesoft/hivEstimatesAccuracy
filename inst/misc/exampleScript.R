@@ -5,7 +5,7 @@ library(ggplot2)
 
 # Define input data path
 # inputDataFilePath <- "G:/My Drive/Projects/19. PZH/Scripts/Received/PLtest.csv"
-inputDataFilePath <- "G:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/dummy_miss1.csv"
+inputDataFilePath <- "G:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/dummy_miss1.zip"
 
 # Read input data
 originalData <- ReadDataFile(inputDataFilePath)
@@ -39,7 +39,7 @@ summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <- list(
   # GetListObject(adjustmentFilePaths["Multiple Imputations (mice)"]),
-  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"])
+  # GetListObject(adjustmentFilePaths["Multiple Imputations (jomo)"]),
   GetListObject(adjustmentFilePaths["Reporting Delays"])
 )
 

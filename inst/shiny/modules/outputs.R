@@ -14,21 +14,9 @@ outputsUI <- function(id)
       solidHeader = FALSE,
       collapsible = TRUE,
       status = "primary",
-      uiOutput(ns("downloadLinks")),
-      br(),
-      p("Data saved as R file (extension 'rds') are lists with the following attributes:"),
-      tags$ol(
-        tags$li("Table: data.frame with the adjusted data"),
-        tags$li("Artifacts: list with artifact objects (data.frames, plots) produced during the adjustment"),
-        tags$li("Parameters: list with the parameters applied"),
-        tags$li("RunIdx: Order of the adjustment"),
-        tags$li("Name: Name of the adjustment"),
-        tags$li("Type: Type of the adjustment"),
-        tags$li("SubType: Sub-type of the adjustment"),
-        tags$li("TimeStamp: Adjustment execution end time in format 'YYYYMMDDhhmmss'")
-      ),
-      p("Data saved as csv (extension 'csv') or Stata (extension 'dta') file contain only the adjusted data.")
-    )
+      uiOutput(ns("downloadLinks"))
+    ),
+    uiOutput(ns("adjustedDataTableBox"))
   )
 }
 
@@ -38,36 +26,56 @@ outputs <- function(input, output, session, adjustedData)
   # Get namespace
   ns <- session$ns
 
-  # EVENT: Button "Download csv/stata data" clicked
-  DownloadIntermediateData <- function(key, format) {
+  finalData <- reactiveVal(NULL)
+  rdDistribution <- reactiveVal(NULL)
+
+  observeEvent(adjustedData(), {
     adjustedData <- adjustedData()
-    if (key %in% names(adjustedData)) {
-      if (format %in% c("csv", "dta")) {
-        intermediateData <- adjustedData[[key]]$Table
-      } else if (format %in% c("rds")) {
-        intermediateData <- adjustedData[[key]]
-      } else {
-        intermediateData <- NULL
+    isolate({
+      finalData(adjustedData[[length(adjustedData)]])
+
+      rdAdjIdx <- which(sapply(adjustedData, "[[", "Type") == "REPORTING_DELAYS")
+      if (length(rdAdjIdx) > 0 && rdAdjIdx > 0) {
+        rdDistribution(adjustedData[[rdAdjIdx]]$Artifacts$RdDistribution)
       }
+    })
+  })
+
+  # EVENT: Button "Download csv/stata data" clicked
+  DownloadIntermediateData <- function(type = "ADJUSTED_DATA", format) {
+
+    timeStamp <- finalData()$TimeStamp
+
+    if (type == "ADJUSTED_DATA") {
+      downloadData <- finalData()
+      fileNamePrefix <- "AdjustedData"
+    } else if (type == "RD_DISTRIBUTION") {
+      downloadData <- rdDistribution()
+      fileNamePrefix <- "RdDistribution"
     } else {
-      intermediateData <- NULL
+      downloadData <- NULL
+    }
+
+    if (!is.null(downloadData) &&
+        type == "ADJUSTED_DATA" &&
+        format %in% c("csv", "dta")) {
+      downloadData <- downloadData$Table
     }
 
     downloadHandler(
       filename = function() {
-        fileName <- sprintf("%d. %s_%s.%s",
-                            adjustedData[[key]]$RunIdx,
-                            adjustedData[[key]]$Name,
-                            adjustedData[[key]]$TimeStamp,
+        fileName <- sprintf("%s_%s.%s",
+                            fileNamePrefix,
+                            timeStamp,
                             format)
         return(fileName)
       },
       content = function(file) {
-        withProgress(message = "Creating intermediate data output file",
+        withProgress(message = "Creating download data output file",
                      detail = "The file will be available for download shortly.",
                      value = 0, {
                        setProgress(0)
-                       WriteDataFile(intermediateData, file)
+                       WriteDataFile(downloadData, file)
                        setProgress(1)
                      })
         return(NULL)
@@ -75,51 +83,55 @@ outputs <- function(input, output, session, adjustedData)
     )
   }
 
-  EnableIntermediateDataDownloadLinks <- function() {
-
-    adjustedData <- adjustedData()
-
-    runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
-    for (runIdx in runIndices) {
-      key <- names(runIndices)[runIdx]
-      downloadRdsBtnId  <- paste0("downloadRdsBtn", runIdx)
-      downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
-      downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
-
-      output[[downloadRdsBtnId]] <- DownloadIntermediateData(key, "rds")
-      output[[downloadCsvBtnId]] <- DownloadIntermediateData(key, "csv")
-      output[[downloadStataBtnId]] <- DownloadIntermediateData(key, "dta")
-    }
-  }
-
   output[["downloadLinks"]] <- renderUI({
-    adjustedData <- adjustedData()
-
-    widget <- list()
+    finalData <- finalData()
+    rdDistribution <- rdDistribution()
 
     isolate({
-      if (!is.null(adjustedData)) {
+      widget <- list()
+      if (!is.null(finalData)) {
 
-        widget[["Header"]] <- p("Download links below provide access to data after each adjustment.")
+        widget[["AD_Header"]] <- h3("Adjusted data downloads")
+        widget[["AD_Description"]] <- p("Adjusted data can be downloaded as:")
+        widget[["AD_Buttons"]] <- tags$ul(
+          tags$li(downloadLink(ns("downloadDataRdsBtn"), "R rds file")),
+          tags$li(downloadLink(ns("downloadDataCsvBtn"), "csv file")),
+          tags$li(downloadLink(ns("downloadDataStataBtn"), "Stata dta file"))
+        )
 
-        runIndices <- sort(sapply(adjustedData, "[[", "RunIdx"))
-        for (runIdx in runIndices) {
-          key <- names(runIndices)[runIdx]
-          name <- adjustedData[[key]]$Name
-          downloadRdsBtnId  <- paste0("downloadRdsBtn", runIdx)
-          downloadCsvBtnId  <- paste0("downloadCsvBtn", runIdx)
-          downloadStataBtnId  <- paste0("downloadStataBtn", runIdx)
+        widget[["AD_HelpText"]] <- tagList(
+          p("Data saved as R file (extension \"rds\") are lists with the following attributes:"),
+          tags$ol(
+            tags$li("Table: data.frame with the adjusted data"),
+            tags$li("Artifacts: list with artifact objects (data.frames, plots) produced during the adjustment"),
+            tags$li("Parameters: list with the parameters applied"),
+            tags$li("RunIdx: Order of the adjustment"),
+            tags$li("Name: Name of the adjustment"),
+            tags$li("Type: Type of the adjustment"),
+            tags$li("SubType: Sub-type of the adjustment"),
+            tags$li("TimeStamp: Adjustment execution end time in format 'YYYYMMDDhhmmss'")
+          ),
+          p("Data saved as csv (extension 'csv') or Stata (extension 'dta') file contain only the adjusted data.")
+        )
 
-          widget[[as.character(runIdx)]] <- fluidRow(
-            id = ns(runIdx),
-            column(3, sprintf("%d. %s", runIdx, name)),
-            column(2, downloadLink(ns(downloadRdsBtnId), "Download as R file")),
-            column(2, downloadLink(ns(downloadCsvBtnId), "Download as csv file")),
-            column(2, downloadLink(ns(downloadStataBtnId), "Download as Stata file"))
+        output[["downloadDataRdsBtn"]] <- DownloadIntermediateData(type = "ADJUSTED_DATA", "rds")
+        output[["downloadDataCsvBtn"]] <- DownloadIntermediateData(type = "ADJUSTED_DATA", "csv")
+        output[["downloadDataStataBtn"]] <- DownloadIntermediateData(type = "ADJUSTED_DATA", "dta")
+
+        if (!is.null(rdDistribution)) {
+          widget[["RD_Header"]] <- h3("Reporting delays downloads")
+          widget[["RD_Description"]] <- p("Reporting delays distributions can be downloaded as:")
+          widget[["RD_Buttons"]] <- tags$ul(
+            tags$li(downloadLink(ns("downloadDistrRdsBtn"), "R rds file")),
+            tags$li(downloadLink(ns("downloadDistrCsvBtn"), "csv file")),
+            tags$li(downloadLink(ns("downloadDistrStataBtn"), "Stata dta file"))
           )
+
+          output[["downloadDistrRdsBtn"]] <- DownloadIntermediateData(type = "RD_DISTRIBUTION", "rds")
+          output[["downloadDistrCsvBtn"]] <- DownloadIntermediateData(type = "RD_DISTRIBUTION", "csv")
+          output[["downloadDistrStataBtn"]] <- DownloadIntermediateData(type = "RD_DISTRIBUTION", "dta")
         }
 
-        EnableIntermediateDataDownloadLinks()
       } else {
         widget <- p("Please, run adjustments first.")
       }
@@ -128,4 +140,30 @@ outputs <- function(input, output, session, adjustedData)
     return(tagList(widget))
   })
 
+  output[["adjustedDataTableBox"]] <- renderUI({
+    finalData <- finalData()$Table
+
+    isolate({
+      if (!is.null(finalData)) {
+        box(
+          width = 12,
+          title = "Adjusted data records",
+          solidHeader = FALSE,
+          status = "warning",
+          collapsible = TRUE,
+          dataTableOutput(ns("adjustedDataTable"))
+        )
+      }
+    })
+  })
+
+  output[["adjustedDataTable"]] <- renderDataTable(finalData()$Table,
+                                                   options = list(
+                                                     dom = '<"top">lirt<"bottom">p',
+                                                     autoWidth = FALSE,
+                                                     pageLength = 25,
+                                                     scrollX = TRUE,
+                                                     deferRender = TRUE,
+                                                     serverSide = TRUE,
+                                                     scroller = FALSE))
 }

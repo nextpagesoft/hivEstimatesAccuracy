@@ -3,7 +3,7 @@ list(
   Name = "Reporting Delays",
 
   # Adjustment type ----
-  Type = "DEPORTING_DELAYS",
+  Type = "REPORTING_DELAYS",
 
   # Adjustment subtype ----
   SubType = "DEFAULT",
@@ -111,6 +111,7 @@ list(
     totalPlotData <- NULL
     stratPlotList <- NULL
     stratPlotListData <- NULL
+    distribution <- NULL
     if (nrow(outputData) > 0) {
 
       # Create a stratum variable - will be used to merge with the estimations,
@@ -140,6 +141,17 @@ list(
       fitStratum[, (stratVarNamesImp) := tstrsplit(Stratum, stratSep)]
       fitStratum[, VarT := max(Delay) - Delay]
       fitStratum <- fitStratum[VarT >= 0]
+
+      # Get distribution object as artifact
+      varNames <- setdiff(colnames(fitStratum),
+                          c("Delay", "P", "Var", "Stratum", "VarT"))
+      rdDistribution <- fitStratum[VarT > 0,
+                                 union(varNames, c("VarT", "P", "Var")),
+                                 with = FALSE]
+      setnames(rdDistribution,
+               old = "VarT",
+               new = "Quarter")
+      setorderv(rdDistribution, union(varNames, "Quarter"))
 
       # Aggregate and keep only required dimensions
       agregat <- outputData[, .(Count = .N),
@@ -199,7 +211,8 @@ list(
     artifacts <- list(OutputPlotTotal = totalPlot,
                       OutputPlotTotalData = totalPlotData,
                       OutputPlotStrat = stratPlotList,
-                      OutputPlotStratData = stratPlotListData)
+                      OutputPlotStratData = stratPlotListData,
+                      RdDistribution = rdDistribution)
 
     cat("No adjustment specific text outputs.\n")
 

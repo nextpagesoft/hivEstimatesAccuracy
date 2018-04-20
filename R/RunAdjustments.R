@@ -60,6 +60,10 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
                  SubType = adjustmentSpec$SubType,
                  TimeStamp = GetTimeStamp())
 
+    if ("Imputation" %in% colnames(data$Table)) {
+      setorderv(data$Table, "Imputation")
+    }
+
     # Store intermediate results for later reference
     results[[adjustmentSpec$Key]] <- data
 

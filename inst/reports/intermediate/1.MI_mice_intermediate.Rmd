@@ -47,7 +47,7 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
       cat("<li>Covariates: ", femaleRemovedXCols, "</li>")
     }
     if (length(femaleRemovedYCols) > 0) {
-      cat("<li>Imputed outputs: ", femaleRemovedYCols, "</li>")
+      cat("<li>Outputs: ", femaleRemovedYCols, "</li>")
     }
     cat("</ul></li>")
   }
@@ -57,7 +57,7 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
       cat("<li>Covariates: ", maleRemovedXCols, "</li>")
     }
     if (length(maleRemovedYCols) > 0) {
-      cat("<li>Imputed outputs: ", maleRemovedYCols, "</li>")
+      cat("<li>Outputs: ", maleRemovedYCols, "</li>")
     }
     cat("</ul></li>")
   }

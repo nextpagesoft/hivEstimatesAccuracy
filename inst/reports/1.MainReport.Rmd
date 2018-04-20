@@ -28,7 +28,7 @@ params:
   AdjustedData: NA
   ReportingDelay:
     label: "Adjust count of cases for reporting delay"
-    value: 0
+    value: 1
     input: checkbox
   Smoothing:
     label: "Apply plot curves smoothing"
@@ -296,7 +296,7 @@ data <- copy(params$AdjustedData[[length(params$AdjustedData)]]$Table)
 cd4Present <- data[, any(!is.na(SqCD4))]
 adjTypes <- sapply(params$AdjustedData, "[[", "Type")
 miPresent <- length(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]) > 0
-rdPresent <- length(adjTypes[adjTypes == "DEPORTING_DELAYS"]) > 0
+rdPresent <- length(adjTypes[adjTypes == "REPORTING_DELAYS"]) > 0
 
 # Determine last MI adjustment, if any, to get "nsdf" parameter
 miAdjName <- tail(names(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]), 1)
@@ -533,7 +533,51 @@ ggplot(data_orig) +
 
 ----------------------------------------------------------------------------------------------------
 
-# Adjusted data
+```{r}
+adjs <- c()
+if (miPresent) adjs <- c(adjs, "Multiple Imputations")
+if (rdPresent) adjs <- c(adjs, "Reporting Delays")
+
+cat(sprintf("<h1>Data adjusted with %s adjustment%s</h1>", 
+            paste(adjs, collapse = " and "),
+            ifelse(length(adjs) > 1, "s", "")))
+```
+
+```{r, eval = !miPresent & rdPresent}
+outputIdx <- outputIdx + 1
+cat(sprintf("**Table %d. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year**", outputIdx))
+rdIdx <- which(adjTypes == "REPORTING_DELAYS")[[1]]
+
+fullTableData <- params$AdjustedData[[rdIdx]]$Artifacts$OutputPlotTotalData[, -("EstCountVar")]
+reportedTableData <- fullTableData[Source == "Reported", .(DateOfDiagnosisYear, Reported = Count, EstCount, LowerEstCount, UpperEstCount)]
+reportedTableData[, ":="(
+  Reported = formatNumbers(Reported),
+  EstCount = formatNumbers(EstCount),
+  LowerEstCount = formatNumbers(LowerEstCount),
+  UpperEstCount = formatNumbers(UpperEstCount)
+)]
+imputedTableData <- fullTableData[Source == "Imputed", .(DateOfDiagnosisYear, Imputed = Count)]
+imputedTableData[, ":="(
+  Imputed = formatNumbers(Imputed)
+)]
+
+if (nrow(imputedTableData) > 0) {
+  tableData <- merge(reportedTableData,
+                     imputedTableData,
+                     by = c("DateOfDiagnosisYear"),
+                     all.x = TRUE)
+  setcolorder(tableData, c("DateOfDiagnosisYear", "Reported", "Imputed", "EstCount", "LowerEstCount", "UpperEstCount"))
+  tableColNames <- c("Diagnosis<br />year", "Reported", "Imputed", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
+} else {
+  tableData <- reportedTableData
+  tableColNames <- c("Diagnosis<br />year", "Reported", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
+}
+
+knitr::kable(tableData,
+             align = rep("r", ncol(tableData)),
+             col.names = tableColNames)
+
+```
 
 ```{r, eval = miPresent}
 cat("<p>The following tables and graphs are on the adjusted for missingness (by Multiple Imputations) data.
@@ -638,6 +682,6 @@ ggplot(res.list.trans[[1]]) +
         axis.text.y = element_text(size = 8))
 ```
 
-```{r, eval = !miPresent}
-cat("Multiple Imputations adjustment has not been performed, threfore no outputs are presented in this section.")
+```{r, eval = !miPresent & !rdPresent}
+cat("No adjustments have been performed, threfore no outputs are presented in this section.")
 ```

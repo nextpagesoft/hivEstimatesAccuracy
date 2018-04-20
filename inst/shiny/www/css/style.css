@@ -309,19 +309,19 @@ div.box-body .shiny-input-container h3 {
 
 /* Data table */
 
-#summary-inputDataTable {
+#summary-inputDataTable, #outputs-adjustedDataTableBox {
   font-size: 12px;
 }
 
-#summary-inputDataTable table {
+#summary-inputDataTable table, #outputs-adjustedDataTableBox table {
   white-space: nowrap;
 }
 
-#summary-inputDataTable tr {
+#summary-inputDataTable tr, #outputs-adjustedDataTableBox tr {
   height: 30px;
 }
 
-#summary-inputDataTable td {
+#summary-inputDataTable td, #outputs-adjustedDataTableBox td {
   text-align: right;
   padding: 5px;
   font-size: 11px;
