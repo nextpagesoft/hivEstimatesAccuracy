@@ -115,6 +115,15 @@ if (nrow(outputData) > 0) {
   fitStratum[, VarT := max(Delay) - Delay]
   fitStratum <- fitStratum[VarT >= 0]
 
+  # Get distribution object
+  varNames <- setdiff(colnames(fitStratum),
+                      c("Delay", "P", "Var", "Stratum", "VarT"))
+  distr <- fitStratum[VarT > 0,
+                      union(varNames, c("VarT", "P", "Var")),
+                      with = FALSE]
+  setnames(distr, old = "VarT", new = "DelayQuarters")
+  setorderv(distr, union(varNames, "DelayQuarters"))
+
   # Aggregate and keep only required dimensions
   agregat <- outputData[, .(Count = .N),
                         by = .(DateOfDiagnosisYear,

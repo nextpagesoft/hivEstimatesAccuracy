@@ -38,21 +38,48 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["missPlotDiv"]] <- renderUI({
+    widgets <- tagList()
     if (appStatus$AttributeMappingValid) {
-      missPlots <- artifacts()$MissPlots
-      if (!is.null(missPlots)) {
-        tagList(
-          h3("1. Missing data summary"),
-          plotOutput(ns("missPlots"))
-        )
+      missPlotsTotal <- artifacts()$MissPlotsTotal
+      missPlotsByGender <- artifacts()$MissPlotsByGender
+      plotCounter <- 0
+      if (!is.null(missPlotsTotal) | !is.null(missPlotsByGender)) {
+        widgets[[length(widgets) + 1]] <- h3("1. Missing data summary")
+
+        if (!is.null(missPlotsTotal)) {
+          plotCounter <- plotCounter + 1
+          widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Total plot", plotCounter))
+          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
+        }
+        if (!is.null(missPlotsByGender)) {
+          plotCounter <- plotCounter + 1
+          widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Gender \"Female\"", plotCounter))
+          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderF"))
+          plotCounter <- plotCounter + 1
+          widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Gender \"Male\"", plotCounter))
+          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderM"))
+        }
       }
     } else {
-      p("Please, upload input data and apply attribute mapping in \"Input data upload\" tab first.")
+      widgets[[length(widgets) + 1]] <- p("Please, upload input data and apply attribute mapping in \"Input data upload\" tab first.")
     }
+    return(widgets)
   })
 
-  output[["missPlots"]] <- renderPlot({
-    PlotMultipleCharts(plots = artifacts()$MissPlots,
+  output[["missPlotsTotal"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlotsTotal,
+                       cols = 3,
+                       widths = c(3, 3, 2))
+  })
+
+  output[["missPlotsGenderF"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$F,
+                       cols = 3,
+                       widths = c(3, 3, 2))
+  })
+
+  output[["missPlotsGenderM"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$M,
                        cols = 3,
                        widths = c(3, 3, 2))
   })

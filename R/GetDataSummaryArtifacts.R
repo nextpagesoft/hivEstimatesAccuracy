@@ -25,7 +25,8 @@ GetDataSummaryArtifacts <- function(inputData)
 
   inputData <- copy(inputData)
 
-  missPlots <- GetMissingnessPlots(inputData)
+  missPlotsTotal <- GetMissingnessPlots(inputData)
+  missPlotsByGender <- lapply(split(inputData, by = "Gender"), GetMissingnessPlots)
 
   # New stuff
   inputData[, ":="(
@@ -129,7 +130,8 @@ GetDataSummaryArtifacts <- function(inputData)
     meanDelayPlot <- NULL
   }
 
-  return(list(MissPlots = missPlots,
+  return(list(MissPlotsTotal = missPlotsTotal,
+              MissPlotsByGender = missPlotsByGender,
               DelayDensFullPlot = delayDensFullPlot,
               DelayDensShortPlot = delayDensShortPlot,
               MeanDelayPlot = meanDelayPlot))
