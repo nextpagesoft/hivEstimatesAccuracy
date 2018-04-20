@@ -265,11 +265,14 @@ ModelTransmissionData <- function(data) {
   }
   
   # Extract betas and var
-  vars <- MIextract(models, fun = vcov)
   betas <- MIextract(models, fun = coefficients)
-  # Rubin's rules applied by  MIcombine
-  t <- MIcombine(betas, vars)
+  betas <- lapply(betas, function(x) x[!is.na(x)])
+  vars <- MIextract(models, fun = vcov)
+  
+  # Rubin's rules applied by MIcombine
+  t <- MIcombine(results = betas, variances = vars)
   X <- model.matrix(models[[1]]$formula)
+  X <- X[, names(betas$`1`)]
   
   # Linear predictor exponentiated to get predicted counts
   linpred <- exp(X %*% coef(t))
