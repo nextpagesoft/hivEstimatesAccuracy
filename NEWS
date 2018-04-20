@@ -1,7 +1,7 @@
 Version 0.9.5 (2018/04/20)
 ------------------------------------------------------------------------------
 
-* Missing data summary plot stratfied by gender.
+* Missing data summary plot stratified by gender.
 * Fix in the main report glm fit for unsmoothed plots - non-conformable arrays.
 * Reporting delays table added to the main report if only RD performed.
 * Adjusted data section title in the main report includes performed adjustment

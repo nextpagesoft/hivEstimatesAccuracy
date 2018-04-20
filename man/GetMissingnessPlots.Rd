@@ -4,9 +4,8 @@
 \alias{GetMissingnessPlots}
 \title{GetMissingnessPlots}
 \usage{
-GetMissingnessPlots(inputData, columnNames = c("Transmission", "Migr",
-  "Gender", "Age", "FirstCD4Count"), labels = c("Transm.", "Migrant",
-  "Gender", "Age", "CD4"))
+GetMissingnessPlots(inputData, columnNames = c("Transmission", "Migr", "Age",
+  "FirstCD4Count"), labels = c("Transm.", "Migrant", "Age", "CD4"))
 }
 \arguments{
 \item{inputData}{Pre-processed input data. Required.}
