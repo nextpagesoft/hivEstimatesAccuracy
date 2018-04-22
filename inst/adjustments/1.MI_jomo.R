@@ -110,10 +110,11 @@ list(
         artifacts[["Beta"]] <- mcmc$collectbeta
         artifacts[["Covariance"]] <- mcmc$collectomega
 
-        cat("\nPerforming imputation.\n\n")
+        cat("\nPerforming imputation.\n")
+        cat("Number of burn-in iterations set to 10 for the actual imputation.\n\n")
         imp <- setDT(jomo::jomo(Y = Y,
                                 X = X,
-                                nburn = nburn,
+                                nburn = 10,
                                 nbetween = nbetween,
                                 nimp = nimp,
                                 beta.start = mcmc$collectbeta[, , nburn],

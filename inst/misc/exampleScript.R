@@ -72,7 +72,7 @@ intermReport <- HTML(intermReport)
 # Create report
 reportFilePaths <- GetReportFileNames()
 params <- list(AdjustedData = adjustedData,
-               ReportingDelay = 0,
+               ReportingDelay = 1,
                Smoothing = 0)
 
 reportFileName <- RenderReportToFile(filePath = reportFilePaths["Main Report"],

@@ -549,29 +549,34 @@ cat(sprintf("**Table %d. Comparison of the reported count of HIV cases with the 
 rdIdx <- which(adjTypes == "REPORTING_DELAYS")[[1]]
 
 fullTableData <- params$AdjustedData[[rdIdx]]$Artifacts$OutputPlotTotalData[, -("EstCountVar")]
-reportedTableData <- fullTableData[Source == "Reported", .(DateOfDiagnosisYear, Reported = Count, EstCount, LowerEstCount, UpperEstCount)]
-reportedTableData[, ":="(
-  Reported = formatNumbers(Reported),
-  EstCount = formatNumbers(EstCount),
-  LowerEstCount = formatNumbers(LowerEstCount),
-  UpperEstCount = formatNumbers(UpperEstCount)
-)]
+reportedTableData <- fullTableData[Source == "Reported", 
+                                   .(DateOfDiagnosisYear, Reported = Count, EstCount, 
+                                     LowerEstCount, UpperEstCount)]
 imputedTableData <- fullTableData[Source == "Imputed", .(DateOfDiagnosisYear, Imputed = Count)]
-imputedTableData[, ":="(
-  Imputed = formatNumbers(Imputed)
-)]
 
 if (nrow(imputedTableData) > 0) {
   tableData <- merge(reportedTableData,
                      imputedTableData,
                      by = c("DateOfDiagnosisYear"),
                      all.x = TRUE)
+  tableData[, Imputed := na.zero(Imputed)]
   setcolorder(tableData, c("DateOfDiagnosisYear", "Reported", "Imputed", "EstCount", "LowerEstCount", "UpperEstCount"))
   tableColNames <- c("Diagnosis<br />year", "Reported", "Imputed", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
 } else {
   tableData <- reportedTableData
   tableColNames <- c("Diagnosis<br />year", "Reported", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
 }
+
+numericCols <- setdiff(colnames(tableData), c("DateOfDiagnosisYear"))
+tableDataTotals <- tableData[, lapply(.SD, sum), .SDcols = numericCols]
+tableDataTotals[, DateOfDiagnosisYear := "Total"]
+ConvertDataTableColumns(tableData, c(DateOfDiagnosisYear = "character"))
+tableData <- rbind(tableData, 
+                   tableDataTotals)
+tableData <- tableData[, (numericCols) := lapply(.SD, formatNumbers), 
+                       .SDcols = numericCols]
+
+setorderv(tableData, "DateOfDiagnosisYear")
 
 knitr::kable(tableData,
              align = rep("r", ncol(tableData)),
