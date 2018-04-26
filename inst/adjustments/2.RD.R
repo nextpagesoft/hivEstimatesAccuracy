@@ -185,6 +185,7 @@ list(
                                      by = c("Source", "Imputation", "DateOfDiagnosisYear"))
       totalPlot <- GetRDPlots(plotData = totalPlotData,
                               isOriginalData = isOriginalData)
+      setorderv(totalPlotData, "DateOfDiagnosisYear")
 
       # D) STRATIFIED PLOT (OPTIONAL) ------------------------------------------------------------------
       if (length(stratVarNames) > 0) {
