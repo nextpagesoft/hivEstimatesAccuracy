@@ -1,15 +1,15 @@
-auto.snapshot: TRUE
+auto.snapshot: FALSE
 use.cache: FALSE
 print.banner.on.startup: auto
 vcs.ignore.lib: TRUE
 vcs.ignore.src: TRUE
 external.packages:
     devtools
-    testthat
-    shinytest
     roxygen2
-local.repos:
+    testthat
+local.repos: 
 load.external.packages.on.startup: TRUE
+ignored.packages: 
 ignored.directories:
     data
     inst
