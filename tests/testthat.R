@@ -1,4 +1,4 @@
-# library(testthat)
+library(testthat)
 library(hivEstimatesAccuracy)
 
-# test_check("hivEstimatesAccuracy")
+test_check("hivEstimatesAccuracy")
