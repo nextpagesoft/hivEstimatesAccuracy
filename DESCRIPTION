@@ -9,7 +9,7 @@ Authors@R: c(
   person("Janusz", "Janiec", email = "jjaniec@pzh.gov.pl", role = c("aut", "ctb")))
 Maintainer: Daniel Lewandowski <daniel@nextpagesoft.net>
 Description: Improves the accuracy of HIV estimates in EU/EEA countries.
-License: GPL-3
+License: EUPL-1.2
 Depends: R (>= 3.1.0)
 Imports:
   data.table (>= 1.10.4-3),
