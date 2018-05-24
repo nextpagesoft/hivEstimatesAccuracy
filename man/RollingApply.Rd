@@ -26,6 +26,5 @@ RollingApply(c(1, 2, 3, 4, 5), width = 3, func = sd)
 RollingApply(c(1), width = 10, func = sd)
 RollingApply(c(1), width = 10, func = mean)
 RollingApply(c(), width = 10, func = sd)
-RollingApply(c(), width = 10, func = mean)
 
 }
