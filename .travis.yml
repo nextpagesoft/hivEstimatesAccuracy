@@ -3,16 +3,15 @@
 language: R
 sudo: false
 cache: packages
-r_packages:
-  - testthat
 # r_build_args: "--no-build-vignettes"
 # r_check_args: "--as-cran --no-vignettes"
 
-_R_CHECK_CRAN_INCOMING_=FALSE
-_R_CHECK_FORCE_SUGGESTS_=FALSE
-_R_CHECK_LICENSE_=FALSE
-_R_CHECK_CODETOOLS_PROFILE_="suppressUndefined=TRUE"
-NOT_CRAN=TRUE
+env:
+  - _R_CHECK_CRAN_INCOMING_=FALSE
+  - _R_CHECK_FORCE_SUGGESTS_=FALSE
+  - _R_CHECK_LICENSE_=FALSE
+  - _R_CHECK_CODETOOLS_PROFILE_="suppressUndefined=TRUE"
+  - NOT_CRAN=TRUE
 
 # env:
 #  matrix:
