@@ -50,5 +50,8 @@ plus dependencies these packages bring.
 See the [LICENSE](https://github.com/nextpagesoft/hivEstimatesAccuracy/blob/master/LICENSE) file for 
 license rights and limitations (EUPL-1.2).
 
+# Continuous integration
+
+[![Travis-CI Build Status](https://travis-ci.org/nextpagesoft/hivEstimatesAccuracy.svg?branch=master)](https://travis-ci.org/nextpagesoft/hivEstimatesAccuracy)
 
 
