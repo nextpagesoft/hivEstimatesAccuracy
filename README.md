@@ -1,3 +1,7 @@
+# Status
+
+[![Travis-CI Build Status](https://travis-ci.org/nextpagesoft/hivEstimatesAccuracy.svg?branch=master)](https://travis-ci.org/nextpagesoft/hivEstimatesAccuracy)
+
 # European Centre for Disease Prevention and Control
 
 An agency of the European Union
@@ -49,6 +53,3 @@ plus dependencies these packages bring.
 
 See the [LICENSE](https://github.com/nextpagesoft/hivEstimatesAccuracy/blob/master/LICENSE) file for 
 license rights and limitations (EUPL-1.2).
-
-
-

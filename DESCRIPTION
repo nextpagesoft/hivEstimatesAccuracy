@@ -1,7 +1,7 @@
 Package: hivEstimatesAccuracy
 Type: Package
 Title: Improves Accuracy of HIV Estimates in EU/EEA Countries
-Version: 0.9.6
+Version: 0.9.7
 Authors@R: c(
   person("Daniel", "Lewandowski", email = "daniel@nextpagesoft.net", role = c("aut", "cre")),
   person("Nikos", "Pantazis", email = "npantaz@med.uoa.gr", role = c("aut")),
@@ -9,28 +9,30 @@ Authors@R: c(
   person("Janusz", "Janiec", email = "jjaniec@pzh.gov.pl", role = c("aut", "ctb")))
 Maintainer: Daniel Lewandowski <daniel@nextpagesoft.net>
 Description: Improves the accuracy of HIV estimates in EU/EEA countries.
-License: EUPL-1.2
+License: EUPL-1.2 (file LICENSE)
 Depends: R (>= 3.1.0)
 Imports:
-  data.table (>= 1.10.4-3),
+  data.table (>= 1.11.2),
   foreign (>= 0.8-0),
   grid (>= 3.0.0),
   ggplot2 (>= 2.2.1),
   graphics (>= 3.0.0),
-  jomo (>= 2.5-1),
-  knitr (>= 1.17),
+  jomo (>= 2.6-2),
+  knitr (>= 1.20),
   mice (>= 2.46.0),
   mitools (>= 2.3),
-  readxl (>= 1.0.0), 
-  rmarkdown (>= 1.6),
-  shiny (>= 1.0.5), 
+  quantreg (>= 5.35),
+  readxl (>= 1.1.0), 
+  rmarkdown (>= 1.9),
+  shiny (>= 1.1.0), 
   shinycssloaders (>= 0.2.0),
-  shinydashboard (>= 0.6.1),
-  shinyjs (>= 0.9.1),
+  shinydashboard (>= 0.7.0),
+  shinyjs (>= 1.0),
   stats (>= 3.0.0),
   utils (>= 3.0.0),
-  quantreg (>= 5.33),
-  yaml (>= 2.1.14)
+  yaml (>= 2.1.19)
+Suggests:
+  testthat
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1

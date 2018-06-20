@@ -17,7 +17,6 @@
 #' RollingApply(c(1), width = 10, func = sd)
 #' RollingApply(c(1), width = 10, func = mean)
 #' RollingApply(c(), width = 10, func = sd)
-#' RollingApply(c(), width = 10, func = mean)
 #'
 #' @export
 RollingApply <- function(data, width, func, ...)
