@@ -62,7 +62,7 @@ Hash: 76578c5f543a6ecbc1365d6445f9ebf7
 Package: bindrcpp
 Source: CRAN
 Version: 0.2.2
-Hash: 826c616fa58feaae4a621de4ba95dc2c
+Hash: 557f908819df9f67af5dc93f501610ab
 Requires: Rcpp, bindr, plogr
 
 Package: broom
@@ -111,7 +111,7 @@ Hash: 1f202ebd812ac7192be3739245746a13
 Package: dplyr
 Source: CRAN
 Version: 0.7.5
-Hash: 88afe14285aa879dc5f0e8513e1046a5
+Hash: cf9a7bcb0b305a27d6250d68cb1ddcdc
 Requires: BH, R6, Rcpp, assertthat, bindrcpp, glue, magrittr,
     pkgconfig, plogr, rlang, tibble, tidyselect
 
@@ -173,8 +173,8 @@ Requires: Rcpp, digest
 
 Package: httpuv
 Source: CRAN
-Version: 1.4.3
-Hash: f9c8e46194fd216f6f10f3996440d7a1
+Version: 1.4.4.1
+Hash: 717902b1dcddd4436cac39b306ef42fb
 Requires: BH, Rcpp, later, promises
 
 Package: jomo
@@ -202,7 +202,7 @@ Hash: ecf589b42cd284b03a4beb9665482d3e
 Package: later
 Source: CRAN
 Version: 0.7.3
-Hash: dfacccb04950f360556f6f2b39eddd58
+Hash: e36046a78ea73034484a54d1ec08b3cf
 Requires: BH, Rcpp, rlang
 
 Package: lazyeval
@@ -213,7 +213,7 @@ Hash: 88926ad9c43581fd0822a37c8ed09f05
 Package: lme4
 Source: CRAN
 Version: 1.1-17
-Hash: b2af33b535350884179d68ecfc30ecb5
+Hash: 2d41de93b052c48162d40c324b3000f2
 Requires: Rcpp, RcppEigen, minqa, nloptr
 
 Package: magrittr
@@ -311,14 +311,14 @@ Hash: 77da8f1df873a4b91e5c4a68fe2fb1b6
 Package: promises
 Source: CRAN
 Version: 1.0.1
-Hash: baecd7c20f1b336c43cd0870598d8815
+Hash: 8aa5f93e1acd1ef14306a954a3d0cb82
 Requires: R6, Rcpp, later, magrittr, rlang
 
 Package: psych
 Source: CRAN
 Version: 1.8.4
 Hash: eb0040e47d327c4416ea68c9cb01316f
-Requires: mnormt
+Requires: foreign, mnormt
 
 Package: purrr
 Source: CRAN
@@ -335,7 +335,7 @@ Requires: MatrixModels, SparseM
 Package: readr
 Source: CRAN
 Version: 1.1.1
-Hash: 53d0fa06f01251259885b00985c989be
+Hash: ca6ad2638b5295fdb97e6bdcfd0f8568
 Requires: BH, R6, Rcpp, hms, tibble
 
 Package: readxl
