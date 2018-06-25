@@ -229,8 +229,8 @@ Requires: mime
 
 Package: mice
 Source: CRAN
-Version: 3.0.0
-Hash: 85d45fd41d77d3c7ad2c348126d93c51
+Version: 3.1.0
+Hash: 1fc43a8a26111bd8020a4e3827efdeba
 Requires: Rcpp, broom, dplyr, mitml, rlang
 
 Package: mime
