@@ -25,4 +25,6 @@ countryData[Code == "GB", ":="(
   Code = "UK"
 )]
 
-save(countryData, file = "D:/_REPOSITORIES/hivEstimatesAccuracy/data/countryData.rda")
+save(countryData,
+     file = "D:/_REPOSITORIES/hivEstimatesAccuracy/data/countryData.rda",
+     compress = "xz")
