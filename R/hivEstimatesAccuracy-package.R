@@ -15,6 +15,8 @@
 #' Author: Janusz Janiec \email{<jjaniec@@pzh.gov.pl>}\cr
 #'
 #' @import data.table
+#' @import ggplot2
+#' @importFrom shiny HTML
 #' @importFrom stats setNames lowess quantile sd var acf
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
 #' @importFrom utils unzip
