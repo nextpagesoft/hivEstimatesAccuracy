@@ -28,11 +28,11 @@ params:
   AdjustedData: NA
   ReportingDelay:
     label: "Adjust count of cases for reporting delay"
-    value: 1
+    value: TRUE
     input: checkbox
   Smoothing:
     label: "Apply plot curves smoothing"
-    value: 0
+    value: FALSE
     input: checkbox
 ---
 
