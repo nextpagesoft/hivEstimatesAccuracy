@@ -14,6 +14,7 @@ params:
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+require(shiny)
 ```
 
 ```{r, results='asis'}
