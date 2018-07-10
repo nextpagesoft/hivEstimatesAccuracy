@@ -30,6 +30,7 @@ Imports:
   shinydashboard (>= 0.7.0),
   shinyjs (>= 1.0),
   stats (>= 3.0.0),
+  survival (>= 2.38-2),
   utils (>= 3.0.0),
   yaml (>= 2.1.19)
 Suggests:

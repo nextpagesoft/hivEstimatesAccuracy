@@ -182,7 +182,7 @@ Package: jomo
 Source: CRAN
 Version: 2.6-2
 Hash: a941d2fbaaf472956c1980080e2fe880
-Requires: lme4
+Requires: lme4, survival
 
 Package: jsonlite
 Source: CRAN
@@ -232,7 +232,7 @@ Package: mice
 Source: CRAN
 Version: 3.1.0
 Hash: 1fc43a8a26111bd8020a4e3827efdeba
-Requires: Rcpp, broom, dplyr, mitml, rlang
+Requires: Rcpp, broom, dplyr, mitml, rlang, survival
 
 Package: mime
 Source: CRAN
@@ -416,6 +416,11 @@ Source: CRAN
 Version: 1.3.1
 Hash: 9f417a1d899ed1f080942ab36998e8b5
 Requires: glue, magrittr, stringi
+
+Package: survival
+Source: CRAN
+Version: 2.42-4
+Hash: 43cdf7683e1030b4976b964d5b22ab47
 
 Package: tibble
 Source: CRAN
