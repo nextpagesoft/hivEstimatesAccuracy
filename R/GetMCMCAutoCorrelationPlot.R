@@ -36,7 +36,7 @@ GetMCMCAutoCorrelationPlot <- function(covariance)
     geom_hline(aes(yintercept = 0),
                colour = "#888888") +
     theme_bw() +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0), breaks = scales::pretty_breaks()) +
     scale_y_continuous(expand = c(0, 0)) +
     ylab("Autocorrelation") +
     facet_grid(Row ~ Column) +

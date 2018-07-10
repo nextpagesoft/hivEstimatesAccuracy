@@ -126,7 +126,6 @@ cat(sprintf("Covariate variables: %s<br />", paste(covariateNames, collapse = ",
 cat(sprintf("Cubic spline coefficients and intercept: %s<br />", paste(coefNames, collapse = ", ")))
 ```
 
-
 **Figure 4. Autocorrelation plot**<br />
 ```{r}
 print(GetMCMCAutoCorrelationPlot(params$InputData$Artifacts$M$Covariance))

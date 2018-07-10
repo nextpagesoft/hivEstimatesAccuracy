@@ -30,7 +30,7 @@ GetMCMCBetasPlot <- function(betas)
   betasPlot <- ggplot(plotData, aes(x = Sample)) +
     geom_line(aes(y = Beta), colour = "#69b023") +
     theme_bw() +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0), breaks = scales::pretty_breaks()) +
     scale_y_continuous(expand = c(0, 0)) +
     ylab("Beta coefficients") +
     facet_wrap(~Element,

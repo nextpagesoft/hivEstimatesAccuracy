@@ -102,6 +102,8 @@ list(
         imp <- mice::mice(cbind(Y, X),
                           m = nimp,
                           maxit = nit)
+        artifacts[["Mids"]] <- imp
+
         imp <- setDT(mice::complete(imp, action = "long", include = TRUE))
         setnames(imp, old = c(".imp", ".id"), new = c("Imputation", "id"))
 

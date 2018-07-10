@@ -24,9 +24,9 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
 
   results <- list()
   # Process adjustments
-  i <- 0
+  i <- 0L
   for (adjustmentSpec in adjustmentSpecs) {
-    i <- i + 1
+    i <- i + 1L
 
     caption <- sprintf("%d. %s", i, adjustmentSpec$Name)
     if (!"Key" %in% names(adjustmentSpec)) {
