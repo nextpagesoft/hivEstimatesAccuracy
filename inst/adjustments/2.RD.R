@@ -10,15 +10,19 @@ list(
 
   # Input parameters to the adjustment function ----
   Parameters = list(
-    # Parameter 1: a specification with label, type and default value
     startYear = list(
       label = "Diagnosis start year",
       value = 2000L,
       input = "numeric"),
-    # Parameter 2: a specification with label, type and default value
+    endYear = list(
+      label = "Notification end year",
+      value = 2017,
+      input = "numeric"),
     endQrt = list(
-      label = "Notification end quarter",
-      value = 2017.25,
+      label = "Notification end quarter (integer between 1 and 4)",
+      value = 1,
+      min = 1,
+      max = 4,
       input = "numeric"),
     stratGender = list(
       name = "stratGender",
@@ -52,7 +56,7 @@ list(
     # Start year
     startYear <- parameters$startYear
     # End quarter
-    endQrt <- parameters$endQrt
+    endQrt <- parameters$endYear + parameters$endQrt / 4
     # Stratifiation columns
     stratVarNames <- c()
     if (parameters$stratGender) {
