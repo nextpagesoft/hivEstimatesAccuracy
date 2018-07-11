@@ -14,6 +14,15 @@ dataSummaryUI <- function(id)
       solidHeader = FALSE,
       status = "primary",
       collapsible = TRUE,
+      sliderInput(ns("yearRange"),
+                  label = h3("Filter data on year of diagnosis"),
+                  min = 1980,
+                  max = 2025,
+                  value = c(1980, 2025),
+                  step = 1,
+                  sep = "",
+                  round = TRUE),
+      textOutput(ns("filterInfo")),
       withSpinner(
         tagList(
           uiOutput(ns("missPlotDiv")),
@@ -33,8 +42,18 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   # Get namespace
   ns <- session$ns
 
+  dataSelection <- reactive({
+    yearRange <- input$yearRange
+    inputData()$Table[, between(DateOfDiagnosisYear, yearRange[1], yearRange[2])]
+  })
+
   artifacts <- reactive({
-    GetDataSummaryArtifacts(inputData()$Table)
+    GetDataSummaryArtifacts(inputData()$Table[dataSelection()])
+  })
+
+  output[["filterInfo"]] <- renderText({
+    dataSelection <- dataSelection()
+    sprintf("Selected %d out of %d", sum(dataSelection), length(dataSelection))
   })
 
   output[["missPlotDiv"]] <- renderUI({

@@ -14,6 +14,7 @@ library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
 library(ggplot2)
+library(data.table)
 
 # Load main library
 library(hivEstimatesAccuracy)
