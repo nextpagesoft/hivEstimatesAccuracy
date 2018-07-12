@@ -23,6 +23,7 @@ Imports:
   mice (>= 3.1.0),
   mitools (>= 2.3),
   quantreg (>= 5.36),
+  parallel (> 3.0.0),
   readxl (>= 1.1.0), 
   rmarkdown (>= 1.10),
   scales (>= 0.5.0),
