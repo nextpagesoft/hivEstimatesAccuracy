@@ -247,8 +247,8 @@ Requires: Rcpp
 
 Package: mitml
 Source: CRAN
-Version: 0.3-5
-Hash: 9bd6be5484999aaa43fab9ed68585178
+Version: 0.3-6
+Hash: 3c0f311732a5464daafbe5875a714a49
 Requires: haven, jomo, pan
 
 Package: mitools
