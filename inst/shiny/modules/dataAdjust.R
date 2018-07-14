@@ -6,10 +6,18 @@ libPaths <- .libPaths()
 # Module globals
 adjustmentSpecFileNames <- GetAdjustmentSpecFileNames()
 
+isLinux <- tolower(Sys.info()[["sysname"]]) == "linux"
+
 # User interface
 dataAdjustUI <- function(id)
 {
   ns <- NS(id)
+
+  if (isLinux) {
+  cancelAdjustBtn <- shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
+  } else {
+    cancelAdjustBtn <- NULL
+  }
 
   tagList(
     div(style = "margin-top: 15px"),
@@ -22,7 +30,9 @@ dataAdjustUI <- function(id)
       actionButton(ns("addAdjustBtn"), "Add"),
       p(""),
       div(id = ns("adjustmentList")),
-      actionButton(ns("runAdjustBtn"), "Run")),
+      actionButton(ns("runAdjustBtn"), "Run"),
+      cancelAdjustBtn
+    ),
     uiOutput(ns("intermReport")),
     uiOutput(ns("runLog"))
   )
@@ -33,6 +43,10 @@ dataAdjust <- function(input, output, session, inputData)
 {
   # Get namespace
   ns <- session$ns
+
+  # Make "task" behave like a reactive value
+  makeReactiveBinding("task")
+  task <- NULL
 
   # Store reactive values
   adjustedData <- reactiveVal(NULL)
@@ -97,7 +111,6 @@ dataAdjust <- function(input, output, session, inputData)
 
   # Reactive values observers
   observeEvent(vals$adjustmentSpecs, {
-    # finalData(NULL)
     adjustedData(NULL)
   })
 
@@ -180,49 +193,77 @@ dataAdjust <- function(input, output, session, inputData)
 
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
-    inputData <- inputData()
-    if (!is.null(inputData)) {
-      # Run adjustments
-      adjustedData(NULL)
-      vals$runLog <- ""
-      vals$intermReport <- ""
-      startTime <- Sys.time()
-      withProgress({
-        tryCatch({
-          runLog <- capture.output({
-            adjustedData <- RunAdjustments(inputData$Table,
-                                           adjustmentSpecs = vals$adjustmentSpecs)
+    inputData <- req(inputData())
+    adjustmentSpecs <- req(vals$adjustmentSpecs)
 
-            intermReport <- RenderReportToHTML(
-              filePath = system.file("reports/intermediate/0.PreProcess.Rmd",
-                                     package = "hivEstimatesAccuracy"),
-              params = list(InputData = inputData))
-            for (i in seq_along(vals$adjustmentSpecs)) {
-              intermReport <- paste(intermReport,
-                                    RenderReportForAdjSpec(vals$adjustmentSpecs[[i]],
-                                                           "intermediate",
-                                                           adjustedData[[i]]))
-            }
-            vals$intermReport <- HTML(intermReport)
-          })
-          vals$runLog <- paste(runLog, collapse = "\n")
-        }, error = function(err) {
-          print(err)
-          adjustedData <- NULL
-        }, finally = {
-          adjustedData(adjustedData)
-        })
-      },
-      message = "Running adjustments...",
-      value = 0.1)
+    shinyjs::disable("runAdjustBtn")
+    shinyjs::enable("cancelAdjustBtn")
+
+    adjustedData(NULL)
+
+    vals$runLog <- ""
+    vals$intermReport <- ""
+
+    # Show progress message during task start
+    prog <- Progress$new(session)
+    prog$set(message = "Running adjustments...", value = 0.1)
+
+    startTime <- Sys.time()
+    task <<- CreateTask({
+      RunAdjustments(
+        inputData$Table,
+        adjustmentSpecs = adjustmentSpecs)
+    })
+
+    o <- observe({
+      # Only proceed when the task is completed (this could mean success,
+      # failure, or cancellation)
+      req(task$completed())
       endTime <- Sys.time()
+
+      adjustedData <- task$result()
+      task <<- NULL
+      if (is.list(adjustedData)) {
+        adjustedData(adjustedData)
+
+        intermReport <- RenderReportToHTML(
+          filePath = system.file("reports/intermediate/0.PreProcess.Rmd",
+                                 package = "hivEstimatesAccuracy"),
+          params = list(InputData = inputData))
+        for (i in seq_along(adjustmentSpecs)) {
+          intermReport <- paste(
+            intermReport,
+            RenderReportForAdjSpec(adjustmentSpecs[[i]],
+                                   "intermediate",
+                                   adjustedData[[i]]))
+        }
+        vals$intermReport <- HTML(intermReport)
+        vals$runLog <- "Done"
+      } else {
+        adjustedData(NULL)
+        vals$runLog <- "Adjustments cancelled"
+      }
       vals$runLog <- paste(paste("Start time  :", FormatTime(startTime)),
                            paste("End time    :", FormatTime(endTime)),
                            paste("Elapsed time:", FormatDiffTime(endTime - startTime)),
                            paste(""),
                            vals$runLog,
                            sep = "\n")
-    }
+
+      # This observer only runs once
+      o$destroy()
+
+      # Close the progress indicator and update button state
+      prog$close()
+      shinyjs::enable("runAdjustBtn")
+      shinyjs::disable("cancelAdjustBtn")
+    })
+
+  })
+
+  # EVENT: Button "Run adjustments" clicked
+  observeEvent(input[["cancelAdjustBtn"]], {
+    req(task)$cancel()
   })
 
   # Output intermediate report when it has changed

@@ -2,7 +2,7 @@
 options(shiny.maxRequestSize = 70 * 1024^2)
 
 # Determine if the app is run on the server or locally
-isServer <- Sys.info()[["nodename"]] == "ShinyServer"
+isServer <- tolower(Sys.info()[["nodename"]]) == "shinyserver"
 
 # Server specific code
 if (isServer) {
