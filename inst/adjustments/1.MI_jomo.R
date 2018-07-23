@@ -48,6 +48,8 @@ list(
   ## Adjustment function ----
   AdjustmentFunction = function(inputData, parameters) {
 
+    require(data.table)
+
     # Perform imputations per data set.
     # This is the actual worker function.
     workerFunction <- function(i, nburn, nbetween, nimp, nsdf) {

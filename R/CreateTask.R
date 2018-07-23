@@ -12,6 +12,8 @@
 #' - cancel(): Call this to prematurely terminate the task.
 #'
 #' @param expr Expression to be executed. Required.
+#' @param args List object with arguments to be passed to \code{expr}. Optional.
+#'   Default = \code{NULL}
 #' @param timeout Number of milliseconds between consecutive checks of the task. Optional.
 #'   Default = 1000L
 #'
@@ -27,7 +29,7 @@
 #' }
 #'
 #' @export
-CreateTask <- function(expr, timeout = 1000L)
+CreateTask <- function(expr, args = NULL, timeout = 1000L)
 {
   shiny::makeReactiveBinding("state")
   state <- "running"
@@ -95,16 +97,31 @@ CreateTask <- function(expr, timeout = 1000L)
       )
     },
     "windows" = {
-      # Run immediately
-      res <- force(expr)
+      # Launch the task in a forked process. This always returns
+      # immediately, and we get back a handle we can use to monitor
+      # or kill the job.
+      task_handle <- callr::r_bg({
+        force(expr)
+      }, args = args)
 
-      if (!inherits(res, "try-error")) {
-        state <- "success"
-        result <- res
-      } else {
-        state <- "error"
-        result <- attr(res, "condition", exact = TRUE)
-      }
+      # Poll every [timeout] milliseconds until the job completes
+      o <- observe({
+        isRunning <- task_handle$is_alive()
+        if (isRunning) {
+          shiny::invalidateLater(timeout)
+        } else {
+          res <- try({task_handle$get_result()})
+          o$destroy()
+          if (!inherits(res, "try-error")) {
+            state <<- "success"
+            result <<- res
+          } else {
+            state <<- "error"
+            result <<- NULL
+          }
+          task_handle$kill()
+        }
+      })
 
       return(
         list(
@@ -113,21 +130,24 @@ CreateTask <- function(expr, timeout = 1000L)
           },
           result = function() {
             if (state == "running") {
-              # If running, abort the current context silently.
-              # We've taken a reactive dependency on "state" so if
-              # the state changes the context will invalidate.
               shiny::req(FALSE)
             } else if (state == "success") {
               return(result)
             } else if (state == "cancel") {
-              return(FALSE)
+              return(state)
             } else if (state == "error") {
               stop(result)
             }
           },
-          cancel = function() {}
+          cancel = function() {
+            if (state == "running") {
+              state <<- "cancel"
+              o$destroy()
+              task_handle$kill()
+            }
+          }
         )
       )
-    }
+    },
   )
 }

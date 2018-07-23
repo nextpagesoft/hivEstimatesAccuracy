@@ -67,9 +67,9 @@ Requires: Rcpp, bindr, plogr
 
 Package: broom
 Source: CRAN
-Version: 0.4.5
-Hash: 514abdac5bd99ae5a232784431e1c0f2
-Requires: dplyr, plyr, psych, reshape2, stringr, tidyr
+Version: 0.5.0
+Hash: 9f383b5f4632f82878222399b5fa7bbd
+Requires: backports, dplyr, purrr, reshape2, stringr, tibble, tidyr
 
 Package: cellranger
 Source: CRAN
@@ -117,9 +117,14 @@ Requires: BH, R6, Rcpp, assertthat, bindrcpp, glue, magrittr,
 
 Package: evaluate
 Source: CRAN
-Version: 0.10.1
-Hash: 54d95f4ec6d0300100413ed0127d89ae
+Version: 0.11
+Hash: 2d90e734f5c12a3473f4be8ef3c15ebb
 Requires: stringr
+
+Package: fansi
+Source: CRAN
+Version: 0.2.3
+Hash: ea2d591618224c56c8d5befde9af822b
 
 Package: forcats
 Source: CRAN
@@ -284,9 +289,9 @@ Hash: 7f3100dc1e9ee36561dcd376a096df81
 
 Package: pillar
 Source: CRAN
-Version: 1.2.3
-Hash: d3b1c0a6cf4b64212509130845c22e09
-Requires: cli, crayon, rlang, utf8
+Version: 1.3.0
+Hash: 3e43f774fa6dfba877caca1aebbeaa6a
+Requires: cli, crayon, fansi, rlang, utf8
 
 Package: pkgconfig
 Source: CRAN

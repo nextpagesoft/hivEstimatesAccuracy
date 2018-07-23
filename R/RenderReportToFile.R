@@ -4,6 +4,8 @@
 #'
 #' @param filePath Path to the source RMarkdown file. Required.
 #' @param format Output format of the report. Optional. Default = \code{"html_fragment"}.
+#' @param outDir Output directory. Temporary directory is used if \code{NULL}. Optional.
+#'   Default = \code{NULL}.
 #' @param ... Additional arguments passed to \link[rmarkdown]{render}. Optional.
 #'
 #' @return File name of the generated report
@@ -18,7 +20,7 @@
 #' }
 #'
 #' @export
-RenderReportToFile <- function(filePath, format = "html_fragment", ...)
+RenderReportToFile <- function(filePath, format = "html_fragment", outDir = NULL, ...)
 {
   stopifnot(!missing(filePath))
 
@@ -53,6 +55,12 @@ RenderReportToFile <- function(filePath, format = "html_fragment", ...)
                                       quiet = TRUE,
                                       envir = new.env(parent = globalenv()),
                                       ...)
+
+  if (!is.null(outDir)) {
+    destFileName <- file.path(outDir, basename(reportFileName))
+    file.copy(reportFileName, destFileName, overwrite = TRUE)
+    unlink(reportFileName)
+  }
 
   return(reportFileName)
 }

@@ -9,13 +9,14 @@ inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/du
 # b) "Multiple Imputations (mice)"
 # c) "Reporting Delays"
 adjustmentNames <- c(
-  "Multiple Imputations (mice)"
+"Multiple Imputations (mice)"
 )
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
-adjustmentSpecs <- setNames(lapply(adjustmentNames,
-                                   function(adjName) GetListObject(adjustmentFilePaths[adjName])),
-                            adjustmentNames)
+adjustmentSpecs <-
+setNames(lapply(adjustmentNames,
+                function(adjName) GetListObject(adjustmentFilePaths[adjName])),
+         adjustmentNames)
 
-# Optionally adjust parameters of the adjustments:
-# For instance stratify "Reporting Delays" adjustment by Transmission category
+# Optionally adjust parameters of the adjustments
+# For instance stratify "Reporting Delays" adjustment by Transmission category:
 # adjustmentSpecs[["Reporting Delays"]]$Parameters$stratTrans$value <- TRUE

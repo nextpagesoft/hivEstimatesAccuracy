@@ -47,6 +47,8 @@ list(
   ## Adjustment function ----
   AdjustmentFunction = function(inputData, parameters) {
 
+    require(data.table)
+
     # Work on a copy
     outputData <- copy(inputData)
 

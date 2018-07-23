@@ -13,12 +13,6 @@ dataAdjustUI <- function(id)
 {
   ns <- NS(id)
 
-  if (isLinux) {
-  cancelAdjustBtn <- shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
-  } else {
-    cancelAdjustBtn <- NULL
-  }
-
   tagList(
     div(style = "margin-top: 15px"),
     box(
@@ -31,7 +25,7 @@ dataAdjustUI <- function(id)
       p(""),
       div(id = ns("adjustmentList")),
       actionButton(ns("runAdjustBtn"), "Run"),
-      cancelAdjustBtn
+      shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
     ),
     uiOutput(ns("intermReport")),
     uiOutput(ns("runLog"))
@@ -209,11 +203,25 @@ dataAdjust <- function(input, output, session, inputData)
     prog$set(message = "Running adjustments...", value = 0.1)
 
     startTime <- Sys.time()
-    task <<- CreateTask({
-      RunAdjustments(
-        inputData$Table,
-        adjustmentSpecs = adjustmentSpecs)
-    })
+
+    if (isLinux) {
+      task <<- CreateTask({
+        RunAdjustments(
+          inputData$Table,
+          adjustmentSpecs = adjustmentSpecs)
+      })
+    } else {
+      task <<- CreateTask(function(x, y) {
+        if (!requireNamespace("hivEstimatesAccuracy", quietly = TRUE)) {
+          print("Loading development version of hivEstimatesAccuracy package")
+          devtools::load_all()
+        }
+        RunAdjustments(
+          data = x,
+          adjustmentSpecs = y)
+      },
+      args = list(inputData$Table, adjustmentSpecs))
+    }
 
     o <- observe({
       # Only proceed when the task is completed (this could mean success,

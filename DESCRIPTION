@@ -13,6 +13,7 @@ Description: Improves the accuracy of HIV estimates in EU/EEA countries.
 License: EUPL-1.2 (file LICENSE)
 Depends: R (>= 3.1.0)
 Imports:
+  callr (>= 2.0.4),
   data.table (>= 1.11.4),
   foreign (>= 0.8-70),
   grid (>= 3.0.0),
