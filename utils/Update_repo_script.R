@@ -1,6 +1,5 @@
 # Documentation, testing, check
 devtools::document()
-devtools::test()
 devtools::check()
 
 # Build source and binary versions
