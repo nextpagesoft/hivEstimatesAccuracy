@@ -36,6 +36,10 @@ GetMissingnessPlots <- function(
   missData <- inputData[, ..columnNames]
   missData[, c(columnNames) := lapply(.SD, isMissing), .SDcols = columnNames]
 
+  if (nrow(missData) == 0) {
+    return(NULL)
+  }
+
   relFreqData <- missData[, lapply(.SD, getRelFreq), .SDcols = columnNames]
   relFreqData <- melt(relFreqData,
                       measure.vars = columnNames,

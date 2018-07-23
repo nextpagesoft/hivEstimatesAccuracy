@@ -49,8 +49,12 @@ PlotMultipleCharts <- function(plots, cols = 1, layout = NULL, widths = NULL)
     for (i in seq_len(numPlots)) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchIdx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      print(plots[[i]], vp = viewport(layout.pos.row = matchIdx$row,
-                                      layout.pos.col = matchIdx$col))
+      tryCatch({
+        print(plots[[i]], vp = viewport(layout.pos.row = matchIdx$row,
+                                        layout.pos.col = matchIdx$col))
+      }, error = function(e) {
+        print("No sufficient data to print this plot")
+      })
     }
   }
 }

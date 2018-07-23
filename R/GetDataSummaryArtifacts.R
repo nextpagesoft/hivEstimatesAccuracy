@@ -26,7 +26,12 @@ GetDataSummaryArtifacts <- function(inputData)
   inputData <- copy(inputData)
 
   missPlotsTotal <- GetMissingnessPlots(inputData)
-  missPlotsByGender <- lapply(split(inputData, by = "Gender"), GetMissingnessPlots)
+  inputDataGender <- split(inputData, by = "Gender")
+  if (length(inputDataGender) > 0) {
+    missPlotsByGender <- lapply(inputDataGender, GetMissingnessPlots)
+  } else {
+    missPlotsByGender <- NULL
+  }
 
   # New stuff
   inputData[, ":="(
@@ -77,7 +82,6 @@ GetDataSummaryArtifacts <- function(inputData)
                vjust = -1) +
       expand_limits(x = c(0, max(30, ceiling(quant99)))) +
       scale_x_continuous(expand = c(0, 0)) +
-      scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
       theme(text = element_text(size = 14),
             panel.grid = element_blank(),
@@ -86,6 +90,10 @@ GetDataSummaryArtifacts <- function(inputData)
       ggtitle("Density of Reporting Delay with last 5 years deleted") +
       xlab("Delay in quarters of the year") +
       ylab("Proportion reported with the delay")
+    if (nrow(shortData) > 0) {
+      delayDensShortPlot <- delayDensShortPlot +
+        scale_y_continuous(expand = c(0, 0))
+    }
   } else {
     delayDensFullPlot <- NULL
     delayDensShortPlot <- NULL
