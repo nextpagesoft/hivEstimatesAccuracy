@@ -14,23 +14,25 @@ dataSummaryUI <- function(id)
       solidHeader = FALSE,
       status = "primary",
       collapsible = TRUE,
-      sliderInput(ns("yearRange"),
-                  label = h3("Filter data on year of diagnosis"),
-                  min = 1980,
-                  max = 2025,
-                  value = c(1980, 2025),
-                  step = 1,
-                  sep = "",
-                  round = TRUE),
-      textOutput(ns("filterInfo")),
-      withSpinner(
-        tagList(
-          uiOutput(ns("missPlotDiv")),
-          uiOutput(ns("delayDensityOutput")),
-          uiOutput(ns("meanDelayOutput"))
-        ),
-        type = 7,
-        proxy.height = "60px")
+      sliderInput(
+        ns("yearRange"),
+        label = h3("Filter data on year of diagnosis"),
+        min = 1980,
+        max = 2025,
+        value = c(1980, 2025),
+        step = 1,
+        sep = "",
+        width = "600px",
+        round = TRUE
+      ),
+      tags$small(textOutput(ns("filterInfo"))),
+      tagList(
+        uiOutput(ns("missPlotDiv")),
+        uiOutput(ns("delayDensityOutput")),
+        uiOutput(ns("meanDelayOutput"))
+      ),
+      type = 7,
+      proxy.height = "60px"
     ),
     uiOutput(ns("inputDataTableBox"))
   )
@@ -44,7 +46,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
 
   dataSelection <- reactive({
     yearRange <- input$yearRange
-    inputData()$Table[, between(DateOfDiagnosisYear, yearRange[1], yearRange[2])]
+    req(inputData()$Table)[, between(DateOfDiagnosisYear, yearRange[1], yearRange[2])]
   })
 
   artifacts <- reactive({
@@ -53,7 +55,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
 
   output[["filterInfo"]] <- renderText({
     dataSelection <- dataSelection()
-    sprintf("Selected %d out of %d", sum(dataSelection), length(dataSelection))
+    sprintf("Selected observations: %d out of %d", sum(dataSelection), length(dataSelection))
   })
 
   output[["missPlotDiv"]] <- renderUI({
@@ -62,22 +64,24 @@ dataSummary <- function(input, output, session, appStatus, inputData)
       missPlotsTotal <- artifacts()$MissPlotsTotal
       missPlotsByGender <- artifacts()$MissPlotsByGender
       plotCounter <- 0
-      if (!is.null(missPlotsTotal) | !is.null(missPlotsByGender)) {
-        widgets[[length(widgets) + 1]] <- h3("1. Missing data summary")
+      widgets[[length(widgets) + 1]] <- h3("1. Missing data summary")
 
-        if (!is.null(missPlotsTotal)) {
-          plotCounter <- plotCounter + 1
-          widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Total plot", plotCounter))
-          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
-        }
-        if (!is.null(missPlotsByGender)) {
-          plotCounter <- plotCounter + 1
-          widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Gender \"Female\"", plotCounter))
-          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderF"))
-          plotCounter <- plotCounter + 1
-          widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Gender \"Male\"", plotCounter))
-          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderM"))
-        }
+      plotCounter <- plotCounter + 1
+      widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Total plot", plotCounter))
+      if (!is.null(missPlotsTotal)) {
+        widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
+      } else {
+        widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
+      }
+      plotCounter <- plotCounter + 1
+      widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. By Gender", plotCounter))
+      if (!is.null(missPlotsByGender)) {
+        widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d.1 Gender = \"Female\"", plotCounter))
+        widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderF"))
+        widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d.2 Gender = \"Male\"", plotCounter))
+        widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderM"))
+      } else {
+        widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
       }
     } else {
       widgets[[length(widgets) + 1]] <- p("Please, upload input data and apply attribute mapping in \"Input data upload\" tab first.")
@@ -110,7 +114,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
       if (!is.null(delayDensShortPlot) & !is.null(delayDensShortPlot)) {
         elem <- plotOutput(ns("delayDensityPlot"))
       } else {
-        elem <- p("This plot cannot be created due to missingness in the provided diagnosis and notification times.")
+        elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
         h3("2. Observed delay density"),
@@ -135,7 +139,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
       if (!is.null(meanDelayPlot)) {
         elem <- plotOutput(ns("meanDelayPlot"))
       } else {
-        elem <- p("This plot cannot be created due to missingness in the provided diagnosis and notification times.")
+        elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
         h3("3. Observed delay by notification time"),
@@ -168,7 +172,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
                                                 options = list(
                                                   dom = '<"top">lirt<"bottom">p',
                                                   autoWidth = FALSE,
-                                                  pageLength = 25,
+                                                  pageLength = 15,
                                                   scrollX = TRUE,
                                                   deferRender = TRUE,
                                                   serverSide = TRUE,
