@@ -33,11 +33,11 @@ if (!is.null(inputData)) {
   # Get "Summary" page plots (optionally)
   summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
 
-  # 5. RUN ADJUSTMENTS -------------------------------------------------------------------------------
+  # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
   adjustedData <- RunAdjustments(data = inputData$Table,
                                  adjustmentSpecs = adjustmentSpecs)
 
-  # 6. SAVE ADJUSTED DATA ----------------------------------------------------------------------------
+  # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Take the last adjustment output as final data
   finalData <- adjustedData[[length(adjustedData)]][["Table"]]
 
@@ -46,7 +46,7 @@ if (!is.null(inputData)) {
                                              suffix = paste0("_", GetTimeStamp()))
   WriteDataFile(finalData, outputDataFilePath)
 
-  # 7. CREATE FINAL REPORT (OPTIONALLY) --------------------------------------------------------------
+  # 7. CREATE FINAL REPORT (OPTIONALLY) ------------------------------------------------------------
   reportFilePath <- GetReportFileNames()["Main Report"]
   params <- list(AdjustedData = adjustedData,
                  ReportingDelay = TRUE,
