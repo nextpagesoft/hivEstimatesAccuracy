@@ -6,7 +6,6 @@ vcs.ignore.src: TRUE
 external.packages:
     devtools
     roxygen2
-    testthat
 local.repos:
 load.external.packages.on.startup: TRUE
 ignored.packages:
