@@ -1,3 +1,10 @@
+Version 0.9.8 (2018/07/23)
+------------------------------------------------------------------------------
+
+* Summary page filtering reimplemented with plots supporting no data and error
+  messages removed.
+* FullMigr variable implemented in the pre-processing.
+
 Version 0.9.7 (2018/07/23)
 ------------------------------------------------------------------------------
 

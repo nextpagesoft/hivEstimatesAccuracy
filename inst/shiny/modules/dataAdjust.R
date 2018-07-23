@@ -213,8 +213,7 @@ dataAdjust <- function(input, output, session, inputData)
     } else {
       task <<- CreateTask(function(x, y) {
         if (!requireNamespace("hivEstimatesAccuracy", quietly = TRUE)) {
-          print("Loading development version of hivEstimatesAccuracy package")
-          devtools::load_all()
+          devtools::load_all(".")
         }
         RunAdjustments(
           data = x,

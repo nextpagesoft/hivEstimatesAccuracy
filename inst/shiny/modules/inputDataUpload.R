@@ -245,7 +245,7 @@ inputDataUpload <- function(input, output, session, appStatus)
                    inputDataTest <- ApplyAttributesMapping(originalData,
                                                            vals$AttrMapping,
                                                            vals$DefaultValues)
-                   setProgress(0.4, detail = "Pre-processing data")
+                   setProgress(0.4, detail = "Pre-processing data with a single imputation of Gender")
 
                    inputDataTest <- PreProcessInputData(inputDataTest)
                    setProgress(0.9, detail = "Checking data validity")

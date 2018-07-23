@@ -2,7 +2,7 @@
 library(hivEstimatesAccuracy)
 
 # 2. LOAD SETTINGS ---------------------------------------------------------------------------------
-source("./inst/misc/runSettings.R")
+source("D:/_REPOSITORIES/Github/hivEstimatesAccuracy/inst/misc/runSettings.R")
 
 # 3. READ INPUT DATA -------------------------------------------------------------------------------
 originalData <- ReadDataFile(inputDataFilePath)
@@ -18,7 +18,7 @@ if (attrMappingStatus$Valid) {
   inputDataTest <- ApplyAttributesMapping(originalData,
                                           attrMapping,
                                           GetPreliminaryDefaultValues())
-  inputDataTest <- PreProcessInputData(inputDataTest)
+  inputDataTest <- PreProcessInputData(inputData = inputDataTest)
   inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
   if (inputDataTestStatus$Valid) {
     inputData <- inputDataTest
