@@ -17,13 +17,13 @@ file.copy(file.path(repoPath, paste0("hivEstimatesAccuracy_", version, ".tar.gz"
           file.path(repoPath, "repo/src/contrib", paste0("hivEstimatesAccuracy_", version, ".tar.gz")),
           overwrite = TRUE)
 file.copy(file.path(repoPath, paste0("hivEstimatesAccuracy_", version, ".zip")),
-          file.path(repoPath, "repo/bin/windows/contrib/3.4", paste0("hivEstimatesAccuracy_", version, ".zip")),
+          file.path(repoPath, "repo/bin/windows/contrib/3.5", paste0("hivEstimatesAccuracy_", version, ".zip")),
           overwrite = TRUE)
 unlink(file.path(repoPath, paste0("hivEstimatesAccuracy_", version, ".zip")))
 
 # Update repo metafiles
 tools::write_PACKAGES(dir = file.path(repoPath, "repo/src/contrib"), type = "source")
-tools::write_PACKAGES(dir = file.path(repoPath, "repo/bin/windows/contrib/3.4"), type = "win.binary")
+tools::write_PACKAGES(dir = file.path(repoPath, "repo/bin/windows/contrib/3.5"), type = "win.binary")
 
 # Update currect version string
 writeLines(version, file.path(repoPath, "version.txt"))
