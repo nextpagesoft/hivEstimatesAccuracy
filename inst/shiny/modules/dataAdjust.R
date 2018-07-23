@@ -212,10 +212,7 @@ dataAdjust <- function(input, output, session, inputData)
       })
     } else {
       task <<- CreateTask(function(x, y) {
-        if (!requireNamespace("hivEstimatesAccuracy", quietly = TRUE)) {
-          devtools::load_all(".")
-        }
-        RunAdjustments(
+        hivEstimatesAccuracy::RunAdjustments(
           data = x,
           adjustmentSpecs = y)
       },
