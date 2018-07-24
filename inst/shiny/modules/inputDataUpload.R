@@ -70,6 +70,18 @@ inputDataUploadUI <- function(id)
           )
         )
       )
+    ),
+    shinyjs::hidden(
+      div(
+        id = ns("migrantBox"),
+        box(
+          width = 12,
+          title = "Migrant variable regrouping",
+          solidHeader = FALSE,
+          status = "warning",
+          collapsible = TRUE
+        )
+      )
     )
   )
 }
@@ -127,9 +139,11 @@ inputDataUpload <- function(input, output, session, appStatus)
     originalData <- originalData()
     if (is.null(originalData)) {
       shinyjs::hide("attrMappingBox", anim = TRUE, animType = "fade")
+      shinyjs::hide("migrantBox", anim = TRUE, animType = "fade")
       # shinyjs::show("introductionBox")
     } else {
       shinyjs::show("attrMappingBox")
+      shinyjs::show("migrantBox")
       # shinyjs::hide("introductionBox", anim = TRUE, animType = "slide", time = 2)
     }
   })
