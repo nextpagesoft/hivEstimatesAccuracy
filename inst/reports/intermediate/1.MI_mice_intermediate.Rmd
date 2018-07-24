@@ -68,12 +68,16 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 
 ## Diagnostic plots for Gender = \"Female\"
 
+Maximum 5 first chains (imputations) are displayed.
+
 **Figure 1. Imputed values plot**<br />
 ```{r}
 print(GetMiceDiagnosticPlot(params$InputData$Artifacts$F$Mids))
 ```
 
 ## Diagnostic plots for Gender = \"Male\"
+
+Maximum 5 first chains (imputations) are displayed.
 
 **Figure 2. Imputed values plot**<br />
 ```{r}
