@@ -145,7 +145,7 @@ dataAdjust <- function(input, output, session, inputData)
       showModal(modalDialog(
         title = "Edit adjustment parameters",
         uiOutput(ns("adjustmentParams")),
-        easyClose = TRUE,
+        easyClose = FALSE,
         footer = tagList(
           actionButton(ns("paramsDlgCancel"), "Cancel"),
           actionButton(ns("paramsDlgOk"), "OK")
