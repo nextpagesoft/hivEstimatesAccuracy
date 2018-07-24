@@ -1,6 +1,6 @@
 list(
   # Adjustment name ----
-  Name = "Multiple Imputations (jomo)",
+  Name = "Joint Modelling Multiple Imputation",
 
   # Adjustment type ----
   Type = "MULTIPLE_IMPUTATIONS",

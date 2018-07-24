@@ -1,6 +1,6 @@
 list(
   # Adjustment name ----
-  Name = "Multiple Imputations (mice)",
+  Name = "Multiple Imputation using Chained Equations - MICE",
 
   # Adjustment type ----
   Type = "MULTIPLE_IMPUTATIONS",
