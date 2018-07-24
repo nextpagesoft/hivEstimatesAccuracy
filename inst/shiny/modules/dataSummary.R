@@ -1,5 +1,5 @@
 # Module globals
-# NONE
+currYear <- year(Sys.time())
 
 # User interface
 dataSummaryUI <- function(id)
@@ -19,7 +19,7 @@ dataSummaryUI <- function(id)
         label = h3("Filter data on year of diagnosis"),
         min = 1980,
         max = 2025,
-        value = c(1980, 2025),
+        value = c(2000, currYear),
         step = 1,
         sep = "",
         width = "600px",
