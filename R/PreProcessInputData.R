@@ -127,7 +127,6 @@ PreProcessInputData <- function(inputData)
   # Update if 'ABROAD' with Region of Nationality
   inputData[FullMigr %chin% "ABROAD" & !is.na(RegionOfNationality) & !CountryOfNationality %chin% ReportingCountry,
             FullMigr := RegionOfNationality]
-  inputData[, FullMigr := factor(FullMigr)]
 
   # Create Migr variable 1, 2, 3...
   inputData[, Migr := factor(NA, levels = c("Reporting Country", "Other Country", "SSA"))]

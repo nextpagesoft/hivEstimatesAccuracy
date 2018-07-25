@@ -30,6 +30,11 @@ if (attrMappingStatus$Valid) {
 }
 
 if (!is.null(inputData)) {
+  # Apply FullMigr mapping
+  distr <- GetOriginDistribution(inputData$Table)
+  map <- GetOriginGroupingMap(migrMappingType, distr)
+  inputData <- ApplyOriginGroupingMap(inputData, map)
+
   # Get "Summary" page plots (optionally)
   summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
 

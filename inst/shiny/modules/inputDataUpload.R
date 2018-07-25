@@ -1,3 +1,7 @@
+# Load application modules
+modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
+source(file.path(modulesPath, "inputDataUpload-Migrant.R"))
+
 # User interface
 inputDataUploadUI <- function(id)
 {
@@ -73,40 +77,8 @@ inputDataUploadUI <- function(id)
     ),
     shinyjs::hidden(
       div(
-        id = ns("migrantBox"),
-        box(
-          width = 12,
-          title = "Migrant variable regrouping",
-          solidHeader = FALSE,
-          status = "warning",
-          collapsible = TRUE,
-          fluidRow(
-            column(
-              4,
-              p(HTML("Distribution of region of origin:<br /><small>All regions in dataset in descending frequency</small>")),
-              tableOutput(ns("regionOfOriginTable"))
-            ),
-            column(
-              4,
-              # tags$table(
-              #   id = ns("migrant4TableDiv"),
-              #   tags$thead(
-              #     tags$tr(
-              #       tags$th("Region", class = ns("attrNameCol")),
-              #       tags$th("Count")
-              #     )
-              #   ),
-              #   tags$tbody(
-              #     tags$tr(
-              #       tags$td("REPCOUNTRY"),
-              #       tags$td(10)
-              #     )
-              #   )
-              # ),
-              uiOutput(ns("migrant4TableDiv"))
-            )
-          )
-        )
+        id = ns("migrantModule"),
+        inputDataUploadMigrantUI(ns("migrant"))
       )
     )
   )
@@ -165,11 +137,11 @@ inputDataUpload <- function(input, output, session, appStatus)
     originalData <- originalData()
     if (is.null(originalData)) {
       shinyjs::hide("attrMappingBox", anim = TRUE, animType = "fade")
-      shinyjs::hide("migrantBox", anim = TRUE, animType = "fade")
+      shinyjs::hide("migrantModule", anim = TRUE, animType = "fade")
       # shinyjs::show("introductionBox")
     } else {
       shinyjs::show("attrMappingBox")
-      shinyjs::show("migrantBox")
+      shinyjs::show("migrantModule")
       # shinyjs::hide("introductionBox", anim = TRUE, animType = "slide", time = 2)
     }
   })
@@ -394,8 +366,8 @@ inputDataUpload <- function(input, output, session, appStatus)
     })
   })
 
-  observeEvent(c(vals$InputDataTestStatus$Valid,
-                 vals$AttrMappingStatus$Valid), {
+  observeEvent(
+    c(vals$InputDataTestStatus$Valid, vals$AttrMappingStatus$Valid), {
     if (is.null(vals$AttrMappingStatus) | is.null(vals$InputDataTestStatus)) {
       inputData(NULL)
       appStatus$AttributeMappingValid <- FALSE
@@ -408,24 +380,7 @@ inputDataUpload <- function(input, output, session, appStatus)
     }
   })
 
-  output[["regionOfOriginTable"]] <- renderTable({
-    inputData <- req(inputData())
+  inputDataWithMapping <- callModule(inputDataUploadMigrant, "migrant", inputData)
 
-    isolate({
-      dt <- inputData$Table
-      distr <- dt[, .(Count = .N), by = .(RegionOfOrigin)]
-      distr[is.na(RegionOfOrigin), RegionOfOrigin := "UNKNOWN"]
-      distr[order(-Count)]
-    })
-  })
-
-  output[["migrant4TableDiv"]] <- renderUI({
-    inputData <- req(inputData())
-
-    isolate({
-      p("Placeholder for grouping UI")
-    })
-  })
-
-    return(inputData)
+  return(inputDataWithMapping)
 }
