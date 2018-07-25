@@ -79,7 +79,33 @@ inputDataUploadUI <- function(id)
           title = "Migrant variable regrouping",
           solidHeader = FALSE,
           status = "warning",
-          collapsible = TRUE
+          collapsible = TRUE,
+          fluidRow(
+            column(
+              4,
+              p(HTML("Distribution of region of origin:<br /><small>All regions in dataset in descending frequency</small>")),
+              tableOutput(ns("regionOfOriginTable"))
+            ),
+            column(
+              4,
+              # tags$table(
+              #   id = ns("migrant4TableDiv"),
+              #   tags$thead(
+              #     tags$tr(
+              #       tags$th("Region", class = ns("attrNameCol")),
+              #       tags$th("Count")
+              #     )
+              #   ),
+              #   tags$tbody(
+              #     tags$tr(
+              #       tags$td("REPCOUNTRY"),
+              #       tags$td(10)
+              #     )
+              #   )
+              # ),
+              uiOutput(ns("migrant4TableDiv"))
+            )
+          )
         )
       )
     )
@@ -382,5 +408,24 @@ inputDataUpload <- function(input, output, session, appStatus)
     }
   })
 
-  return(inputData)
+  output[["regionOfOriginTable"]] <- renderTable({
+    inputData <- req(inputData())
+
+    isolate({
+      dt <- inputData$Table
+      distr <- dt[, .(Count = .N), by = .(RegionOfOrigin)]
+      distr[is.na(RegionOfOrigin), RegionOfOrigin := "UNKNOWN"]
+      distr[order(-Count)]
+    })
+  })
+
+  output[["migrant4TableDiv"]] <- renderUI({
+    inputData <- req(inputData())
+
+    isolate({
+      p("Placeholder for grouping UI")
+    })
+  })
+
+    return(inputData)
 }
