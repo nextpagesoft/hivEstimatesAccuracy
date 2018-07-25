@@ -24,6 +24,8 @@ createReportsUI <- function(id)
 # Server logic
 createReports <- function(input, output, session, adjustedData)
 {
+  ns <- session$ns
+
   # Store reactive values
   vals <- reactiveValues(selectedReportName = NULL,
                          reportParamsWidgets = list(),
@@ -32,7 +34,6 @@ createReports <- function(input, output, session, adjustedData)
   # Output reports selection
   output[["reportSelection"]] <- renderUI({
     isolate({
-      ns <- session$ns
 
       # Get adjustment list
       reportSelection <- fluidRow(
@@ -56,22 +57,17 @@ createReports <- function(input, output, session, adjustedData)
 
   # Get selected report name on change
   observeEvent(input[["select"]], {
-    ns <- session$ns
-    if (input$select != "") {
-      vals$selectedReportName <- input$select
-      if (vals$selectedReportName != "") {
-        reportFileName <- reportFileNames[vals$selectedReportName]
-        if (file.exists(reportFileName)) {
-          reportMdLines <- readLines(reportFileName, warn = FALSE)
-          paramSpecs <- knitr::knit_params(reportMdLines)
+    vals$selectedReportName <- req(input$select)
+    reportFileName <- reportFileNames[vals$selectedReportName]
+    if (file.exists(reportFileName)) {
+      reportMdLines <- readLines(reportFileName, warn = FALSE)
+      paramSpecs <- knitr::knit_params(reportMdLines)
 
-          vals$reportParamsWidgets <-
-            GetParamWidgets(paramSpecs,
-                            params = vals$reportParams[[vals$selectedReportName]],
-                            skipParamNames = skipWidgetParamNames,
-                            ns = ns)
-        }
-      }
+      vals$reportParamsWidgets <-
+        GetParamWidgets(paramSpecs,
+                        params = vals$reportParams[[vals$selectedReportName]],
+                        skipParamNames = skipWidgetParamNames,
+                        ns = ns)
     }
   })
 
@@ -82,12 +78,10 @@ createReports <- function(input, output, session, adjustedData)
 
   # EVENT: Button "Open parameters dialog" clicked
   observeEvent(input[["openParamsDlg"]], {
-    ns <- session$ns
-
     showModal(modalDialog(
       title = "Edit report parameters",
       uiOutput(ns("reportParams")),
-      easyClose = TRUE,
+      easyClose = FALSE,
       footer = tagList(
         modalButton("Cancel"),
         actionButton(ns("paramsDlgOk"), "OK")
