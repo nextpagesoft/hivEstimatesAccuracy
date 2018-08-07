@@ -33,8 +33,8 @@ list(
   RegionOfOrigin = list(
     description = "Region of origin of patient.",
     type = "character",
-    values = c("", "UNK", "Unk", "ABROAD", "AUSTNZ", "CAR", "CENTEUR", "EASTASIAPAC", "EASTEUR", "EUROPE", "LATAM",
-               "NORTHAFRMIDEAST", "NORTHAM", "REPCOUNTRY", "SOUTHASIA", "SUBAFR", "WESTEUR")
+    values = c("", "UNK", "ABROAD", "AUSTNZ", "CAR", "CENTEUR", "EASTASIAPAC", "EASTEUR", "EUROPE",
+               "LATAM", "NORTHAFRMIDEAST", "NORTHAM", "REPCOUNTRY", "SOUTHASIA", "SUBAFR", "WESTEUR")
   ),
   DateOfAIDSDiagnosisYear = list(
     description = "Year of AIDS diagnosis",
