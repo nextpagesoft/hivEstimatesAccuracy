@@ -14,7 +14,7 @@ if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"
 }
 attrMappingStatus <- GetAttrMappingStatus(attrMapping)
-if (attrMappingStatus$Valid) {
+if (attrMappingStatus[["Valid"]]) {
   inputDataTest <- ApplyAttributesMapping(originalData,
                                           attrMapping,
                                           GetPreliminaryDefaultValues())
