@@ -60,6 +60,7 @@ RenderReportToFile <- function(filePath, format = "html_fragment", outDir = NULL
     destFileName <- file.path(outDir, basename(reportFileName))
     file.copy(reportFileName, destFileName, overwrite = TRUE)
     unlink(reportFileName)
+    reportFileName <- destFileName
   }
 
   return(reportFileName)
