@@ -1,4 +1,10 @@
-Version 0.9.9 (2018/07/)
+Version 0.9.10 (2018/07/)
+------------------------------------------------------------------------------
+
+* Under development
+
+
+Version 0.9.9 (2018/07/25)
 ------------------------------------------------------------------------------
 
 * Default selected years in summary page are 2000 and current year.
@@ -6,6 +12,7 @@ Version 0.9.9 (2018/07/)
 * Adjustments renamed.
 * Maximum number of mice chains increased to 5. Text added in the intermediate
   report.
+* Interface and processing of grouping of FullMigr implemented.
 
 
 Version 0.9.8 (2018/07/23)
