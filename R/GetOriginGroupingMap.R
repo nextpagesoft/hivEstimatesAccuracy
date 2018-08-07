@@ -21,6 +21,7 @@ GetOriginGroupingMap <- function(type, distr) {
     "REPCOUNTRY + UNK + OTHER" = ,
     "REPCOUNTRY + UNK + 4 most prevalent other regions" = {
       c(REPCOUNTRY      = "REPCOUNTRY",
+        ABROAD          = "OTHER",
         SUBAFR          = "OTHER",
         WESTEUR         = "OTHER",
         CENTEUR         = "OTHER",
@@ -37,6 +38,7 @@ GetOriginGroupingMap <- function(type, distr) {
     "REPCOUNTRY + UNK + SUBAFR + OTHER" = {
       c(REPCOUNTRY      = "REPCOUNTRY",
         SUBAFR          = "SUBAFR",
+        ABROAD          = "OTHER",
         WESTEUR         = "OTHER",
         CENTEUR         = "OTHER",
         EASTEUR         = "OTHER",
