@@ -9,7 +9,7 @@ library(ggplot2)
 stratSep <- "_"
 
 # Stratifiation columns
-stratVarNames <- c("Gender", "Transmission", "Migr")
+stratVarNames <- c("Gender", "Transmission", "GroupedRegionOfOrigin")
 
 # Start year
 startYear <- 2000L

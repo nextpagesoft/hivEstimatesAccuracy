@@ -64,7 +64,7 @@ list(
       # Define covariates
       xColNamesAll <- c("AIDS")
       # Define outcomes
-      yColNamesAll <- c("Age", "SqCD4", "Transmission", "Migr")
+      yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
 
       # Determine which columns to pass to the jomo package
 

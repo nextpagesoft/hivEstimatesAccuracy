@@ -30,7 +30,7 @@ if (attrMappingStatus[["Valid"]]) {
 }
 
 if (!is.null(inputData)) {
-  # Apply FullMigr mapping
+  # Apply GroupedRegionOfOrigin mapping
   distr <- GetOriginDistribution(inputData$Table)
   map <- GetOriginGroupingMap(migrMappingType, distr)
   inputData <- ApplyOriginGroupingMap(inputData, map)

@@ -40,7 +40,7 @@ params$InputData$Artifacts$OutputPlotStrat$Transmission
 
 ```
 
-```{r, fig.width = 10, fig.height = calcFigHeight("Migr"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Migr)}}
+```{r, fig.width = 10, fig.height = calcFigHeight("GroupedRegionOfOrigin"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin)}}
 params$InputData$Artifacts$OutputPlotStrat$Migr
 ```
 

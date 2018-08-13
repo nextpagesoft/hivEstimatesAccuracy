@@ -68,7 +68,7 @@ list(
       stratVarNames <- union(stratVarNames, "Transmission")
     }
     if (parameters$stratMigr) {
-      stratVarNames <- union(stratVarNames, "Migr")
+      stratVarNames <- union(stratVarNames, "GroupedRegionOfOrigin")
     }
     stratVarNames <- stratVarNames[stratVarNames %in% colnames(outputData)]
 

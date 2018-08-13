@@ -4,15 +4,15 @@
 \alias{GetMissingnessPlots}
 \title{GetMissingnessPlots}
 \usage{
-GetMissingnessPlots(inputData, columnNames = c("Transmission", "Migr",
-  "Age", "FirstCD4Count"), labels = c("Transm.", "Migrant", "Age",
-  "CD4"))
+GetMissingnessPlots(inputData, columnNames = c("Transmission",
+  "GroupedRegionOfOrigin", "Age", "FirstCD4Count"), labels = c("Transm.",
+  "Migrant", "Age", "CD4"))
 }
 \arguments{
 \item{inputData}{Pre-processed input data. Required.}
 
 \item{columnNames}{Names of columns in \code{inputData} selected for missingness plot. Optional.
-Default = \code{c("Transmission", "Migr", "Gender", "Age", "FirstCD4Count")}}
+Default = \code{c("Transmission", "GroupedRegionOfOrigin", "Gender", "Age", "FirstCD4Count")}}
 
 \item{labels}{Labels to be displayed instead of strings in \code{columnNames}. Optional.
 Default = \code{c("Transm.", "Migrant", "Gender", "Age", "CD4")}}

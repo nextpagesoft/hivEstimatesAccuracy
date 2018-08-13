@@ -47,7 +47,7 @@ PreProcessInputData <- function(inputData)
   inputData[!is.na(CountryOfNationality) & CountryOfNationality %chin% ReportingCountry,
             RegionOfNationality := "REPCOUNTRY"]
 
-  # Create detailed 'Migrant' variable: FullMigr based on Region Of Origin
+  # Create detailed 'Migrant' variable: FullRegionOfOrigin based on Region Of Origin
   inputData[, FullRegionOfOrigin := RegionOfOrigin]
 
   # Update if missing with Region of Birth

@@ -8,7 +8,7 @@
 #' @return NULL
 #'
 #' @examples
-#' distr <- data.table::data.table(FullMigr = c("REPCOUNTRY", "SUBAFR"), Count = c(1536, 2237))
+#' distr <- data.table::data.table(FullRegionOfOrigin = c("REPCOUNTRY", "SUBAFR"), Count = c(1536, 2237))
 #' GetOriginGroupingMap(
 #'   type = "REPCOUNTRY + UNK + 4 most prevalent other regions",
 #'   distr = distr
@@ -55,13 +55,17 @@ GetOriginGroupingMap <- function(type, distr) {
   )
 
   map <- as.data.table(map, keep.rownames = TRUE)
-  setnames(map, c("FullMigr", "GroupOfOrigin"))
+  setnames(map, c("FullRegionOfOrigin", "GroupedRegionOfOrigin"))
 
   if (type == "REPCOUNTRY + UNK + 4 most prevalent other regions") {
-    sepRegions <- head(distr[!FullMigr %chin% c("REPCOUNTRY", "UNK"),
-                             FullMigr], 3)
-    map[FullMigr %chin% sepRegions, GroupOfOrigin := FullMigr]
+    sepRegions <- head(distr[!FullRegionOfOrigin %chin% c("REPCOUNTRY", "UNK"),
+                             FullRegionOfOrigin], 3)
+    map[FullRegionOfOrigin %chin% sepRegions,
+        GroupedRegionOfOrigin := FullRegionOfOrigin]
   }
+
+  map[, GroupedRegionOfOrigin := factor(GroupedRegionOfOrigin,
+                                        levels = unique(GroupedRegionOfOrigin))]
 
   return(map)
 }

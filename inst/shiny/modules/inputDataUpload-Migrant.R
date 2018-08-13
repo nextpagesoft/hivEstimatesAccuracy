@@ -6,14 +6,14 @@ groupingNames <-
 GetGroupingTable <- function(type, distr, map) {
   groupDistr <- merge(distr, map, all.x = TRUE)
   groupDistr <- groupDistr[, .(
-    RegionOfOrigin = paste(FullMigr, collapse = ", "),
+    FullRegionOfOrigin = paste(FullRegionOfOrigin, collapse = ", "),
     Count = sum(Count)
-    ), by = GroupOfOrigin]
+    ), by = GroupedRegionOfOrigin]
   groupDistr <- groupDistr[order(-Count)]
-  groupDistr <- rbind(groupDistr[GroupOfOrigin == "REPCOUNTRY"],
-                      groupDistr[!GroupOfOrigin %chin% c("REPCOUNTRY", "UNK", "OTHER")],
-                      groupDistr[GroupOfOrigin == "OTHER"],
-                      groupDistr[GroupOfOrigin == "UNK"])
+  groupDistr <- rbind(groupDistr[GroupedRegionOfOrigin == "REPCOUNTRY"],
+                      groupDistr[!GroupedRegionOfOrigin %chin% c("REPCOUNTRY", "UNK", "OTHER")],
+                      groupDistr[GroupedRegionOfOrigin == "OTHER"],
+                      groupDistr[GroupedRegionOfOrigin == "UNK"])
   return(groupDistr)
 }
 
@@ -41,7 +41,7 @@ inputDataUploadMigrantUI <- function(id)
             8,
             selectInput(ns("groupSelect"),
                         width = "400px",
-                        label = "Regrouping options",
+                        label = "Grouping options",
                         choices = groupingNames,
                         selected = 0,
                         selectize = TRUE),

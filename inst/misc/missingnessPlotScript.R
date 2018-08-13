@@ -1,5 +1,5 @@
 library(data.table)
-colNames <- c("FirstCD4Count", "Transmission", "Migr", "Age", "Gender")
+colNames <- c("FirstCD4Count", "Transmission", "GroupedRegionOfOrigin", "Age", "Gender")
 
 getRelFreq <- function(x) sum(x) / length(x)
 isMissing <- function(x) as.integer(is.na(x))

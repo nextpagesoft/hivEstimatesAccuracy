@@ -19,9 +19,9 @@ ApplyOriginGroupingMap <- function(inputData, map)
   inputData$Table <- merge(inputData$Table,
                            map,
                            all.x = TRUE,
-                           by = "FullMigr",
+                           by = "FullRegionOfOrigin",
                            sort = FALSE)
-  setcolorder(inputData$Table, c(oldColOrder, "GroupOfOrigin"))
+  setcolorder(inputData$Table, c(oldColOrder, "GroupedRegionOfOrigin"))
 
   return(inputData)
 }

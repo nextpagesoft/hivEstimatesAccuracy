@@ -4,7 +4,7 @@
 #'
 #' @param inputData Pre-processed input data. Required.
 #' @param columnNames Names of columns in \code{inputData} selected for missingness plot. Optional.
-#'   Default = \code{c("Transmission", "Migr", "Gender", "Age", "FirstCD4Count")}
+#'   Default = \code{c("Transmission", "GroupedRegionOfOrigin", "Gender", "Age", "FirstCD4Count")}
 #' @param labels Labels to be displayed instead of strings in \code{columnNames}. Optional.
 #'   Default = \code{c("Transm.", "Migrant", "Gender", "Age", "CD4")}
 #'
@@ -18,7 +18,7 @@
 #' @export
 GetMissingnessPlots <- function(
   inputData,
-  columnNames = c("Transmission", "Migr", "Age", "FirstCD4Count"),
+  columnNames = c("Transmission", "GroupedRegionOfOrigin", "Age", "FirstCD4Count"),
   labels = c("Transm.", "Migrant", "Age", "CD4")
 )
 {
