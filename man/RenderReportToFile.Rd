@@ -4,7 +4,8 @@
 \alias{RenderReportToFile}
 \title{RenderReportToFile}
 \usage{
-RenderReportToFile(filePath, format = "html_fragment", outDir = NULL, ...)
+RenderReportToFile(filePath, format = "html_fragment", outDir = NULL,
+  ...)
 }
 \arguments{
 \item{filePath}{Path to the source RMarkdown file. Required.}

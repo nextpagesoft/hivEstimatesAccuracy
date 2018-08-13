@@ -4,7 +4,8 @@
 \alias{RenderReportForAdjSpec}
 \title{RenderReportForAdjSpec}
 \usage{
-RenderReportForAdjSpec(adjustmentSpec, fileNameSuffix = "", params = NULL)
+RenderReportForAdjSpec(adjustmentSpec, fileNameSuffix = "",
+  params = NULL)
 }
 \arguments{
 \item{adjustmentSpec}{Adjustment specification. Required.}
