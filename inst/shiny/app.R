@@ -10,11 +10,11 @@ if (isServer) {
 }
 
 # Load standard libraries
-library(shiny)
-library(shinydashboard)
-library(shinycssloaders)
-library(ggplot2)
-library(data.table)
+suppressPackageStartupMessages(library(shiny))
+suppressPackageStartupMessages(library(shinydashboard))
+suppressPackageStartupMessages(library(shinycssloaders))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(data.table))
 
 # Load main library
 library(hivEstimatesAccuracy)
