@@ -599,9 +599,10 @@ rdIdx <- which(adjTypes == "REPORTING_DELAYS")[[1]]
 
 fullTableData <- params$AdjustedData[[rdIdx]]$Artifacts$OutputPlotTotalData[, -("EstCountVar")]
 reportedTableData <- fullTableData[Source == "Reported", 
-                                   .(DateOfDiagnosisYear, Reported = Count, EstCount, 
+                                   .(MissingData, DateOfDiagnosisYear, Reported = Count, EstCount, 
                                      LowerEstCount, UpperEstCount)]
-imputedTableData <- fullTableData[Source == "Imputed", .(DateOfDiagnosisYear, Imputed = Count)]
+imputedTableData <- fullTableData[Source == "Imputed", .(MissingData, DateOfDiagnosisYear, 
+                                                         Imputed = Count)]
 
 if (nrow(imputedTableData) > 0) {
   tableData <- merge(reportedTableData,
@@ -609,25 +610,34 @@ if (nrow(imputedTableData) > 0) {
                      by = c("DateOfDiagnosisYear"),
                      all.x = TRUE)
   tableData[, Imputed := na.zero(Imputed)]
-  setcolorder(tableData, c("DateOfDiagnosisYear", "Reported", "Imputed", "EstCount", "LowerEstCount", "UpperEstCount"))
-  tableColNames <- c("Diagnosis<br />year", "Reported", "Imputed", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
+  setcolorder(tableData, c("DateOfDiagnosisYear", "Reported", "Imputed", "EstCount",  
+                           "LowerEstCount", "UpperEstCount"))
+  tableColNames <- c("Diagnosis<br />year", "Reported", "Imputed", "Estimated", 
+                     "Estimated<br />lower bound", "Estimated<br />upper bound")
 } else {
   tableData <- reportedTableData
-  tableColNames <- c("Diagnosis<br />year", "Reported", "Estimated", "Estimated<br />lower bound", "Estimated<br />upper bound")
+  tableColNames <- c("Diagnosis<br />year", "Reported", "Estimated", "Estimated<br />lower bound", 
+                     "Estimated<br />upper bound")
 }
 
-numericCols <- setdiff(colnames(tableData), c("DateOfDiagnosisYear"))
-tableDataTotals <- tableData[, lapply(.SD, sum), .SDcols = numericCols]
+numericCols <- setdiff(colnames(tableData), c("MissingData", "DateOfDiagnosisYear"))
+tableDataTotals <- tableData[, lapply(.SD, sum, na.rm = TRUE), .SDcols = numericCols, by = "MissingData"]
 tableDataTotals[, DateOfDiagnosisYear := "Total"]
 ConvertDataTableColumns(tableData, c(DateOfDiagnosisYear = "character"))
 tableData <- rbind(tableData, 
                    tableDataTotals)
 tableData <- tableData[, (numericCols) := lapply(.SD, formatNumbers), 
                        .SDcols = numericCols]
-setorderv(tableData, "DateOfDiagnosisYear")
-knitr::kable(tableData,
+setorderv(tableData, c("MissingData", "DateOfDiagnosisYear"))
+knitr::kable(tableData[MissingData == FALSE, -("MissingData")],
              align = rep("r", ncol(tableData)),
              col.names = tableColNames)
+
+if (fullTableData[, any(MissingData)]) {
+  cat(sprintf("Weights for %d out of %d records could not be determined due to missingness in the data.", 
+              fullTableData[MissingData == TRUE, sum(Count, na.rm = TRUE)],
+              fullTableData[, sum(Count, na.rm = TRUE)]))
+}
 ```
 
 ```{r, eval = miPresent}
@@ -734,5 +744,5 @@ ggplot(res.list.trans[[1]]) +
 not reliable or causing numerical problems thus they are not shown.* 
 
 ```{r, eval = !miPresent & !rdPresent}
-cat("No adjustments have been performed, threfore no outputs are presented in this section.")
+cat("No adjustments have been performed, therefore no outputs are presented in this section.")
 ```
