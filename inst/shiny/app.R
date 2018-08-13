@@ -30,7 +30,8 @@ source(file.path(modulesPath, "manual.R"))
 
 # App globals
 titleString <- "HIV Estimates Accuracy"
-versionString <- sprintf("v. %s", as.character(packageVersion("hivEstimatesAccuracy")))
+versionString <- sprintf("v. %s", as.character(packageDescription(pkg = "hivEstimatesAccuracy",
+                                                                  fields = "Version")))
 addResourcePath("www", system.file("shiny/www/", package = "hivEstimatesAccuracy"))
 
 # Define application user interface
