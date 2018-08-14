@@ -8,7 +8,9 @@
 #' @return NULL
 #'
 #' @examples
-#' distr <- data.table::data.table(FullRegionOfOrigin = c("REPCOUNTRY", "SUBAFR"), Count = c(1536, 2237))
+#' distr <- data.table::data.table(
+#'   FullRegionOfOrigin = c("REPCOUNTRY", "SUBAFR"),
+#'   Count = c(1536, 2237))
 #' GetOriginGroupingMap(
 #'   type = "REPCOUNTRY + UNK + 4 most prevalent other regions",
 #'   distr = distr

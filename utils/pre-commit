@@ -1,4 +1,4 @@
-#!c:/SoftDevel/R/R-3.5.1/bin/Rscript.exe
+#!c:/SoftDevel/R/R-3.5.1/bin/Rscript.exe --vanilla
 
 # License: CC0 (just be nice and point others to where you got this)
 # Author: Robert M Flight <rflight79@gmail.com>, github.com/rmflight
@@ -32,12 +32,13 @@ if (!is.na(tmpEnv)) {
 }
 
 # Check that there are files that will be committed, don't want to increment version if there won't
-# be a commit
+# be a commit.
 fileDiff <- system("git diff HEAD --name-only", intern = TRUE)
 
 if ((length(fileDiff) > 0) && doIncrement) {
-  currDir <- getwd() # this should be the top level directory of the git repo
-  currDCF <- read.dcf("DESCRIPTION")
+  oldDcfFile <- file("DESCRIPTION", open = "rb", encoding = "UTF-8")
+  currDCF <- read.dcf(oldDcfFile)
+  close(oldDcfFile)
   currVersion <- currDCF[1, "Version"]
   splitVersion <- strsplit(currVersion, "-", fixed = TRUE)[[1]]
   nVer <- length(splitVersion)
@@ -47,8 +48,8 @@ if ((length(fileDiff) > 0) && doIncrement) {
   newVersion <- paste(splitVersion, collapse = "-")
   currDCF[1, "Version"] <- newVersion
   currDCF[1, "Date"] <- as.character(Sys.Date())
-  dcfFile <- file("DESCRIPTION", "wb")
-  write.dcf(currDCF, dcfFile, indent = 4, width = 80)
-  close(dcfFile)
+  newDcfFile <- file("DESCRIPTION", open = "wb", encoding = "UTF-8")
+  write.dcf(currDCF, newDcfFile, indent = 4, width = 80)
+  close(newDcfFile)
   system("git add DESCRIPTION", intern = FALSE)
 }
