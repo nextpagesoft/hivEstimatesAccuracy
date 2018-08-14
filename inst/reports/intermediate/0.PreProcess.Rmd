@@ -1,7 +1,7 @@
 ---
 name: "Pre Process"
 author: "HIV Estimates Accuracy tool"
-title: "Multiple Imputations (mice)"
+title: "Pre-process data"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_fragment:

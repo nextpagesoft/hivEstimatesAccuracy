@@ -20,7 +20,7 @@ if (attrMappingStatus[["Valid"]]) {
                                           GetPreliminaryDefaultValues())
   inputDataTest <- PreProcessInputData(inputData = inputDataTest)
   inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
-  if (inputDataTestStatus$Valid) {
+  if (inputDataTestStatus[["Valid"]]) {
     inputData <- inputDataTest
   } else {
     inputData <- NULL
