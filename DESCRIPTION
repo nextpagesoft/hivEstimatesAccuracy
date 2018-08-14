@@ -1,28 +1,25 @@
 Package: hivEstimatesAccuracy
 Type: Package
 Title: Improves Accuracy of HIV Estimates in EU/EEA Countries
-Version: 0.9.10-9
+Version: 0.9.10-10
 Date: 2018-08-14
-Authors@R: c( person("Daniel", "Lewandowski", email =
-        "daniel@nextpagesoft.net", role = c("aut", "cre")),
-        person("Nikos", "Pantazis", email = "npantaz@med.uoa.gr", role
-        = c("aut")), person("Magdalena", "RosiEska", email =
-        "mrosinska@pzh.gov.pl", role = c("aut", "cph")),
-        person("Janusz", "Janiec", email = "jjaniec@pzh.gov.pl", role =
-        c("aut", "ctb")))
+Authors@R: c(person("Magdalena", "RosiEska", email = "mrosinska@pzh.gov.pl",
+    role = c("aut", "cph")), person("Nikos", "Pantazis", email =
+    "npantaz@med.uoa.gr", role = c("aut")), person("Daniel", "Lewandowski",
+    email = "daniel@nextpagesoft.net", role = c("aut", "cre")),
+    person("Janusz", "Janiec", email = "jjaniec@pzh.gov.pl", role = c("aut",
+    "ctb")))
 Maintainer: Daniel Lewandowski <daniel@nextpagesoft.net>
-Description: Improves the accuracy of HIV estimates in EU/EEA
-        countries.
+Description: Improves the accuracy of HIV estimates in EU/EEA countries.
 License: EUPL-1.2 (file LICENSE)
 Depends: R (>= 3.1.0)
-Imports: callr (>= 2.0.4), data.table (>= 1.11.4), foreign (>= 0.8-70),
-        grid (>= 3.0.0), ggplot2 (>= 3.0.0), graphics (>= 3.0.0), jomo
-        (>= 2.6-2), knitr (>= 1.20), mice (>= 3.1.0), mitools (>= 2.3),
-        quantreg (>= 5.36), parallel (> 3.0.0), readxl (>= 1.1.0),
-        rmarkdown (>= 1.10), scales (>= 0.5.0), shiny (>= 1.1.0),
-        shinycssloaders (>= 0.2.0), shinydashboard (>= 0.7.0), shinyjs
-        (>= 1.0), stats (>= 3.0.0), survival (>= 2.38-2), utils (>=
-        3.0.0), yaml (>= 2.1.19)
+Imports: callr (>= 2.0.4), data.table (>= 1.11.4), foreign (>= 0.8-70), grid
+    (>= 3.0.0), ggplot2 (>= 3.0.0), graphics (>= 3.0.0), jomo (>= 2.6-2), knitr
+    (>= 1.20), mice (>= 3.1.0), mitools (>= 2.3), quantreg (>= 5.36), parallel
+    (> 3.0.0), readxl (>= 1.1.0), rmarkdown (>= 1.10), scales (>= 0.5.0), shiny
+    (>= 1.1.0), shinycssloaders (>= 0.2.0), shinydashboard (>= 0.7.0), shinyjs
+    (>= 1.0), stats (>= 3.0.0), survival (>= 2.38-2), utils (>= 3.0.0), yaml
+    (>= 2.1.19)
 Suggests:
 Encoding: UTF-8
 LazyData: true
