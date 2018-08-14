@@ -28,6 +28,7 @@ dataSummaryUI <- function(id)
       tags$small(textOutput(ns("filterInfo"))),
       tagList(
         uiOutput(ns("missPlotDiv")),
+        uiOutput(ns("missPlotRDOutput")),
         uiOutput(ns("delayDensityOutput")),
         uiOutput(ns("meanDelayOutput"))
       ),
@@ -60,11 +61,11 @@ dataSummary <- function(input, output, session, appStatus, inputData)
 
   output[["missPlotDiv"]] <- renderUI({
     widgets <- tagList()
-    if (appStatus$AttributeMappingValid) {
+    if (appStatus[["AttributeMappingValid"]]) {
       missPlotsTotal <- artifacts()$MissPlotsTotal
       missPlotsByGender <- artifacts()$MissPlotsByGender
       plotCounter <- 0
-      widgets[[length(widgets) + 1]] <- h3("1. Missing data summary")
+      widgets[[length(widgets) + 1]] <- h3("1. Overall missing data summary")
 
       plotCounter <- plotCounter + 1
       widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Total plot", plotCounter))
@@ -107,6 +108,22 @@ dataSummary <- function(input, output, session, appStatus, inputData)
                        widths = c(3, 3, 2))
   })
 
+  output[["missPlotRDOutput"]] <- renderUI({
+    req(appStatus[["AttributeMappingValid"]])
+    req(artifacts()$MissPlotsRD)
+
+    tagList(
+      h3("2. Reporting dates missing data summary"),
+      plotOutput(ns("MissPlotsRD"))
+    )
+  })
+
+  output[["MissPlotsRD"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlotsRD,
+                       cols = 3,
+                       widths = c(3, 3, 2))
+  })
+
   output[["delayDensityOutput"]] <- renderUI({
     if (appStatus$AttributeMappingValid) {
       delayDensFullPlot <- artifacts()$DelayDensFullPlot
@@ -117,7 +134,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h3("2. Observed delay density"),
+        h3("3. Observed delay density"),
         elem
       )
     } else {
@@ -142,7 +159,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h3("3. Observed delay by notification time"),
+        h3("4. Observed delay by notification time"),
         elem
       )
 

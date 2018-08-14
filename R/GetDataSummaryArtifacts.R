@@ -25,6 +25,7 @@ GetDataSummaryArtifacts <- function(inputData)
 
   inputData <- copy(inputData)
 
+  # Generic missingness plots
   missPlotsTotal <- GetMissingnessPlots(inputData)
   inputDataGender <- split(inputData, by = "Gender")
   if (length(inputDataGender) > 0) {
@@ -33,7 +34,14 @@ GetDataSummaryArtifacts <- function(inputData)
     missPlotsByGender <- NULL
   }
 
-  # New stuff
+  # Reporting delays missingness plots
+  missPlotsRD <-
+    GetMissingnessPlots(inputData,
+                        columnNames = c("DateOfDiagnosisYear", "DateOfDiagnosisQuarter",
+                                        "DateOfNotificationYear", "DateOfNotificationQuarter"),
+                        labels = c("Diag. year", "Diag. quarter", "Notif. year", "Notif. quarter"))
+
+  # Observed delay distribution
   inputData[, ":="(
     NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
     DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
@@ -41,7 +49,6 @@ GetDataSummaryArtifacts <- function(inputData)
   inputData[, VarX := 4 * (NotificationTime - DiagnosisTime)]
   inputData[VarX < 0, VarX := NA]
 
-  # Observed delay distribution
   if (!all(is.na(inputData$VarX))) {
     quant95 <- quantile(inputData$VarX, probs = 0.95, na.rm = TRUE)
     quant99 <- quantile(inputData$VarX, probs = 0.99, na.rm = TRUE)
@@ -140,6 +147,7 @@ GetDataSummaryArtifacts <- function(inputData)
 
   return(list(MissPlotsTotal = missPlotsTotal,
               MissPlotsByGender = missPlotsByGender,
+              MissPlotsRD = missPlotsRD,
               DelayDensFullPlot = delayDensFullPlot,
               DelayDensShortPlot = delayDensShortPlot,
               MeanDelayPlot = meanDelayPlot))
