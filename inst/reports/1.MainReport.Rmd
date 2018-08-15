@@ -78,7 +78,10 @@ colNamesMappingTable <-
 
 ```{r functions, eval = TRUE, include = FALSE}
 # Returns Median (IQR) as string
-mediqr <- function(v, digits = 0) {
+mediqr <- function(
+  v, 
+  digits = 0
+) {
   med <- quantile(v, na.rm = TRUE, probs = 0.5)
   q1  <- quantile(v, na.rm = TRUE, probs = 0.25)
   q3  <- quantile(v, na.rm = TRUE, probs = 0.75)
@@ -329,6 +332,40 @@ ModelTransmissionData <- function(data) {
   return(list(Wide = wide, 
               Pred = pred))
 }
+
+GetMedianCD4Adaptive <- function(
+  data,
+  byvar
+) {
+  distr <- data[, .(Count = .N), by = c(byvar)]
+  distr[, Total := sum(Count)]
+  distr[, Perc := Count / Total]
+  
+  thresholds <- c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
+  result <- list()
+  for (threshold in thresholds) {
+    badCategories <- distr[Perc < threshold, unique(get(byvar))]
+    badIds <- data[get(byvar) %in% badCategories, unique(id)]
+    reduced_data_mi <- data[!id %in% badIds]
+    reduced_data_mi[, (byvar) := droplevels(get(byvar))]
+
+    result <- suppressWarnings(try(mimediqrcd4(vvar = "SqCD4", 
+                                               data = reduced_data_mi, 
+                                               byvar = byvar),
+                                   silent = TRUE))
+    if (!inherits(result, "try-error")) {
+      if (length(badCategories) > 0) {
+        result[["Message"]] <- sprintf("<p>Persons which were %s anywhere (i.e. even in one imputed dataset) are removed. Threshold of %2.2f%% of count per category within the dataset was applied.</p>",
+                                       paste(colNamesMapping[as.character(badCategories)], 
+                                             collapse = ", "),
+                                       threshold * 100)
+      }
+      break
+    }
+  }
+  
+  return(result) 
+}
 ```
 
 ```{r, eval = TRUE, include = FALSE}
@@ -405,18 +442,26 @@ data[Transmission %in% c(NA, "NA", ""), Transmission := "Missing"]
 data_orig <- subset(data, Imputation == 0L)
 data_orig[, ':='(
   CD4 = SqCD4^2,
-  Transmission = factor(Transmission)
+  Transmission = factor(Transmission),
+  Gender = factor(Gender)
 )]
 
 # MI data
 data_mi <- subset(data, Imputation != 0L)
-data_mi[, Transmission := factor(Transmission)]
+data_mi[, ':='(
+  Transmission = factor(Transmission),
+  Gender = factor(Gender)
+)]
 
 # B. Collapsed data for Poisson regressions ---
 
 # Unadjusted
-temp_data_orig_gender <- data_orig[, .(Count = .N), by = .(DateOfDiagnosisYear, Gender)]
-temp_data_orig_transmission <- data_orig[, .(Count = .N), by = .(DateOfDiagnosisYear, Transmission)]
+temp_data_orig_gender <- 
+  data_orig[, .(Count = .N), 
+            by = .(DateOfDiagnosisYear, Gender)]
+temp_data_orig_transmission <- 
+  data_orig[, .(Count = .N), 
+            by = .(DateOfDiagnosisYear, Transmission)]
 
 # Adjusted
 temp_data_mi_gender <- 
@@ -443,25 +488,11 @@ if (cd4Present) {
               by = .(DateOfDiagnosisYear, Transmission)][, max(MaxMedian, na.rm = TRUE)]
 
   if (miPresent) {
-    res.list.gender <- mimediqrcd4(vvar = "SqCD4", data = data_mi, byvar = "Gender")
-    
     # Quantile regressions not possible with rare categories and discrete time extrapolated - dodgy 
     # results from quantile regressions with rare categories and smoothed time rare categories 
     # removed.
-
-    # Removing persons which were MTCT or TRANSFU anywhere (i.e. even in one imputed dataset)
-    distr <- data_mi[, .(Count = .N), by = .(Transmission)]
-    distr[, Total := sum(Count)]
-    distr[, Perc := Count / Total]
-    badCategories <- distr[Perc < 0.05, unique(Transmission)]
-    if (length(badCategories) > 0) {
-      cat(sprintf("<p>Removing persons which were %s anywhere (i.e. even in one imputed dataset)</p>",
-                  paste(badCategories, collapse = ", ")))
-    }
-    badIds <- data_mi[Transmission %chin% badCategories, unique(id)]
-    reduced_data_mi <- data_mi[!id %in% badIds]
-    reduced_data_mi[, Transmission := droplevels(Transmission)]
-    res.list.trans <- mimediqrcd4(vvar = "SqCD4", data = reduced_data_mi, byvar = "Transmission")
+    res.list.gender <- GetMedianCD4Adaptive(data_mi, byvar = "Gender")
+    res.list.trans <- GetMedianCD4Adaptive(data_mi, byvar = "Transmission")
 
     maxMIGender <- res.list.gender[[1]][, max(q1, na.rm = TRUE)]
     maxMITrans <- res.list.trans[[1]][, max(q1, na.rm = TRUE)]
@@ -698,6 +729,9 @@ cat("## Median CD4 after adjustment")
 outputIdx <- outputIdx + 1
 table6 <- res.list.gender[[2]]
 cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by gender**", outputIdx))
+if (!is.null(res.list.gender[["Message"]])) {
+  cat(res.list.gender[["Message"]])
+}
 knitr::kable(table6, row.names = FALSE, align = rep("r", ncol(table6)))
 
 cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by gender**<br />", outputIdx))
@@ -719,8 +753,11 @@ ggplot(res.list.gender[[1]]) +
 
 ```{r, eval = miPresent & cd4Present}
 outputIdx <- outputIdx + 1
-cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**", outputIdx))
 table7 <- res.list.trans[[2]]
+cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**", outputIdx))
+if (!is.null(res.list.trans[["Message"]])) {
+  cat(res.list.trans[["Message"]])
+}
 knitr::kable(table7, row.names = FALSE, align = rep("r", ncol(table7)))
 
 cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
@@ -739,9 +776,6 @@ ggplot(res.list.trans[[1]]) +
   theme(axis.text.x = element_text(size = 8),
         axis.text.y = element_text(size = 8))
 ```
-
-*Results on CD4 cell count for transmission categories with very low number of cases were either 
-not reliable or causing numerical problems thus they are not shown.* 
 
 ```{r, eval = !miPresent & !rdPresent}
 cat("No adjustments have been performed, therefore no outputs are presented in this section.")
