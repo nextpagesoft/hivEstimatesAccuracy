@@ -1,8 +1,9 @@
-Version 0.9.10 (2018/07/)
+Version 0.9.10 (2018/08/)
 ------------------------------------------------------------------------------
 
 * Do no filter records in RD adjustment
 * New naming convention for migrant variables
+* RD missingness plot
 *
 
 

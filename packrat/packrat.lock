@@ -129,8 +129,8 @@ Requires: stringr
 
 Package: fansi
 Source: CRAN
-Version: 0.2.3
-Hash: ea2d591618224c56c8d5befde9af822b
+Version: 0.3.0
+Hash: 8d0a24d8245abbfa2b030460734495ab
 
 Package: forcats
 Source: CRAN
@@ -418,8 +418,8 @@ Hash: d093478ac90064e670cd4bf1a99b47b6
 
 Package: stringi
 Source: CRAN
-Version: 1.2.3
-Hash: bccbb90bf5e1c53f659359c06c0dde79
+Version: 1.2.4
+Hash: 03ab60ef7fa4627b38ad67c95ce6b04c
 
 Package: stringr
 Source: CRAN
