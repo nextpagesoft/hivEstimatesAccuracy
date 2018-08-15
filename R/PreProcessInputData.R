@@ -75,17 +75,17 @@ PreProcessInputData <- function(inputData)
   # ...based on RegionOfOrigin if not NA
   inputData[is.na(GroupOfOrigin) & !is.na(RegionOfOrigin),
             GroupOfOrigin := ifelse(RegionOfOrigin == "REPCOUNTRY", 1L,
-                                    ifelse(!RegionOfOrigin %in% "SUBAFR", 2L,
+                                    ifelse(!RegionOfOrigin %chin% "SUBAFR", 2L,
                                            3L))]
   # ...based on CountryOfBirth if not NA
   inputData[is.na(GroupOfOrigin) & !is.na(CountryOfBirth),
             GroupOfOrigin := ifelse(CountryOfBirth == ReportingCountry, 1L,
-                                    ifelse(!CountryOfBirth %in% ssaCountryCodes, 2L,
+                                    ifelse(!CountryOfBirth %chin% ssaCountryCodes, 2L,
                                            3L))]
   # ...based on CountryOfNationality if not NA
   inputData[is.na(GroupOfOrigin) & !is.na(CountryOfNationality),
             GroupOfOrigin := ifelse(CountryOfNationality == ReportingCountry, 1L,
-                                    ifelse(!CountryOfNationality %in% ssaCountryCodes, 2L,
+                                    ifelse(!CountryOfNationality %chin% ssaCountryCodes, 2L,
                                            3L))]
 
   # Transform CD4
@@ -97,11 +97,8 @@ PreProcessInputData <- function(inputData)
                                            "AIDS-Yes", "AIDS-No"),
                                     "AIDS-No"))]
 
-  # Transform Transmission
-  inputData[, Transmission := factor(Transmission)]
-
   # Imput Gender
-  selGenderMissing1 <- inputData[, is.na(Gender) & Transmission %in% "MSM"]
+  selGenderMissing1 <- inputData[, is.na(Gender) & Transmission %chin% "MSM"]
   inputData[selGenderMissing1, Gender := "M"]
 
   # A single imputation based on categorical year and transmission
@@ -112,6 +109,10 @@ PreProcessInputData <- function(inputData)
   miceImputation <- mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE)
   inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
   inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
+
+  # Transform columns to factor
+  inputData[, Gender := factor(Gender)]
+  inputData[, Transmission := factor(Transmission)]
 
   results <- list(Table = inputData,
                   Artifacts = list(MissGenderReplaced = sum(selGenderMissing1),
