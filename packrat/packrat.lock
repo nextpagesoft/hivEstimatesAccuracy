@@ -104,11 +104,6 @@ Source: CRAN
 Version: 1.11.4
 Hash: d8736a5fe41e5ebef191c43f5e22652f
 
-Package: dichromat
-Source: CRAN
-Version: 2.0-0
-Hash: 08eed0c80510af29bb15f840ccfe37ce
-
 Package: digest
 Source: CRAN
 Version: 0.6.15
