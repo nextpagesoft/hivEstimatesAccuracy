@@ -19,7 +19,7 @@
 #' @importFrom shiny HTML
 #' @importFrom stats setNames lowess quantile sd var acf
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
-#' @importFrom utils unzip
+#' @importFrom utils unzip head
 #'
 NULL
 
