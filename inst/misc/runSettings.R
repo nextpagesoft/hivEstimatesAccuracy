@@ -1,7 +1,7 @@
 # 1. INPUT DATA ------------------------------------------------------------------------------------
 # Set path to the input data file
-inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL.csv"
-# inputDataFilePath <- "/media/sf_VirtualBox_SharedDrive/dummy_miss1.zip"
+# inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL.csv"
+inputDataFilePath <- "/media/sf_VirtualBox_Share/EL2.csv"
 
 # 2. ADJUSTMENTS SELECTION -------------------------------------------------------------------------
 # Select adjustments to perform. Order is important. Available adjustment names:
@@ -9,8 +9,8 @@ inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL
 # b) " Multiple Imputation using Chained Equations - MICE"
 # c) "Reporting Delays"
 adjustmentNames <- c(
-# "Multiple Imputation using Chained Equations - MICE",
-"Reporting Delays"
+"Multiple Imputation using Chained Equations - MICE"
+# "Reporting Delays"
 )
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <-
@@ -20,7 +20,7 @@ adjustmentSpecs <-
 
 # Optionally adjust parameters of the adjustments
 # For instance stratify "Reporting Delays" adjustment by Transmission category:
-adjustmentSpecs[["Reporting Delays"]]$Parameters$stratTrans$value <- TRUE
+# adjustmentSpecs[["Reporting Delays"]]$Parameters$stratTrans$value <- TRUE
 
 # 3. FULLMIGR MAPPING ------------------------------------------------------------------------------
 migrMappingType <- "REPCOUNTRY + UNK + 4 most prevalent other regions"

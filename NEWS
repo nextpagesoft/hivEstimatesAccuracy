@@ -1,9 +1,10 @@
 Version 0.9.10 (2018/08/)
 ------------------------------------------------------------------------------
 
-* Do no filter records in RD adjustment
-* New naming convention for migrant variables
-* RD missingness plot
+* Do no filter records in RD adjustment.
+* New naming convention for migrant variables.
+* Implement RD missingness plot.
+* Implement adaptive "badCategories" detection mechanism in the main report.
 *
 
 

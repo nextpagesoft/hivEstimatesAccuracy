@@ -2,7 +2,8 @@
 library(hivEstimatesAccuracy)
 
 # 2. LOAD SETTINGS ---------------------------------------------------------------------------------
-source("D:/_REPOSITORIES/Github/hivEstimatesAccuracy/inst/misc/runSettings.R")
+# source("D:/_REPOSITORIES/Github/hivEstimatesAccuracy/inst/misc/runSettings.R")
+source("/home/daniel/_REPOSITORIES/hivEstimatesAccuracy/inst/misc/runSettings.R")
 
 # 3. READ INPUT DATA -------------------------------------------------------------------------------
 originalData <- ReadDataFile(inputDataFilePath)
