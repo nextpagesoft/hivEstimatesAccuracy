@@ -2,7 +2,7 @@
 #'
 #' Renders html fragment from RMarkdown document.
 #'
-#' @param filePath Path to the source RMarkdown file. Required.
+#' @param reportFilePath Path to the source RMarkdown file. Required.
 #' @param params Parameters passed to the report. Optional. Default = NULL.
 #'
 #' @return string with the rendered report
@@ -13,18 +13,20 @@
 #' }
 #'
 #' @export
-RenderReportToHTML <- function(filePath, params = NULL)
+RenderReportToHTML <- function(reportFilePath, params = NULL)
 {
-  stopifnot(!missing(filePath))
+  stopifnot(!missing(reportFilePath))
 
-  htmlFileName <- RenderReportToFile(filePath = filePath,
-                                     format = "html_fragment",
-                                     params = params)
-
+  outDir <- tempfile()
+  dir.create(outDir, recursive = TRUE)
   on.exit({
-    unlink(htmlFileName)
+    unlink(outDir, recursive = TRUE)
   })
 
+  htmlFileName <- RenderReportToFile(reportFilePath = reportFilePath,
+                                     format = "html_fragment",
+                                     params = params,
+                                     outDir = outDir)
   reportFileContent <- ReadStringFromFile(htmlFileName)
   report <- HTML(reportFileContent)
 

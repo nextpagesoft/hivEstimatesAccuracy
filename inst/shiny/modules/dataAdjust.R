@@ -231,8 +231,8 @@ dataAdjust <- function(input, output, session, inputData)
         adjustedData(adjustedData)
 
         intermReport <- RenderReportToHTML(
-          filePath = system.file("reports/intermediate/0.PreProcess.Rmd",
-                                 package = "hivEstimatesAccuracy"),
+          reportFilePath = system.file("reports/intermediate/0.PreProcess.Rmd",
+                                       package = "hivEstimatesAccuracy"),
           params = list(InputData = inputData))
         for (i in seq_along(adjustmentSpecs)) {
           intermReport <- paste(

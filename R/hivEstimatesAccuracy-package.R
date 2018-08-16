@@ -19,7 +19,8 @@
 #' @importFrom shiny HTML
 #' @importFrom stats setNames lowess quantile sd var acf
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
-#' @importFrom utils unzip head
+#' @importFrom utils unzip head zip
+#' @importFrom tools file_path_sans_ext
 #'
 NULL
 

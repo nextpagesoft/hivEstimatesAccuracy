@@ -4,16 +4,18 @@
 \alias{RenderReportToFile}
 \title{RenderReportToFile}
 \usage{
-RenderReportToFile(filePath, format = "html_fragment", outDir = NULL,
-  ...)
+RenderReportToFile(reportFilePath, format = "html_fragment",
+  outputFilePath = NULL, outDir = dirname(reportFilePath), ...)
 }
 \arguments{
-\item{filePath}{Path to the source RMarkdown file. Required.}
+\item{reportFilePath}{Path to the source RMarkdown file. Required.}
 
 \item{format}{Output format of the report. Optional. Default = \code{"html_fragment"}.}
 
+\item{outputFilePath}{Path to the output file. Optional. Default = \code{NULL}.}
+
 \item{outDir}{Output directory. Temporary directory is used if \code{NULL}. Optional.
-Default = \code{NULL}.}
+Default = \code{\link{dirname}(reportFilePath)}.}
 
 \item{...}{Additional arguments passed to \link[rmarkdown]{render}. Optional.}
 }

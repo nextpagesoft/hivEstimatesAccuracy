@@ -4,10 +4,10 @@
 \alias{RenderReportToHTML}
 \title{RenderReportToHTML}
 \usage{
-RenderReportToHTML(filePath, params = NULL)
+RenderReportToHTML(reportFilePath, params = NULL)
 }
 \arguments{
-\item{filePath}{Path to the source RMarkdown file. Required.}
+\item{reportFilePath}{Path to the source RMarkdown file. Required.}
 
 \item{params}{Parameters passed to the report. Optional. Default = NULL.}
 }

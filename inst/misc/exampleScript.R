@@ -43,6 +43,8 @@ if (!is.null(inputData)) {
   adjustedData <- RunAdjustments(data = inputData$Table,
                                  adjustmentSpecs = adjustmentSpecs)
 
+  RenderReportToHTML()
+
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Take the last adjustment output as final data
   finalData <- adjustedData[[length(adjustedData)]][["Table"]]
@@ -59,21 +61,27 @@ if (!is.null(inputData)) {
                  Smoothing = FALSE)
 
   htmlReportFileName <- RenderReportToFile(
-    filePath = reportFilePath,
+    reportFilePath = reportFilePath,
     format = "html_document",
     params = params,
     outDir = dirname(inputDataFilePath))
   browseURL(htmlReportFileName)
 
+  latexReportFileName <- RenderReportToFile(
+    reportFilePath = reportFilePath,
+    format = "latex_document",
+    params = params,
+    outDir = dirname(inputDataFilePath))
+
   pdfReportFileName <- RenderReportToFile(
-    filePath = reportFilePath,
+    reportFilePath = reportFilePath,
     format = "pdf_document",
     params = params,
     outDir = dirname(inputDataFilePath))
   browseURL(pdfReportFileName)
 
   wordReportFileName <- RenderReportToFile(
-    filePath = reportFilePath,
+    reportFilePath = reportFilePath,
     format = "word_document",
     params = params,
     outDir = dirname(inputDataFilePath))

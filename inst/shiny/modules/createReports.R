@@ -149,6 +149,7 @@ createReports <- function(input, output, session, adjustedData)
           div(id = "reportDiv",
               downloadButton(ns("downloadHtmlReport"), "Download as HTML"),
               downloadButton(ns("downloadPdfReport"), "Download as PDF"),
+              downloadButton(ns("downloadLatexReport"), "Download as Latex"),
               downloadButton(ns("downloadWordReport"), "Download as Word"),
               report
           )
@@ -172,6 +173,7 @@ createReports <- function(input, output, session, adjustedData)
     fileExtension <- switch(format,
                             "html_document" = "html",
                             "pdf_document" = "pdf",
+                            "latex_document" = "zip",
                             "word_document" = "docx",
                             "txt")
 
@@ -196,10 +198,10 @@ createReports <- function(input, output, session, adjustedData)
           # Knit the document, passing in the "data" list, and eval it in a
           # child of the global environment (this isolates the code in the document
           # from the code in this app).
-          RenderReportToFile(reportFileNames[vals$selectedReportName],
+          RenderReportToFile(reportFilePath = reportFileNames[vals$selectedReportName],
                              format = format,
                              params = params,
-                             output_file = file)
+                             outputFilePath = file)
           setProgress(1)
         })
       }
@@ -209,6 +211,7 @@ createReports <- function(input, output, session, adjustedData)
   # Respond to report download button clicks
   output[["downloadHtmlReport"]] <- reportDownloadHandler("html_document")
   output[["downloadPdfReport"]] <- reportDownloadHandler("pdf_document")
+  output[["downloadLatexReport"]] <- reportDownloadHandler("latex_document")
   output[["downloadWordReport"]] <- reportDownloadHandler("word_document")
 
   return(report)

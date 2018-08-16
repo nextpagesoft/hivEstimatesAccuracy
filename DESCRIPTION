@@ -1,7 +1,7 @@
 Package: hivEstimatesAccuracy
 Type: Package
 Title: Improves Accuracy of HIV Estimates in EU/EEA Countries
-Version: 0.9.10-16
+Version: 0.9.10-17
 Date: 2018-08-16
 Authors@R: c(person("Magdalena", "Rosinska", email = "mrosinska@pzh.gov.pl",
     role = c("aut", "cph")), person("Nikos", "Pantazis", email =
@@ -18,8 +18,8 @@ Imports: callr (>= 2.0.4), data.table (>= 1.11.4), foreign (>= 0.8-70), grid
     (>= 1.20), mice (>= 3.1.0), mitools (>= 2.3), quantreg (>= 5.36), parallel
     (> 3.0.0), readxl (>= 1.1.0), rmarkdown (>= 1.10), scales (>= 0.5.0), shiny
     (>= 1.1.0), shinycssloaders (>= 0.2.0), shinydashboard (>= 0.7.0), shinyjs
-    (>= 1.0), stats (>= 3.0.0), survival (>= 2.38-2), utils (>= 3.0.0), yaml
-    (>= 2.1.19)
+    (>= 1.0), stats (>= 3.0.0), survival (>= 2.38-2), tools (>= 3.0.0), utils
+    (>= 3.0.0), yaml (>= 2.1.19)
 Suggests:
 Encoding: UTF-8
 LazyData: true

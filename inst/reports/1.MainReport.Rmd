@@ -15,10 +15,16 @@ output:
     theme: default
     toc: yes
     toc_float: no
+  latex_document:
+    toc: yes
+    template: default
+    highlight: null
+    citation_package: none
   pdf_document:
     toc: yes
     template: default
     highlight: null
+    citation_package: none
   word_document:
     reference_docx: ./resources/template_ECDC.docx
     fig_width: 7
