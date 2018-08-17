@@ -43,8 +43,6 @@ if (!is.null(inputData)) {
   adjustedData <- RunAdjustments(data = inputData$Table,
                                  adjustmentSpecs = adjustmentSpecs)
 
-  RenderReportToHTML()
-
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Take the last adjustment output as final data
   finalData <- adjustedData[[length(adjustedData)]][["Table"]]

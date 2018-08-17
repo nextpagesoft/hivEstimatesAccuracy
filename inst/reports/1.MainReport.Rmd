@@ -40,6 +40,10 @@ params:
     label: "Apply plot curves smoothing"
     value: FALSE
     input: checkbox
+  ConfInt:
+    label: "Apply plot curves smoothing"
+    value: FALSE
+    input: checkbox
 editor_options: 
   chunk_output_type: console
 ---
@@ -63,6 +67,7 @@ outputIdx <- 0
 colNamesMapping <- 
   c(DateOfDiagnosisYear = "Year of diagnosis",
     Total = "Total",
+    Overall = "Overall",
     F = "Female",
     M = "Male",
     O = "Other",
@@ -83,58 +88,115 @@ colNamesMappingTable <-
 ```
 
 ```{r functions, eval = TRUE, include = FALSE}
-# Returns Median (IQR) as string
-mediqr <- function(
-  v, 
+# Format columns to string representing mid value with range
+FormatRangeCols <- function(
+  data, 
   digits = 0
 ) {
-  med <- quantile(v, na.rm = TRUE, probs = 0.5)
-  q1  <- quantile(v, na.rm = TRUE, probs = 0.25)
-  q3  <- quantile(v, na.rm = TRUE, probs = 0.75)
-  res <- paste0(formatNumbers(med, digits), " (", 
-                formatNumbers(q1, digits), ", ",
-                formatNumbers(q3, digits),")")
+  res <- paste0(formatNumbers(data[[2]], digits), " (",
+                formatNumbers(data[[1]], digits), ", ",
+                formatNumbers(data[[3]], digits),")")
   return(res)
 }
 
 # Returns Median (IQR) in rowvar X colvar dataframe + margins
-mediqrby <- function(
+GetIQRData <- function(
   data, 
   vvar, 
   rowvar, 
-  colvar, 
-  digits = 0, 
-  colNamesMapping = colNamesMappingTable) 
-{
-  by.main <- by(data[[vvar]], 
-                list(as.factor(data[[rowvar]]), as.factor(data[[colvar]])), 
-                mediqr, 
-                digits)
-  array.main <- array(by.main, dim(by.main), dimnames(by.main))
+  colvar,
+  probs = c(0.25, 0.5, 0.75)
+) {
+  dt <- copy(data)
+  dt <- dt[, c(rowvar, colvar, vvar), with = FALSE]
+  aggr1 <- dt[, {as.list(quantile(get(vvar), na.rm = TRUE, probs = probs))}, 
+              by = c(rowvar, colvar)]
+  aggr2 <- dt[, {as.list(quantile(get(vvar), na.rm = TRUE, probs = probs))}, 
+              by = c(rowvar)]
+  aggr2[, (colvar) := "Overall"]
+
+  aggr3 <- dt[, {as.list(quantile(get(vvar), na.rm = TRUE, probs = probs))}, 
+              by = c(colvar)]
+  aggr3[, (rowvar) := "Total"]
+  aggr4 <- dt[, {as.list(quantile(get(vvar), na.rm = TRUE, probs = probs))}]
+  aggr4[, c(rowvar, colvar) := .("Total", "Overall")]
   
-  by.tot.col <- by(data[[vvar]], list(data[[rowvar]]), mediqr, digits)
-  array.tot.col <-
-    array(by.tot.col, dim(by.tot.col), dimnames(by.tot.col))
+  dt <- rbindlist(list(aggr1, aggr2, aggr3, aggr4),
+                  use.names = TRUE)
+
+  allComb <- CJ(rowvar = unique(dt[[rowvar]]),
+                colvar = unique(dt[[colvar]]))
+  setnames(allComb, 
+           old = c("rowvar", "colvar"), 
+           new = c(rowvar, colvar))
   
-  by.tot.row <- by(data[[vvar]], list(data[[colvar]]), mediqr, digits)
-  array.tot.row <-
-    array(by.tot.row, dim(by.tot.row), dimnames(by.tot.row))
-  
-  grand.tot <- mediqr(data[[vvar]], digits)
-  Total <- c(array.tot.row, grand.tot)
-  temptab <- rbind(cbind(array.main, array.tot.col), Total)
-  temptab <- as.data.table(cbind(row.names(temptab), temptab))
-  setnames(temptab, 
-           old = c(1, ncol(temptab)), 
-           new = c(rowvar, "Overall"))
-  if (!is.null(colNamesMapping)) {
-    colNamesMapping <- colNamesMapping[names(colNamesMapping) %in% colnames(temptab)]
-    setnames(temptab, 
-             old = names(colNamesMapping), 
-             new = colNamesMapping)  
-  }  
-  
-  return(temptab)
+  dt <- dt[allComb, on = c(rowvar, colvar)]
+  return(dt)
+}
+
+# Formats IQR data to be displayed in the report as table
+GetIQRDataTable <- function(
+  data, 
+  rowvar,
+  colvar,
+  probsStr = c("25%", "50%", "75%"),
+  mapping = colNamesMappingTable,
+  digits = 0
+) {
+  dt <- dcast(data, 
+              as.formula(sprintf("%s ~ %s", rowvar, colvar)), 
+              value.var = probsStr)
+
+  colNames <- colnames(dt)
+  colLevels <- levels(data[[colvar]])
+  for (val in colLevels) {
+    valColNames <- sort(grep(paste0("_", val), colNames, value = TRUE))
+    dt[, (val) := FormatRangeCols(.SD, digits = digits), .SDcols = valColNames]
+  }
+  dt <- dt[, c(rowvar, colLevels), with = FALSE]
+  if (!is.null(mapping)) {
+    mapping <- mapping[names(mapping) %in% colnames(dt)]
+    setnames(dt, 
+             old = names(mapping), 
+             new = mapping)  
+  }
+  return(dt)
+}
+
+# Formats IQR data to be displayed in the report as plot
+GetIQRDataPlot <- function(
+  data,
+  rowvar,
+  colvar,
+  cd4YLim,
+  probsStr = c("25%", "50%", "75%"),
+  mapping = colNamesMapping,
+  colors = colorPalette
+) {
+  plotObj <- ggplot(data = data, 
+                    aes(x = as.integer(get(rowvar)),
+                        color = get(colvar),
+                        fill = get(colvar))) +
+    # geom_ribbon(aes(ymin = get(probsStr[1]),
+    #                 ymax = get(probsStr[3])),
+    #             alpha = 0.1,
+    #             colour = NA) +
+    geom_line(aes(y = get(probsStr[2])), size = 0.5) +
+    geom_point(aes(y = get(probsStr[2])), size = 1.5) +
+    scale_x_continuous(expand = c(0, 0), breaks = data[, as.integer(sort(unique(get(rowvar))))]) +
+    scale_y_continuous(expand = c(0, 0)) +
+    expand_limits(y = c(0, cd4YLim)) +
+    scale_colour_manual(name = colvar,
+                        labels = mapping,
+                        values = colors) +
+    scale_fill_manual(name = colvar,
+                    labels = mapping,
+                    values = colors) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 8),
+          axis.text.y = element_text(size = 8)) +
+    labs(x = "Year", y = "Median CD4 cell count (cells/microL)")
+  return(plotObj)
 }
 
 # A function to return formatted 2-way tables of counts (%) and totals
@@ -548,25 +610,23 @@ ggplot(temp_data_orig_gender) +
 
 ```{r, eval = cd4Present}
 outputIdx <- outputIdx + 1
-table2 <- mediqrby(data = data_orig, vvar = "CD4", rowvar = "DateOfDiagnosisYear", colvar = "Gender")
+
+vvar <- "CD4"
+rowvar <- "DateOfDiagnosisYear"
+colvar <- "Gender"
+probs <- c(0.25, 0.5, 0.75)
+probsStr <- c("25%", "50%", "75%")
+
+genderIQRData <- GetIQRData(data = data_orig, vvar, rowvar, colvar, probs)
+genderIQRDataTable <- GetIQRDataTable(data = genderIQRData, rowvar, colvar, probsStr)
+genderIQRDataPlot <- GetIQRDataPlot(data = genderIQRData[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+                                    rowvar, colvar, cd4YLim, probsStr)
+
 cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by gender**", outputIdx))
-knitr::kable(table2, row.names = FALSE, align = rep("r", ncol(table2)))
+knitr::kable(genderIQRDataTable, row.names = FALSE, align = rep("r", ncol(genderIQRDataTable)))
 
 cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by gender**<br />", outputIdx))
-ggplot(data_orig) +
-  aes(x = DateOfDiagnosisYear, y = CD4, color = Gender) +
-  stat_summary(fun.y = "median", na.rm = TRUE, geom = "line") +
-  stat_summary(fun.y = "median", na.rm = TRUE, geom = "point") +
-  labs(x = "Year", y = "Median CD4 cell count (cells/microL)") +
-  expand_limits(y = c(0, cd4YLim)) +
-  scale_colour_manual(name = "Gender",
-                      labels = colNamesMapping,
-                      values = colorPalette) +
-  scale_x_continuous(expand = c(0, 0), breaks = data_orig[, sort(unique(DateOfDiagnosisYear))]) +
-  scale_y_continuous(expand = c(0, 0)) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8))
+print(genderIQRDataPlot)
 ```
 
 ## Unadjusted data by transmission
@@ -596,25 +656,23 @@ ggplot(temp_data_orig_transmission) +
 
 ```{r, eval = cd4Present}
 outputIdx <- outputIdx + 1
-table4 <- mediqrby(data_orig, vvar = "CD4", rowvar = "DateOfDiagnosisYear", colvar = "Transmission")
+
+vvar <- "CD4"
+rowvar <- "DateOfDiagnosisYear"
+colvar <- "Transmission"
+probs <- c(0.25, 0.5, 0.75)
+probsStr <- c("25%", "50%", "75%")
+
+transIQRData <- GetIQRData(data = data_orig, vvar, rowvar, colvar, probs)
+transIQRDataTable <- GetIQRDataTable(data = transIQRData, rowvar, colvar, probsStr)
+transIQRDataPlot <- GetIQRDataPlot(data = transIQRData[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                                   rowvar, colvar, cd4YLim, probsStr)
+
 cat(sprintf("**Table %d. Median (IQR) CD4 cell count (cells/microL) by transmission**", outputIdx))
-knitr::kable(table4, row.names = FALSE, align = rep("r", ncol(table4)))
+knitr::kable(transIQRDataTable, row.names = FALSE, align = rep("r", ncol(genderIQRDataTable)))
 
 cat(sprintf("**Figure %d. Median CD4 cell count (cells/microL) by transmission**<br />", outputIdx))
-ggplot(data_orig) +
-  aes(x = DateOfDiagnosisYear, y = CD4, color = Transmission) +
-  stat_summary(fun.y = "median", na.rm = TRUE, geom = "line") +
-  stat_summary(fun.y = "median", na.rm = TRUE, geom = "point") +
-  labs(x = "Year", y = "Median CD4 cell count (cells/microL)")  +
-  expand_limits(y = c(0, cd4YLim)) +
-  scale_colour_manual(name = "Transmission\ncategory",
-                      labels = colNamesMapping,
-                      values = colorPalette) +
-  scale_x_continuous(expand = c(0, 0), breaks = data_orig[, sort(unique(DateOfDiagnosisYear))]) +
-  scale_y_continuous(expand = c(0, 0)) +
-  theme_classic() +
-  theme(axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8))
+print(transIQRDataPlot)
 ```
 
 ----------------------------------------------------------------------------------------------------
