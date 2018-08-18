@@ -40,8 +40,8 @@ params:
     label: "Apply plot curves smoothing"
     value: FALSE
     input: checkbox
-  ConfInt:
-    label: "Apply plot curves smoothing"
+  CD4ConfInt:
+    label: "Plot confidence intervals in CD4 count plots"
     value: FALSE
     input: checkbox
 editor_options: 
@@ -170,6 +170,7 @@ GetIQRDataPlot <- function(
   colvar,
   cd4YLim,
   probsStr = c("25%", "50%", "75%"),
+  CD4ConfInt = FALSE,
   mapping = colNamesMapping,
   colors = colorPalette
 ) {
@@ -177,10 +178,6 @@ GetIQRDataPlot <- function(
                     aes(x = as.integer(get(rowvar)),
                         color = get(colvar),
                         fill = get(colvar))) +
-    # geom_ribbon(aes(ymin = get(probsStr[1]),
-    #                 ymax = get(probsStr[3])),
-    #             alpha = 0.1,
-    #             colour = NA) +
     geom_line(aes(y = get(probsStr[2])), size = 0.5) +
     geom_point(aes(y = get(probsStr[2])), size = 1.5) +
     scale_x_continuous(expand = c(0, 0), breaks = data[, as.integer(sort(unique(get(rowvar))))]) +
@@ -196,6 +193,15 @@ GetIQRDataPlot <- function(
     theme(axis.text.x = element_text(size = 8),
           axis.text.y = element_text(size = 8)) +
     labs(x = "Year", y = "Median CD4 cell count (cells/microL)")
+  
+  if (CD4ConfInt) {
+    plotObj <- plotObj +  
+      geom_ribbon(aes(ymin = get(probsStr[1]),
+                      ymax = get(probsStr[3])),
+                  alpha = 0.1,
+                  colour = NA)
+  }
+  
   return(plotObj)
 }
 
@@ -439,6 +445,7 @@ GetMedianCD4Adaptive <- function(
 ```{r, eval = TRUE, include = FALSE}
 optReportingDelay <- as.logical(params$ReportingDelay)
 optSmoothing <- as.logical(params$Smoothing)
+optCD4ConfInt <- as.logical(params$CD4ConfInt)
 
 finalDataIdx <- length(params$AdjustedData)
 data <- copy(params$AdjustedData[[finalDataIdx]]$Table)
