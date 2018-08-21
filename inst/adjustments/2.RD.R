@@ -199,6 +199,7 @@ list(
                           agregat[MissingData == FALSE, .(VarT, Stratum, Weight = 1 / P)],
                           by = c("VarT", "Stratum"),
                           all.x = TRUE)
+      outputData[is.na(Weight), Weight := 1]
 
       # C) TOTAL PLOT ----------------------------------------------------------------------------------
       totalPlotData <- GetRDPlotData(data = agregat,
@@ -232,7 +233,7 @@ list(
         names(stratPlotList) <- stratVarNames
       }
     } else {
-      outputData[, Weight := NA_real_]
+      outputData[, Weight := 1]
     }
 
     # Keep only columns present in the input object plus the weight
