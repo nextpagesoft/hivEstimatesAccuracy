@@ -56,7 +56,8 @@ if (!is.null(inputData)) {
   reportFilePath <- GetReportFileNames()["Main Report"]
   params <- list(AdjustedData = adjustedData,
                  ReportingDelay = TRUE,
-                 Smoothing = FALSE)
+                 Smoothing = FALSE,
+                 CD4ConfInt = TRUE)
 
   htmlReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,
