@@ -73,9 +73,9 @@ Requires: backports, dplyr, purrr, reshape2, stringr, tibble, tidyr
 
 Package: callr
 Source: CRAN
-Version: 2.0.4
-Hash: ae3d74ab94396fc7f6b879f17fb71a12
-Requires: R6, processx
+Version: 3.0.0
+Hash: 15276cfa2f9ee6de0af04a4b0692f296
+Requires: R6, base64enc, processx
 
 Package: cellranger
 Source: CRAN
@@ -106,8 +106,8 @@ Hash: d8736a5fe41e5ebef191c43f5e22652f
 
 Package: digest
 Source: CRAN
-Version: 0.6.15
-Hash: 1f202ebd812ac7192be3739245746a13
+Version: 0.6.16
+Hash: 6a025f0eaa147827d9843f25d86b5d23
 
 Package: dplyr
 Source: CRAN
@@ -219,8 +219,8 @@ Hash: 88926ad9c43581fd0822a37c8ed09f05
 
 Package: lme4
 Source: CRAN
-Version: 1.1-17
-Hash: 9c1b0cbd1b4e458175c43eb218addb96
+Version: 1.1-18-1
+Hash: 1a917b09361ffb34f288e77a43a35961
 Requires: Rcpp, RcppEigen, minqa, nloptr
 
 Package: magrittr
@@ -291,8 +291,8 @@ Requires: cli, crayon, fansi, rlang, utf8
 
 Package: pkgconfig
 Source: CRAN
-Version: 2.0.1
-Hash: 0dda4a2654a22b36a715c2b0b6fbacac
+Version: 2.0.2
+Hash: b0fd6ed908e150b77e5f00c6478bd58c
 
 Package: plogr
 Source: CRAN
@@ -305,22 +305,22 @@ Version: 1.8.4
 Hash: 05d65ee369a267f0d0c56604000c69b5
 Requires: Rcpp
 
-Package: praise
-Source: CRAN
-Version: 1.0.0
-Hash: 77da8f1df873a4b91e5c4a68fe2fb1b6
-
 Package: processx
 Source: CRAN
-Version: 3.1.0
-Hash: 3f3cd7b280ca226a53513cb41f5aab3d
-Requires: R6, assertthat, crayon, testthat
+Version: 3.2.0
+Hash: 906405f0bc681c9438826952417d5d5a
+Requires: R6, assertthat, crayon, ps
 
 Package: promises
 Source: CRAN
 Version: 1.0.1
 Hash: 1e5d5469b95be6e1b6cd8c35e3bdea60
 Requires: R6, Rcpp, later, magrittr, rlang
+
+Package: ps
+Source: CRAN
+Version: 1.1.0
+Hash: 730119cd27ec2d3270bc572a532e3f81
 
 Package: purrr
 Source: CRAN
@@ -359,8 +359,8 @@ Requires: Rcpp, plyr, stringr
 
 Package: rlang
 Source: CRAN
-Version: 0.2.1
-Hash: 2b163b981be3d6daaac1ad505dd0bf30
+Version: 0.2.2
+Hash: 49b735b7b1d14f561d21cce12c6703df
 
 Package: rmarkdown
 Source: CRAN
@@ -427,12 +427,6 @@ Source: CRAN
 Version: 2.42-6
 Hash: d5c26735d2428f697cb3406c0336fc3f
 
-Package: testthat
-Source: CRAN
-Version: 2.0.0
-Hash: 537114b476376c5773bf3c557f5bbd19
-Requires: R6, crayon, digest, magrittr, praise, rlang, withr, cli
-
 Package: tibble
 Source: CRAN
 Version: 1.4.2
@@ -454,8 +448,8 @@ Requires: Rcpp, glue, purrr, rlang
 
 Package: tinytex
 Source: CRAN
-Version: 0.6
-Hash: a149d4e6a2f7d6422e063a19cca52bb9
+Version: 0.7
+Hash: dd8bee60e088d200d7d0f7bde5be4375
 Requires: xfun
 
 Package: utf8
