@@ -1,5 +1,4 @@
 # FUNCTIONS --------------------------------------------------------------------
-
 FormatNumbers <- function(
   x,
   digits = 0
@@ -56,10 +55,15 @@ GetAggregatedData <- function(
 
   dt <- dt[allComb, on = c(rowvar, colvar)]
 
+  if ("Count_Val" %in% colnames(dt)) {
+    dt[,
+       Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
+       by = c(rowvar)]
+  }
+
   return(dt)
 }
 
-# Formats IQR data to be displayed in the report as table
 GetReportTable <- function(
   data,
   rowvar,
@@ -92,7 +96,6 @@ GetReportTable <- function(
   return(dt)
 }
 
-# Formats IQR data to be displayed in the report as plot
 GetReportPlot <- function(
   data,
   rowvar,
@@ -195,19 +198,6 @@ GetModelledQuantileData <- function(
   return(result)
 }
 
-FilterData <- function(data, colvar, badCategories)
-{
-  if (length(badCategories) > 0) {
-    badIds <- data[get(colvar) %in% badCategories, unique(id)]
-    filteredData <- data[!id %in% badIds]
-    filteredData[, (colvar) := droplevels(get(colvar))]
-  } else {
-    filteredData <- data
-  }
-
-  return(filteredData)
-}
-
 GetModelledQuantileDataAdaptive <- function(
   data,
   rowvar,
@@ -249,8 +239,21 @@ GetModelledQuantileDataAdaptive <- function(
               BadCategories = badCategories))
 }
 
-GetModelledTransmissionData <- function(data) {
+FilterData <- function(data, colvar, badCategories)
+{
+  if (length(badCategories) > 0) {
+    badIds <- data[get(colvar) %in% badCategories, unique(id)]
+    filteredData <- data[!id %in% badIds]
+    filteredData[, (colvar) := droplevels(get(colvar))]
+  } else {
+    filteredData <- data
+  }
 
+  return(filteredData)
+}
+
+GetModelledTransmissionData <- function(data)
+{
   # mitools doesn't like factors with 0 frequency levels
   data[, Transmission := droplevels(Transmission)]
 
@@ -397,10 +400,6 @@ dataOrigGender <-
           CD4_Median = quant[2],
           CD4_High = quant[3])
       }")
-dataOrigGender <-
-  dataOrigGender[,
-                 Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
-                 by = .(DateOfDiagnosisYear)]
 
 dataOrigTrans <-
   GetAggregatedData(
@@ -417,10 +416,6 @@ dataOrigTrans <-
           CD4_Median = quant[2],
           CD4_High = quant[3])
       }")
-dataOrigTrans <-
-  dataOrigTrans[,
-                Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
-                by = .(DateOfDiagnosisYear)]
 
 if (cd4Present) {
   if (miPresent) {
@@ -433,15 +428,15 @@ if (cd4Present) {
                                       rowvar = "DateOfDiagnosisYear",
                                       vvar = "SqCD4",
                                       colNamesMapping = colNamesMappingTable)$Result
-    res <-
+    dataMITransCD4ResList <-
       GetModelledQuantileDataAdaptive(data = dataMI,
                                       colvar = "Transmission",
                                       rowvar = "DateOfDiagnosisYear",
                                       vvar = "SqCD4",
                                       colNamesMapping = colNamesMappingTable)
 
-    dataMITransCD4 <- res$Result
-    transBadCategories <- res$BadCategories
+    dataMITransCD4 <- dataMITransCD4ResList$Result
+    transBadCategories <- dataMITransCD4ResList$BadCategories
 
     cd4YLim <- GetNiceUpperLimit(max(dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
                                      dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
@@ -474,7 +469,8 @@ plot2 <- GetReportPlot(data = dataOrigGender[DateOfDiagnosisYear != "Total" & Ge
                        rowvar = "DateOfDiagnosisYear",
                        colvar = "Gender",
                        vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
-                       confIntervals = TRUE)
+                       confIntervals = TRUE,
+                       cd4YLim = cd4YLim)
 
 # Section 3: Unadjusted count data by Transmission
 table3 <- GetReportTable(data = dataOrigTrans,
@@ -495,7 +491,8 @@ plot4 <- GetReportPlot(data = dataOrigTrans[DateOfDiagnosisYear != "Total" & Tra
                        rowvar = "DateOfDiagnosisYear",
                        colvar = "Transmission",
                        vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
-                       confIntervals = TRUE)
+                       confIntervals = TRUE,
+                       cd4YLim = cd4YLim)
 
 # Section 5: Adjusted count data by Transmission
 
@@ -514,8 +511,41 @@ if (miPresent) {
 }
 
 dataMITrans <- GetModelledTransmissionData(data = dataMITrans)
-dataMITrans <-
-  dataMITrans[,
-              Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
-              by = .(DateOfDiagnosisYear)]
+dataMITrans <- GetAggregatedData(data = dataMITrans,
+                                 rowvar = "DateOfDiagnosisYear",
+                                 colvar = "Transmission",
+                                 aggrExpr = ".(Count_Val = sum(Count_Val, na.rm = TRUE))")
 
+table5 <- GetReportTable(data = dataMITrans,
+                         rowvar = "DateOfDiagnosisYear",
+                         colvar = "Transmission",
+                         vvars = c("Count_Val", "Count_Perc"))
+plot5 <- GetReportPlot(data = dataMITrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                       rowvar = "DateOfDiagnosisYear",
+                       colvar = "Transmission",
+                       vvars = "Count_Val",
+                       cd4YLim = cd4YLim)
+
+# Section 6: Adjusted Median CD4 data by Gender
+table6 <- GetReportTable(data = dataMIGenderCD4,
+                         rowvar = "DateOfDiagnosisYear",
+                         colvar = "Gender",
+                         vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+plot6 <- GetReportPlot(data = dataMIGenderCD4[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+                       rowvar = "DateOfDiagnosisYear",
+                       colvar = "Gender",
+                       vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                       confIntervals = TRUE,
+                       cd4YLim = cd4YLim)
+
+# Section 7: Adjusted Median CD4 data by Transmission
+table7 <- GetReportTable(data = dataMITransCD4,
+                         rowvar = "DateOfDiagnosisYear",
+                         colvar = "Transmission",
+                         vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+plot7 <- GetReportPlot(data = dataMITransCD4[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                       rowvar = "DateOfDiagnosisYear",
+                       colvar = "Transmission",
+                       vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                       confIntervals = TRUE,
+                       cd4YLim = cd4YLim)

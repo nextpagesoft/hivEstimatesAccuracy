@@ -1,0 +1,824 @@
+---
+name: "Main Report-new"
+author: "HIV Estimates Accuracy tool"
+title: "Multiple imputations"
+date: "`r format(Sys.time(), '%d %B %Y, %H:%M:%S')`"
+output:
+  html_fragment:
+    number_sections: yes
+    smart: yes
+    toc: yes
+  html_document:
+    highlight: null
+    mathjax: null
+    number_sections: yes
+    self_contained: yes
+    theme: default
+    toc: yes
+    toc_float: no
+  latex_document:
+    toc: yes
+    template: default
+    highlight: null
+    citation_package: none
+  pdf_document:
+    toc: yes
+    template: default
+    highlight: null
+    citation_package: none
+  word_document:
+    reference_docx: ./resources/template_ECDC.docx
+    fig_width: 7
+    fig_height: 4
+    toc: yes
+params:
+  AdjustedData: NA
+  ReportingDelay:
+    label: "Adjust count of cases for reporting delay"
+    value: TRUE
+    input: checkbox
+  Smoothing:
+    label: "Apply plot curves smoothing"
+    value: FALSE
+    input: checkbox
+  CD4ConfInt:
+    label: "Plot confidence intervals in CD4 count plots"
+    value: FALSE
+    input: checkbox
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, eval = TRUE, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      results = "asis", 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      include = TRUE, 
+                      fig.height = 4,
+                      fig.width = 10,
+                      dev = "svg")
+
+require(data.table)
+require(ggplot2)
+require(mitools)
+require(quantreg)
+
+colorPalette <- c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce", "#b23A48", "#7a5980", "#63372c", "#284b63")
+colNamesMapping <- 
+  c(DateOfDiagnosisYear = "Year of diagnosis",
+    Total = "Total",
+    Overall = "Overall",
+    F = "Female",
+    M = "Male",
+    O = "Other",
+    HAEMO = "Haemophilia",
+    HETERO = "Hetero",
+    IDU = "IDU",
+    MTCT = "MTCT",
+    MSM = "MSM",
+    NOSO = "Nosocomial",
+    TRANSFU = "Transfusion",
+    Missing = "Missing")
+colNamesMappingTable <- 
+  setNames(
+    c(colNamesMapping[1],
+    paste(colNamesMapping[2], "[N]"),
+    paste(colNamesMapping[-c(1:2)], "[N (%)]")),
+    names(colNamesMapping))
+
+FormatNumbers <- function(
+  x,
+  digits = 0
+) {
+  selNA <- is.na(x)
+  res <- rep("-", length(x))
+  res[!selNA] <- sprintf(paste0("%.", digits, "f"), x[!selNA])
+
+  return(res)
+}
+
+FormatRangeCols <- function(
+  data,
+  digits = 0
+) {
+  if (ncol(data) == 2) {
+    res <- paste0(FormatNumbers(data[[1]], digits), " (",
+                  FormatNumbers(data[[2]], digits), ")")
+  } else {
+    res <- paste0(FormatNumbers(data[[2]], digits), " (",
+                  FormatNumbers(data[[1]], digits), ", ",
+                  FormatNumbers(data[[3]], digits),")")
+  }
+
+  return(res)
+}
+
+GetAggregatedData <- function(
+  data,
+  rowvar,
+  colvar,
+  aggrExpr = ".(Count = .N)"
+) {
+  expr <- parse(text = aggrExpr)
+
+  aggr1 <- data[, {eval(expr, envir = data)}, by = c(rowvar, colvar)]
+  aggr2 <- data[, {eval(expr, envir = data)}, by = c(rowvar)]
+  aggr3 <- data[, {eval(expr, envir = data)}, by = c(colvar)]
+  aggr4 <- data[, {eval(expr, envir = data)}]
+
+  aggr2[, (colvar) := "Overall"]
+  aggr3[, (rowvar) := "Total"]
+  aggr4[, c(rowvar, colvar) := .("Total", "Overall")]
+
+  dt <- rbindlist(list(aggr1, aggr2, aggr3, aggr4),
+                  use.names = TRUE)
+
+  allComb <- CJ(rowvar = unique(dt[[rowvar]]),
+                colvar = unique(dt[[colvar]]))
+  setnames(allComb,
+           old = c("rowvar", "colvar"),
+           new = c(rowvar, colvar))
+
+  dt <- dt[allComb, on = c(rowvar, colvar)]
+
+  if ("Count_Val" %in% colnames(dt)) {
+    dt[,
+       Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
+       by = c(rowvar)]
+  }
+
+  return(dt)
+}
+
+GetReportTable <- function(
+  data,
+  rowvar,
+  colvar,
+  vvars,
+  mapping = colNamesMappingTable,
+  digits = 0
+) {
+  dt <- dcast(data,
+              as.formula(sprintf("%s ~ %s", rowvar, colvar)),
+              value.var = vvars)
+
+  colLevels <- levels(data[[colvar]])
+  for (val in colLevels) {
+    valColNames <- grep(paste0("_", val, "$"),
+                        paste(vvars, val, sep = "_"),
+                        value = TRUE)
+    dt[, (val) := FormatRangeCols(.SD, digits = digits), .SDcols = valColNames]
+  }
+  dt <- dt[, c(rowvar, colLevels), with = FALSE]
+  if (!is.null(mapping)) {
+    mapping <- mapping[names(mapping) %in% colnames(dt)]
+    setnames(dt,
+             old = names(mapping),
+             new = mapping)
+  }
+
+  dt <- knitr::kable(dt, 
+                     align = rep("r", ncol(dt)))
+
+  return(dt)
+}
+
+GetReportPlot <- function(
+  data,
+  rowvar,
+  colvar,
+  vvars,
+  cd4YLim = NULL,
+  probsStr = NULL,
+  confIntervals = FALSE,
+  mapping = colNamesMapping,
+  colors = colorPalette
+) {
+  plotObj <- ggplot(data = data,
+                    aes(x = as.integer(get(rowvar)),
+                        y = get(vvars[1]),
+                        color = get(colvar),
+                        fill = get(colvar))) +
+    geom_line(size = 0.5) +
+    geom_point(size = 1.5) +
+    scale_x_continuous(expand = c(0, 0), breaks = data[, as.integer(sort(unique(get(rowvar))))]) +
+    scale_y_continuous(expand = c(0, 0)) +
+    expand_limits(y = c(0, cd4YLim)) +
+    scale_colour_manual(name = colvar,
+                        labels = mapping,
+                        values = colors) +
+    scale_fill_manual(name = colvar,
+                      labels = mapping,
+                      values = colors) +
+    theme_classic() +
+    theme(axis.text.x = element_text(size = 8),
+          axis.text.y = element_text(size = 8)) +
+    labs(x = "Year", y = "Median CD4 cell count (cells/microL)")
+
+  if (confIntervals) {
+    plotObj <- plotObj +
+      geom_ribbon(aes(ymin = get(vvars[2]),
+                      ymax = get(vvars[3])),
+                  alpha = 0.1,
+                  colour = NA)
+  }
+
+  return(plotObj)
+}
+
+GetModelledQuantileData <- function(
+  data,
+  rowvar,
+  colvar,
+  vvar,
+  nsdf,
+  probs = c(CD4_Low = 0.25, CD4_Median = 0.5, CD4_High = 0.75)
+) {
+  dataList <- imputationList(split(
+    data[, c(vvar, colvar, rowvar, "DY", "Imputation", "ModelWeight"),
+         with = FALSE],
+    by = "Imputation"))
+  result <- NULL
+  for (probName in names(probs)) {
+    prob <- probs[probName]
+    if (optSmoothing) {
+      models <-
+        with(dataList,
+             rq(formula =
+                  as.formula(sprintf("%s ~ %s * splines::ns(DY, df = nsdf)",
+                                     vvar, colvar)),
+                tau = prob,
+                data = dataList$imputations,
+                weights = ModelWeight,
+                method = "br"))
+      vars <- MIextract(models, fun = function(model) {
+        diag(summary(model, covariance = TRUE)$cov)
+      })
+    } else {
+      models <-
+        with(dataList,
+             rqss(formula =
+                    as.formula(sprintf("%s ~ %s * as.factor(DY)", vvar, colvar)),
+                  tau = prob,
+                  data = dataList$imputations,
+                  weights = ModelWeight,
+                  method = "sfn"))
+      vars <- MIextract(models, fun = function(model) {
+        diag(as.matrix(summary(model, cov = TRUE)$Vcov))
+      })
+    }
+
+    betas <- MIextract(models, fun = coefficients)
+    t <- MIcombine(betas, vars)
+    X <- model.matrix(models$`1`$formula)
+    linpred <- (X %*% coef(t))^2
+    pred <- cbind(dataList$imputations$`1`,
+                  Linpred = as.vector(linpred))
+    pred <- unique(pred[, c(rowvar, colvar, "Linpred"), with = FALSE])
+
+    if (is.null(result)) {
+      result <- copy(pred)
+    } else {
+      result <- cbind(result, Linpred = pred$Linpred)
+    }
+    setnames(result, "Linpred", probName)
+  }
+  return(result)
+}
+
+GetModelledQuantileDataAdaptive <- function(
+  data,
+  rowvar,
+  colvar,
+  vvar,
+  nsdf,
+  colNamesMapping,
+  probs = c(CD4_Low = 0.25, CD4_Median = 0.5, CD4_High = 0.75),
+  thresholds = c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
+) {
+  distr <- data[, .(Count = .N), by = c(colvar)]
+  distr[, Perc := Count / sum(Count)]
+
+  result <- NULL
+  message <- NULL
+  badCategories <- NULL
+  for (threshold in thresholds) {
+    badCategories <- distr[Perc < threshold, unique(get(colvar))]
+    filteredData <- FilterData(data, colvar, badCategories)
+
+    result <- suppressWarnings({
+      try(GetModelledQuantileData(data = filteredData,
+                                  colvar = colvar,
+                                  rowvar = rowvar,
+                                  vvar = vvar,
+                                  nsdf = nsdf,
+                                  probs = probs),
+          silent = TRUE)
+      })
+    if (!inherits(result, "try-error")) {
+      if (length(badCategories) > 0) {
+        message <-
+          sprintf("<p>Persons which were %s anywhere (i.e. even in one imputed dataset) are removed. Threshold of %2.2f%% of count per category within the dataset was applied.</p>",
+                  paste(colNamesMapping[as.character(badCategories)],
+                        collapse = ", "),
+                  threshold * 100)
+      }
+      break
+    }
+  }
+  
+  return(list(Result = result,
+              Message = message,
+              BadCategories = badCategories))
+}
+
+FilterData <- function(data, colvar, badCategories)
+{
+  if (length(badCategories) > 0) {
+    badIds <- data[get(colvar) %in% badCategories, unique(id)]
+    filteredData <- data[!id %in% badIds]
+    filteredData[, (colvar) := droplevels(get(colvar))]
+  } else {
+    filteredData <- data
+  }
+
+  return(filteredData)
+}
+
+GetModelledTransmissionData <- function(
+  data,
+  nsdf
+) {
+  # mitools doesn't like factors with 0 frequency levels
+  data[, Transmission := droplevels(Transmission)]
+
+  # Fit saturated Poisson model to MI data
+  dataList <- imputationList(split(data, by = "Imputation"))
+
+  # Main model
+  if (optSmoothing) {
+    suppressWarnings({
+      models <- with(dataList,
+                     glm(Count_Val ~ as.factor(Transmission) * splines::ns(DY, df = nsdf),
+                         data = data,
+                         family = poisson(link = log)))
+    })
+  } else {
+    suppressWarnings({
+      models <- with(dataList,
+                     glm(Count_Val ~ as.factor(Transmission) * as.factor(DY),
+                         data = data,
+                         family = poisson(link = log)))
+    })
+  }
+
+  # Extract betas and var
+  betas <- MIextract(models, fun = coefficients)
+  vars <- MIextract(models, fun = vcov)
+
+  # Rubin's rules applied by MIcombine
+  t <- MIcombine(results = betas, variances = vars)
+  X <- model.matrix(models$`1`$formula)
+  X <- X[, names(betas$`1`)]
+
+  # Linear predictor exponentiated to get predicted counts
+  if (anyNA(coef(t))) {
+    naCoef <- which(is.na(coef(t)))
+    linpred <- exp(X[, -naCoef] %*% coef(t)[-naCoef])
+  } else{
+    linpred <- exp(X %*% coef(t))
+  }
+
+  # Manipulation to end-up with a wide-format dataframe
+  pred <- cbind(dataList$imputations$`1`,
+                Linpred = as.vector(linpred))
+  pred <- pred[, .(DateOfDiagnosisYear, Transmission, Count_Val = Linpred)]
+
+  return(pred)
+}
+
+GetModelledTransmissionDataAdaptive <- function(
+  data,
+  nsdf,
+  thresholds = c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
+) {
+  distr <- data[, .(Count = .N), by = Transmission]
+  distr[, Perc := Count / sum(Count)]
+
+  result <- NULL
+  message <- NULL
+  badCategories <- NULL
+  for (threshold in thresholds) {
+    badCategories <- distr[Perc < threshold, unique(Transmission)]
+    filteredData <- FilterData(data, "Transmission", badCategories)
+
+    result <- suppressWarnings({
+      try(GetModelledTransmissionData(data = filteredData,
+                                      nsdf = nsdf),
+          silent = TRUE)
+      })
+    if (!inherits(result, "try-error")) {
+      if (length(badCategories) > 0) {
+        message <-
+          sprintf("<p>Persons which were %s anywhere (i.e. even in one imputed dataset) are removed. Threshold of %2.2f%% of count per category within the dataset was applied.</p>",
+                  paste(colNamesMapping[as.character(badCategories)],
+                        collapse = ", "),
+                  threshold * 100)
+      }
+      break
+    }
+  }
+  
+  return(list(Result = result,
+              Message = message,
+              BadCategories = badCategories))
+}
+
+GetRDReportTable <- function(data) 
+{
+  dt <- copy(data)
+  numericCols <- setdiff(colnames(dt), c("DateOfDiagnosisYear"))
+  dtTotals <- dt[, lapply(.SD, sum, na.rm = TRUE), .SDcols = numericCols]
+  dtTotals[, DateOfDiagnosisYear := "Total"]
+  ConvertDataTableColumns(dt, c(DateOfDiagnosisYear = "character"))
+  dt <- rbind(dt, 
+                       dtTotals)
+  dt[, (numericCols) := lapply(.SD, FormatNumbers), .SDcols = numericCols]
+  setorderv(dt, c("DateOfDiagnosisYear"))
+  tableColNames <- c("Diagnosis<br />year", 
+                     "Missing<br />details", 
+                     "Reported",
+                     "Unreported", 
+                     "Estimated", 
+                     "Estimated<br />lower bound", 
+                     "Estimated<br />upper bound")
+  dt <- knitr::kable(dt,
+                     align = rep("r", ncol(rdTableData)),
+                     col.names = tableColNames)
+
+  return(dt)  
+}
+
+
+optReportingDelay <- as.logical(params$ReportingDelay)
+optSmoothing <- as.logical(params$Smoothing)
+optCD4ConfInt <- as.logical(params$CD4ConfInt)
+
+finalDataIdx <- length(params$AdjustedData)
+data <- copy(params$AdjustedData[[finalDataIdx]]$Table)
+
+cd4Present <- data[, any(!is.na(SqCD4))]
+adjTypes <- sapply(params$AdjustedData, "[[", "Type")
+miPresent <- length(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]) > 0
+rdPresent <- length(adjTypes[adjTypes == "REPORTING_DELAYS"]) > 0
+
+# Determine last MI adjustment, if any, to get "nsdf" parameter
+miAdjName <- tail(names(adjTypes[adjTypes == "MULTIPLE_IMPUTATIONS"]), 1)
+if (length(miAdjName) == 1) {
+  nsdf <- params$AdjustedData[[miAdjName]]$Parameters$nsdf
+} else {
+  nsdf <- 5L
+}
+
+# Create and initialize requried columns
+if (!miPresent) {
+  data[, Imputation := 0L]
+}
+
+if (rdPresent & optReportingDelay) {
+  data[, ModelWeight := Weight]
+} else {
+  data[, ModelWeight := 1.0]
+}
+
+# A. Make manipulations ---
+data[Transmission %in% c(NA, "NA", ""), Transmission := "Missing"]
+
+# Original data
+dataOrig <- data[Imputation == 0L]
+dataOrig[, ':='(
+  CD4 = SqCD4^2,
+  Transmission = factor(Transmission),
+  Gender = factor(Gender)
+)]
+
+# MI data
+dataMI <- data[Imputation != 0L]
+dataMI[, ':='(
+  Transmission = factor(Transmission),
+  Gender = factor(Gender)
+)]
+
+# Unadjusted
+dataOrigGender <-
+  GetAggregatedData(
+    data = dataOrig,
+    rowvar = "DateOfDiagnosisYear",
+    colvar = "Gender",
+    aggrExpr =
+      "{
+        count <- .N
+        quant <- quantile(CD4, na.rm = TRUE, probs = c(0.25, 0.5, 0.75), names = FALSE)
+        list(
+          Count_Val = count,
+          CD4_Low = quant[1],
+          CD4_Median = quant[2],
+          CD4_High = quant[3])
+      }")
+
+dataOrigTrans <-
+  GetAggregatedData(
+    data = dataOrig,
+    rowvar = "DateOfDiagnosisYear",
+    colvar = "Transmission",
+    aggrExpr =
+      "{
+        count <- .N
+        quant <- quantile(CD4, na.rm = TRUE, probs = c(0.25, 0.5, 0.75), names = FALSE)
+        list(
+          Count_Val = count,
+          CD4_Low = quant[1],
+          CD4_Median = quant[2],
+          CD4_High = quant[3])
+      }")
+
+if (cd4Present) {
+  if (miPresent) {
+    # Quantile regressions not possible with rare categories and discrete time
+    # extrapolated - dodgy results from quantile regressions with rare
+    # categories and smoothed time rare categories removed.
+    dataMIGenderCD4List <-
+      GetModelledQuantileDataAdaptive(data = dataMI,
+                                      colvar = "Gender",
+                                      rowvar = "DateOfDiagnosisYear",
+                                      vvar = "SqCD4",
+                                      nsdf = nsdf,
+                                      colNamesMapping = colNamesMappingTable)
+    dataMITransCD4List <-
+      GetModelledQuantileDataAdaptive(data = dataMI,
+                                      colvar = "Transmission",
+                                      rowvar = "DateOfDiagnosisYear",
+                                      vvar = "SqCD4",
+                                      nsdf = nsdf,
+                                      colNamesMapping = colNamesMappingTable)
+    dataMIGenderCD4 <- dataMIGenderCD4List[["Result"]]
+    dataMITransCD4 <- dataMITransCD4List[["Result"]]
+
+    cd4YLim <- 
+      GetNiceUpperLimit(max(dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+                            dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+                            dataMIGenderCD4$CD4_Median,
+                            dataMITransCD4$CD4_Median,
+                            na.rm = TRUE))
+  } else {
+    cd4YLim <- 
+      GetNiceUpperLimit(max(dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+                            dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+                            na.rm = TRUE))
+  }
+}
+
+dataMI <- FilterData(data = dataMI, 
+                     colvar = "Transmission",
+                     badCategories = dataMITransCD4List[["BadCategories"]])
+dataMITrans <-
+  dataMI[,
+         .(Count_Val = sum(ModelWeight, na.rm = TRUE)),
+         by = .(Imputation, DateOfDiagnosisYear, Transmission)]
+if (nrow(dataMITrans) > 0) {
+  dataMITrans[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
+} else {
+  dataMITrans[, DY := integer()]
+}
+dataMITrans <- GetModelledTransmissionDataAdaptive(data = dataMITrans,
+                                                   nsdf = nsdf)
+dataMITrans <- GetAggregatedData(data = dataMITrans,
+                                 rowvar = "DateOfDiagnosisYear",
+                                 colvar = "Transmission",
+                                 aggrExpr = ".(Count_Val = sum(Count_Val, na.rm = TRUE))")
+
+# PRODUCE OUTPUTS --------------------------------------------------------------
+
+tblOrigGenderCount <- 
+  GetReportTable(data = dataOrigGender,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Gender",
+                 vvars = c("Count_Val", "Count_Perc"))
+plotOrigGenderCount <- 
+  GetReportPlot(data = dataOrigGender[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Gender",
+                vvars = "Count_Val")
+
+tblOrigGenderCD4 <- 
+  GetReportTable(data = dataOrigGender,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Gender",
+                 vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+plotOrigGenderCD4 <- 
+  GetReportPlot(data = dataOrigGender[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Gender",
+                vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                confIntervals = TRUE,
+                cd4YLim = cd4YLim)
+tblMIGenderCD4 <- 
+  GetReportTable(data = dataMIGenderCD4,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Gender",
+                 vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+plotMIGenderCD4 <- 
+  GetReportPlot(data = dataMIGenderCD4[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Gender",
+                vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                confIntervals = TRUE,
+                cd4YLim = cd4YLim)
+
+tblOrigTransCount <- 
+  GetReportTable(data = dataOrigTrans,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Transmission",
+                 vvars = c("Count_Val", "Count_Perc"))
+plotOrigTransCount <- 
+  GetReportPlot(data = dataOrigTrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Transmission",
+                vvars = "Count_Val")
+tblMITransCount <- 
+  GetReportTable(data = dataMITrans,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Transmission",
+                 vvars = c("Count_Val", "Count_Perc"))
+plotMITransCount <- 
+  GetReportPlot(data = dataMITrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Transmission",
+                vvars = "Count_Val",
+                cd4YLim = cd4YLim)
+
+tblOrigTransCD4 <- 
+  GetReportTable(data = dataOrigTrans,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Transmission",
+                 vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+plotOrigTransCD4 <- 
+  GetReportPlot(data = dataOrigTrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Transmission",
+                vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                confIntervals = TRUE,
+                cd4YLim = cd4YLim)
+tblMITransCD4 <- 
+  GetReportTable(data = dataMITransCD4,
+                 rowvar = "DateOfDiagnosisYear",
+                 colvar = "Transmission",
+                 vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+plotMITransCD4 <- 
+  GetReportPlot(data = dataMITransCD4[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+                rowvar = "DateOfDiagnosisYear",
+                colvar = "Transmission",
+                vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                confIntervals = TRUE,
+                cd4YLim = cd4YLim)
+
+if (rdPresent) {
+  rdIdx <- which(adjTypes == "REPORTING_DELAYS")[[1]]
+  rdData <- params[["AdjustedData"]][[rdIdx]][["Artifacts"]][["ReportTableData"]]
+  tblRd <- GetRDReportTable(data = rdData)
+}
+```
+
+--------------------------------------------------------------------------------
+
+# Introduction
+
+```{r}
+cat("<p>Adjustments:</p>") 
+cat("<ol>")
+cat(sprintf("<li>%s</li>",
+            ifelse(miPresent,
+                   "Multiple Imputations adjustment performed.",
+                   "Multiple Imputations adjustment not performed.")))
+cat(sprintf("<li>%s</li>",
+            ifelse(rdPresent,
+                   "Reporting Delays adjustment performed.",
+                   "Reporting Delays adjustment not performed.")))
+cat("</ol>")
+
+cat("<p>Selected report options:</p>") 
+cat("<ol>")
+cat(sprintf("<li>%s</li>", 
+            ifelse(optReportingDelay, 
+                   "Correction of count of cases for reporting delay.",
+                   "Original count of case.")))
+cat(sprintf("<li>%s</li>", 
+            ifelse(optSmoothing, 
+                   "Smoothed version of calendar time.",
+                   "Original calendar time.")))
+cat(sprintf("<li>%s</li>", 
+            ifelse(optCD4ConfInt, 
+                   "CD4 plots with confidence interval.",
+                   "CD4 plots without confidence interval.")))
+cat("</ol>")
+
+if (!cd4Present) {
+  cat("<p>CD4 count is missing in the unadjusted and the adjusted data. All CD4 related plots and figures are omitted in this report.</p>")  
+}
+```
+
+--------------------------------------------------------------------------------
+
+# Comparison of data by Gender
+
+## Number of diagnoses per year by Gender
+
+Data stratified by *gender* is shown only for unadjusted data since there were 
+no missing data on *gender* after pre-processing, which takes place before 
+adjustments.
+
+### Number of diagnoses per year by Gender category and overall before 
+adjustments
+
+```{r}
+tblOrigGenderCount
+plotOrigGenderCount
+```
+
+## Median CD4 cell count (cells/microL) by Gender
+
+```{r}
+if (cd4Present) {
+  cat("### Median CD4 cell count (cells/microL) by Gender before adjustments")
+  tblOrigGenderCD4
+  plotOrigGenderCD4
+  
+  if (miPresent) {
+    cat("### Median CD4 cell count (cells/microL) by Gender after adjustments")
+    tblMIGenderCD4
+    if (!IsEmptyString(dataMIGenderCD4List[["Message"]])) {
+      cat(dataMIGenderCD4List[["Message"]])
+    }
+    plotMIGenderCD4
+  } else {
+    cat("<p>CD4 cell count after adjustments is not available since no imputations adjustements have been run.</p>")
+  }
+} else {
+  cat("<p>CD4 cell count results are not available due to full missingness of this attribute in the input data.</p>")
+}
+```
+
+--------------------------------------------------------------------------------
+
+# Comparison of data by Transmission
+
+## Number of diagnoses per year by Transmission
+
+### Number of diagnoses per year by Transmission category and overall before 
+adjustments
+
+```{r}
+tblOrigTransCount
+plotOrigTransCount
+```
+
+### Number of diagnoses per year by Transmission category and overall after
+adjustments
+
+```{r}
+tblMITransCount
+plotMITransCount
+```
+
+## Median CD4 cell count (cells/microL) by Transmission
+
+```{r}
+if (cd4Present) {
+  cat("### Median CD4 cell count (cells/microL) by Transmission before adjustments")
+  tblOrigTransCD4
+  plotOrigTransCD4
+  
+  if (miPresent) {
+    cat("### Median CD4 cell count (cells/microL) by Transmission after adjustments")
+    tblMITransCD4
+    if (!IsEmptyString(dataMITransCD4List[["Message"]])) {
+      cat(dataMITransCD4List[["Message"]])
+    }
+    plotMITransCD4
+  } else {
+    cat("<p>CD4 cell count after adjustments is not available since no imputations adjustements have been run.</p>")
+  }
+} else {
+  cat("<p>CD4 cell count results are not available due to full missingness of this attribute in the input data.</p>")
+}
+```
+
+```{r}
+if (rdPresent) {
+  cat("-----------------------------------------------------------------------")
+  cat("# Comparison of the reported and estimated number of diagnoses per year")
+  tblRd
+}
+
+```

@@ -53,7 +53,7 @@ if (!is.null(inputData)) {
   WriteDataFile(finalData, outputDataFilePath)
 
   # 7. CREATE FINAL REPORT (OPTIONALLY) ------------------------------------------------------------
-  reportFilePath <- GetReportFileNames()["Main Report"]
+  reportFilePath <- GetReportFileNames()["Main Report-new"]
   params <- list(AdjustedData = adjustedData,
                  ReportingDelay = TRUE,
                  Smoothing = FALSE,

@@ -135,6 +135,7 @@ list(
 
     totalPlot <- NULL
     totalPlotData <- NULL
+    rdData <- NULL
     stratPlotList <- NULL
     stratPlotListData <- NULL
     rdDistribution <- NULL
@@ -209,6 +210,21 @@ list(
       totalPlot <- GetRDPlots(plotData = totalPlotData[MissingData == FALSE],
                               isOriginalData = isOriginalData)
 
+      reportTableData <-
+        totalPlotData[Source == "Reported" & MissingData == FALSE,
+                      .(DateOfDiagnosisYear, Reported = Count, EstCount,
+                        LowerEstCount, UpperEstCount)]
+      missRdData <-
+        totalPlotData[Source == "Reported" & MissingData == TRUE,
+                      .(DateOfDiagnosisYear, Count)]
+      reportTableData[missRdData,
+                      MissingData := Count,
+                      on = .(DateOfDiagnosisYear)]
+      reportTableData[, Unreported := na.zero(EstCount) - na.zero(Reported)]
+      setcolorder(reportTableData,
+                  c("DateOfDiagnosisYear", "MissingData", "Reported",
+                    "Unreported", "EstCount", "LowerEstCount", "UpperEstCount"))
+
       # D) STRATIFIED PLOT (OPTIONAL) ------------------------------------------------------------------
       if (length(stratVarNames) > 0) {
         # Stratification
@@ -245,6 +261,7 @@ list(
                       OutputPlotTotalData = totalPlotData,
                       OutputPlotStrat = stratPlotList,
                       OutputPlotStratData = stratPlotListData,
+                      ReportTableData = reportTableData,
                       RdDistribution = rdDistribution)
 
     cat("No adjustment specific text outputs.\n")
