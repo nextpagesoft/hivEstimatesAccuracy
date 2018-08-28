@@ -3,6 +3,8 @@ name: "Main Report-new"
 author: "HIV Estimates Accuracy tool"
 title: "Multiple imputations"
 date: "`r format(Sys.time(), '%d %B %Y, %H:%M:%S')`"
+editor_options: 
+  chunk_output_type: console
 output:
   html_fragment:
     smart: yes
@@ -47,8 +49,6 @@ params:
     label: "Plot confidence intervals in CD4 count plots"
     value: FALSE
     input: checkbox
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r setup, eval = TRUE, include = FALSE}
@@ -64,9 +64,6 @@ knitr::opts_chunk$set(echo = FALSE,
 
 ```{r, eval = TRUE, include = FALSE}
 # Setup ------------------------------------------------------------------------
-require(data.table)
-require(ggplot2)
-require(mitools)
 require(quantreg)
 
 colorPalette <- c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce", "#b23A48", "#7a5980", "#63372c", "#284b63")
@@ -251,7 +248,7 @@ GetModelledQuantileData <- function(
   nsdf,
   probs = c(CD4_Low = 0.25, CD4_Median = 0.5, CD4_High = 0.75)
 ) {
-  dataList <- imputationList(split(
+  dataList <- mitools::imputationList(split(
     data[, c(vvar, colvar, rowvar, "DY", "Imputation", "ModelWeight"),
          with = FALSE],
     by = "Imputation"))
@@ -261,14 +258,14 @@ GetModelledQuantileData <- function(
     if (optSmoothing) {
       models <-
         with(dataList,
-             rq(formula =
+             quantreg::rq(formula =
                   as.formula(sprintf("%s ~ %s * splines::ns(DY, df = nsdf)",
                                      vvar, colvar)),
                 tau = prob,
                 data = dataList$imputations,
                 weights = ModelWeight,
                 method = "br"))
-      vars <- MIextract(models, fun = function(model) {
+      vars <- mitools::MIextract(models, fun = function(model) {
         diag(summary(model, covariance = TRUE)$cov)
       })
     } else {
