@@ -5,9 +5,9 @@ title: "Multiple imputations"
 date: "`r format(Sys.time(), '%d %B %Y, %H:%M:%S')`"
 output:
   html_fragment:
-    number_sections: yes
     smart: yes
     toc: yes
+    number_sections: yes
   html_document:
     highlight: null
     mathjax: null
@@ -15,7 +15,9 @@ output:
     self_contained: yes
     theme: default
     toc: yes
-    toc_float: no
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
   latex_document:
     toc: yes
     template: default
@@ -49,7 +51,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r, eval = TRUE, include = FALSE}
+```{r setup, eval = TRUE, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
                       results = "asis", 
                       message = FALSE, 
@@ -58,7 +60,10 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.height = 4,
                       fig.width = 10,
                       dev = "svg")
+```
 
+```{r, eval = TRUE, include = FALSE}
+# Setup ------------------------------------------------------------------------
 require(data.table)
 require(ggplot2)
 require(mitools)
@@ -86,6 +91,8 @@ colNamesMappingTable <-
     paste(colNamesMapping[2], "[N]"),
     paste(colNamesMapping[-c(1:2)], "[N (%)]")),
     names(colNamesMapping))
+
+# Functions --------------------------------------------------------------------
 
 FormatNumbers <- function(
   x,
@@ -159,6 +166,10 @@ GetReportTable <- function(
   mapping = colNamesMappingTable,
   digits = 0
 ) {
+  if (is.null(data)) {
+    return(NULL)
+  }
+  
   dt <- dcast(data,
               as.formula(sprintf("%s ~ %s", rowvar, colvar)),
               value.var = vvars)
@@ -195,6 +206,10 @@ GetReportPlot <- function(
   mapping = colNamesMapping,
   colors = colorPalette
 ) {
+  if (is.null(data)) {
+    return(NULL)
+  }
+
   plotObj <- ggplot(data = data,
                     aes(x = as.integer(get(rowvar)),
                         y = get(vvars[1]),
@@ -214,7 +229,8 @@ GetReportPlot <- function(
     theme_classic() +
     theme(axis.text.x = element_text(size = 8),
           axis.text.y = element_text(size = 8)) +
-    labs(x = "Year", y = "Median CD4 cell count (cells/microL)")
+    labs(x = "Year", 
+         y = expression("Median CD4 cell count (cells/"*mu*"L)"))
 
   if (confIntervals) {
     plotObj <- plotObj +
@@ -287,19 +303,80 @@ GetModelledQuantileData <- function(
   return(result)
 }
 
-GetModelledQuantileDataAdaptive <- function(
+GetModelledCountData <- function(
   data,
-  rowvar,
   colvar,
-  vvar,
-  nsdf,
-  colNamesMapping,
-  probs = c(CD4_Low = 0.25, CD4_Median = 0.5, CD4_High = 0.75),
-  thresholds = c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
+  nsdf
 ) {
-  distr <- data[, .(Count = .N), by = c(colvar)]
-  distr[, Perc := Count / sum(Count)]
+  data <- data[,
+               .(Count_Val = sum(ModelWeight, na.rm = TRUE)),
+               by = c("Imputation", "DateOfDiagnosisYear", colvar)]
+  if (nrow(data) > 0) {
+    data[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
+  } else {
+    data[, DY := integer()]
+  }
+  
+  # mitools doesn't like factors with 0 frequency levels
+  data[, (colvar) := droplevels(get(colvar))]
 
+  # Fit saturated Poisson model to MI data
+  dataList <- imputationList(split(data, by = "Imputation"))
+
+  # Main model
+  if (optSmoothing) {
+    suppressWarnings({
+      models <- with(dataList,
+                     glm(formula = 
+                           as.formula(sprintf("Count_Val ~ as.factor(%s) * splines::ns(DY, df = nsdf)", 
+                                              colvar)),
+                         data = data,
+                         family = poisson(link = log)))
+    })
+  } else {
+    suppressWarnings({
+      models <- with(dataList,
+                     glm(formula = 
+                           as.formula(sprintf("Count_Val ~ as.factor(%s) * as.factor(DY)", 
+                                              colvar)),
+                         data = data,
+                         family = poisson(link = log)))
+    })
+  }
+
+  # Extract betas and var
+  betas <- MIextract(models, fun = coefficients)
+  vars <- MIextract(models, fun = vcov)
+
+  # Rubin's rules applied by MIcombine
+  t <- MIcombine(results = betas, variances = vars)
+  X <- model.matrix(models$`1`$formula)
+  X <- X[, names(betas$`1`)]
+
+  # Linear predictor exponentiated to get predicted counts
+  if (anyNA(coef(t))) {
+    naCoef <- which(is.na(coef(t)))
+    linpred <- exp(X[, -naCoef] %*% coef(t)[-naCoef])
+  } else{
+    linpred <- exp(X %*% coef(t))
+  }
+
+  # Manipulation to end-up with a wide-format dataframe
+  pred <- cbind(dataList$imputations$`1`,
+                Count_Val = as.vector(linpred))
+  pred <- pred[, c("DateOfDiagnosisYear", colvar, "Count_Val"), with = FALSE]
+
+  return(pred)
+}
+
+GetModelledDataAdaptive <- function(
+  colvar,
+  colNamesMapping,
+  distr,
+  modelFunc,
+  thresholds = c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1),
+  ...
+) {
   result <- NULL
   message <- NULL
   badCategories <- NULL
@@ -308,14 +385,8 @@ GetModelledQuantileDataAdaptive <- function(
     filteredData <- FilterData(data, colvar, badCategories)
 
     result <- suppressWarnings({
-      try(GetModelledQuantileData(data = filteredData,
-                                  colvar = colvar,
-                                  rowvar = rowvar,
-                                  vvar = vvar,
-                                  nsdf = nsdf,
-                                  probs = probs),
-          silent = TRUE)
-      })
+      try(modelFunc(colvar = colvar, ...), silent = TRUE)
+    })
     if (!inherits(result, "try-error")) {
       if (length(badCategories) > 0) {
         message <-
@@ -346,97 +417,12 @@ FilterData <- function(data, colvar, badCategories)
   return(filteredData)
 }
 
-GetModelledTransmissionData <- function(
-  data,
-  nsdf
-) {
-  # mitools doesn't like factors with 0 frequency levels
-  data[, Transmission := droplevels(Transmission)]
-
-  # Fit saturated Poisson model to MI data
-  dataList <- imputationList(split(data, by = "Imputation"))
-
-  # Main model
-  if (optSmoothing) {
-    suppressWarnings({
-      models <- with(dataList,
-                     glm(Count_Val ~ as.factor(Transmission) * splines::ns(DY, df = nsdf),
-                         data = data,
-                         family = poisson(link = log)))
-    })
-  } else {
-    suppressWarnings({
-      models <- with(dataList,
-                     glm(Count_Val ~ as.factor(Transmission) * as.factor(DY),
-                         data = data,
-                         family = poisson(link = log)))
-    })
-  }
-
-  # Extract betas and var
-  betas <- MIextract(models, fun = coefficients)
-  vars <- MIextract(models, fun = vcov)
-
-  # Rubin's rules applied by MIcombine
-  t <- MIcombine(results = betas, variances = vars)
-  X <- model.matrix(models$`1`$formula)
-  X <- X[, names(betas$`1`)]
-
-  # Linear predictor exponentiated to get predicted counts
-  if (anyNA(coef(t))) {
-    naCoef <- which(is.na(coef(t)))
-    linpred <- exp(X[, -naCoef] %*% coef(t)[-naCoef])
-  } else{
-    linpred <- exp(X %*% coef(t))
-  }
-
-  # Manipulation to end-up with a wide-format dataframe
-  pred <- cbind(dataList$imputations$`1`,
-                Linpred = as.vector(linpred))
-  pred <- pred[, .(DateOfDiagnosisYear, Transmission, Count_Val = Linpred)]
-
-  return(pred)
-}
-
-GetModelledTransmissionDataAdaptive <- function(
-  data,
-  nsdf,
-  thresholds = c(0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1)
-) {
-  distr <- data[, .(Count = .N), by = Transmission]
-  distr[, Perc := Count / sum(Count)]
-
-  result <- NULL
-  message <- NULL
-  badCategories <- NULL
-  for (threshold in thresholds) {
-    badCategories <- distr[Perc < threshold, unique(Transmission)]
-    filteredData <- FilterData(data, "Transmission", badCategories)
-
-    result <- suppressWarnings({
-      try(GetModelledTransmissionData(data = filteredData,
-                                      nsdf = nsdf),
-          silent = TRUE)
-      })
-    if (!inherits(result, "try-error")) {
-      if (length(badCategories) > 0) {
-        message <-
-          sprintf("<p>Persons which were %s anywhere (i.e. even in one imputed dataset) are removed. Threshold of %2.2f%% of count per category within the dataset was applied.</p>",
-                  paste(colNamesMapping[as.character(badCategories)],
-                        collapse = ", "),
-                  threshold * 100)
-      }
-      break
-    }
-  }
-  
-  return(list(Result = result,
-              Message = message,
-              BadCategories = badCategories))
-}
-
 GetRDReportTable <- function(data) 
 {
+  if (is.null(data)) {
+    return(NULL)
+  }
+  
   dt <- copy(data)
   numericCols <- setdiff(colnames(dt), c("DateOfDiagnosisYear"))
   dtTotals <- dt[, lapply(.SD, sum, na.rm = TRUE), .SDcols = numericCols]
@@ -450,16 +436,17 @@ GetRDReportTable <- function(data)
                      "Missing<br />details", 
                      "Reported",
                      "Unreported", 
-                     "Estimated", 
-                     "Estimated<br />lower bound", 
-                     "Estimated<br />upper bound")
+                     "Estimated total", 
+                     "Estimated total<br />lower bound", 
+                     "Estimated total<br />upper bound")
   dt <- knitr::kable(dt,
-                     align = rep("r", ncol(rdTableData)),
+                     align = rep("r", ncol(dt)),
                      col.names = tableColNames)
 
   return(dt)  
 }
 
+# Processing -------------------------------------------------------------------
 
 optReportingDelay <- as.logical(params$ReportingDelay)
 optSmoothing <- as.logical(params$Smoothing)
@@ -510,6 +497,11 @@ dataMI[, ':='(
   Gender = factor(Gender)
 )]
 
+dataMIGenderCountDistr <- 
+  dataMI[, .(Count = .N), by = .(Gender)][, Perc := Count / sum(Count)]
+dataMITransCountDistr <- 
+  dataMI[, .(Count = .N), by = .(Transmission)][, Perc := Count / sum(Count)]
+
 # Unadjusted
 dataOrigGender <-
   GetAggregatedData(
@@ -543,63 +535,90 @@ dataOrigTrans <-
           CD4_High = quant[3])
       }")
 
-if (cd4Present) {
-  if (miPresent) {
+dataMIGenderCD4 <- NULL
+dataMITransCD4 <- NULL
+dataMITransCount <- NULL
+if (miPresent) {
+  if (cd4Present) {
     # Quantile regressions not possible with rare categories and discrete time
     # extrapolated - dodgy results from quantile regressions with rare
     # categories and smoothed time rare categories removed.
     dataMIGenderCD4List <-
-      GetModelledQuantileDataAdaptive(data = dataMI,
-                                      colvar = "Gender",
-                                      rowvar = "DateOfDiagnosisYear",
-                                      vvar = "SqCD4",
-                                      nsdf = nsdf,
-                                      colNamesMapping = colNamesMappingTable)
+      GetModelledDataAdaptive(
+        data = dataMI,
+        modelFunc = GetModelledQuantileData,
+        colvar = "Gender",
+        rowvar = "DateOfDiagnosisYear",
+        vvar = "SqCD4",
+        distr = dataMIGenderCountDistr,
+        nsdf = nsdf,
+        colNamesMapping = colNamesMappingTable)
     dataMITransCD4List <-
-      GetModelledQuantileDataAdaptive(data = dataMI,
-                                      colvar = "Transmission",
-                                      rowvar = "DateOfDiagnosisYear",
-                                      vvar = "SqCD4",
-                                      nsdf = nsdf,
-                                      colNamesMapping = colNamesMappingTable)
+      GetModelledDataAdaptive(
+        data = dataMI,
+        modelFunc = GetModelledQuantileData,
+        colvar = "Transmission",
+        rowvar = "DateOfDiagnosisYear",
+        vvar = "SqCD4",
+        distr = dataMITransCountDistr,
+        nsdf = nsdf,
+        colNamesMapping = colNamesMappingTable)
+    
     dataMIGenderCD4 <- dataMIGenderCD4List[["Result"]]
     dataMITransCD4 <- dataMITransCD4List[["Result"]]
+    
+    transBadCategories <- dataMITransCD4List[["BadCategories"]]
+  } else {
+    transBadCategories <- c()
+  }
 
+  # Prefilter data on the same categories as in CD4 modelling
+  dataMI <- 
+    FilterData(
+      data = dataMI, 
+      colvar = "Transmission",
+      badCategories = transBadCategories)
+  dataMITransCountList <- 
+    GetModelledDataAdaptive(
+      data = dataMI,
+      modelFunc = GetModelledCountData,
+      colvar = "Transmission",                    
+      distr = dataMITransCountDistr,
+      nsdf = nsdf)
+  dataMITransCount <- 
+    GetAggregatedData(
+      data = dataMITransCountList[["Result"]],
+      rowvar = "DateOfDiagnosisYear",
+      colvar = "Transmission",
+      aggrExpr = ".(Count_Val = sum(Count_Val, na.rm = TRUE))")
+}
+
+cd4YLim <- NULL
+if (cd4Present) {
+  if (miPresent) {
     cd4YLim <- 
-      GetNiceUpperLimit(max(dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-                            dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-                            dataMIGenderCD4$CD4_Median,
-                            dataMITransCD4$CD4_Median,
-                            na.rm = TRUE))
+      GetNiceUpperLimit(max(
+        dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+        dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+        dataMIGenderCD4$CD4_Median,
+        dataMITransCD4$CD4_Median,
+        na.rm = TRUE))
   } else {
     cd4YLim <- 
-      GetNiceUpperLimit(max(dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-                            dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-                            na.rm = TRUE))
+      GetNiceUpperLimit(max(
+        dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+        dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+        na.rm = TRUE))
   }
 }
 
-dataMI <- FilterData(data = dataMI, 
-                     colvar = "Transmission",
-                     badCategories = dataMITransCD4List[["BadCategories"]])
-dataMITrans <-
-  dataMI[,
-         .(Count_Val = sum(ModelWeight, na.rm = TRUE)),
-         by = .(Imputation, DateOfDiagnosisYear, Transmission)]
-if (nrow(dataMITrans) > 0) {
-  dataMITrans[, DY := DateOfDiagnosisYear - min(DateOfDiagnosisYear)]
-} else {
-  dataMITrans[, DY := integer()]
+rdData <- NULL
+if (rdPresent) {
+  rdIdx <- tail(grep("^REPORTING_DELAYS$", adjTypes), 1)
+  rdData <- params[["AdjustedData"]][[rdIdx]][["Artifacts"]][["ReportTableData"]]
 }
-dataMITrans <- GetModelledTransmissionDataAdaptive(data = dataMITrans,
-                                                   nsdf = nsdf)
-dataMITrans <- GetAggregatedData(data = dataMITrans,
-                                 rowvar = "DateOfDiagnosisYear",
-                                 colvar = "Transmission",
-                                 aggrExpr = ".(Count_Val = sum(Count_Val, na.rm = TRUE))")
 
 # PRODUCE OUTPUTS --------------------------------------------------------------
-
 tblOrigGenderCount <- 
   GetReportTable(data = dataOrigGender,
                  rowvar = "DateOfDiagnosisYear",
@@ -647,12 +666,12 @@ plotOrigTransCount <-
                 colvar = "Transmission",
                 vvars = "Count_Val")
 tblMITransCount <- 
-  GetReportTable(data = dataMITrans,
+  GetReportTable(data = dataMITransCount,
                  rowvar = "DateOfDiagnosisYear",
                  colvar = "Transmission",
                  vvars = c("Count_Val", "Count_Perc"))
 plotMITransCount <- 
-  GetReportPlot(data = dataMITrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+  GetReportPlot(data = dataMITransCount[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
                 rowvar = "DateOfDiagnosisYear",
                 colvar = "Transmission",
                 vvars = "Count_Val",
@@ -683,11 +702,7 @@ plotMITransCD4 <-
                 confIntervals = TRUE,
                 cd4YLim = cd4YLim)
 
-if (rdPresent) {
-  rdIdx <- which(adjTypes == "REPORTING_DELAYS")[[1]]
-  rdData <- params[["AdjustedData"]][[rdIdx]][["Artifacts"]][["ReportTableData"]]
-  tblRd <- GetRDReportTable(data = rdData)
-}
+tblRd <- GetRDReportTable(data = rdData)
 ```
 
 --------------------------------------------------------------------------------
@@ -724,7 +739,7 @@ cat(sprintf("<li>%s</li>",
 cat("</ol>")
 
 if (!cd4Present) {
-  cat("<p>CD4 count is missing in the unadjusted and the adjusted data. All CD4 related plots and figures are omitted in this report.</p>")  
+  cat("<p>CD4 count is missing in both the unadjusted and the adjusted data. All CD4 related tables and figures are omitted in this report.</p>")  
 }
 ```
 
@@ -732,93 +747,95 @@ if (!cd4Present) {
 
 # Comparison of data by Gender
 
-## Number of diagnoses per year by Gender
+## Number of diagnoses per year
 
 Data stratified by *gender* is shown only for unadjusted data since there were 
 no missing data on *gender* after pre-processing, which takes place before 
 adjustments.
 
-### Number of diagnoses per year by Gender category and overall before 
-adjustments
+### Before and after adjustments
 
 ```{r}
-tblOrigGenderCount
 plotOrigGenderCount
+tblOrigGenderCount
 ```
 
-## Median CD4 cell count (cells/microL) by Gender
+## Median CD4 cell count (cells/$\mu$L)
 
-```{r}
-if (cd4Present) {
-  cat("### Median CD4 cell count (cells/microL) by Gender before adjustments")
-  tblOrigGenderCD4
-  plotOrigGenderCD4
-  
-  if (miPresent) {
-    cat("### Median CD4 cell count (cells/microL) by Gender after adjustments")
-    tblMIGenderCD4
-    if (!IsEmptyString(dataMIGenderCD4List[["Message"]])) {
-      cat(dataMIGenderCD4List[["Message"]])
-    }
-    plotMIGenderCD4
-  } else {
-    cat("<p>CD4 cell count after adjustments is not available since no imputations adjustements have been run.</p>")
-  }
-} else {
-  cat("<p>CD4 cell count results are not available due to full missingness of this attribute in the input data.</p>")
+```{r, eval = cd4Present}
+cat("### Before adjustments", "\n")
+plotOrigGenderCD4
+tblOrigGenderCD4
+```
+
+```{r, eval = cd4Present & miPresent}
+cat("### After adjustments", " \n")
+plotMIGenderCD4
+tblMIGenderCD4
+if (!IsEmptyString(dataMIGenderCD4List[["Message"]])) {
+  cat(dataMIGenderCD4List[["Message"]], "\n")
 }
+```
+
+```{r, eval = cd4Present & !miPresent}
+cat("CD4 cell count after adjustments is not available since no imputation adjustements have been run.", "\n")
+```
+
+```{r, eval = !cd4Present}
+cat("CD4 cell count results are not available due to full missingness of this attribute in the input data.", "\n")
 ```
 
 --------------------------------------------------------------------------------
 
 # Comparison of data by Transmission
 
-## Number of diagnoses per year by Transmission
+## Number of diagnoses per year
 
-### Number of diagnoses per year by Transmission category and overall before 
-adjustments
+### Before adjustments
 
 ```{r}
-tblOrigTransCount
 plotOrigTransCount
+tblOrigTransCount
 ```
 
-### Number of diagnoses per year by Transmission category and overall after
-adjustments
-
-```{r}
-tblMITransCount
+```{r, eval = miPresent}
+cat("### After adjustments", "\n")
 plotMITransCount
-```
-
-## Median CD4 cell count (cells/microL) by Transmission
-
-```{r}
-if (cd4Present) {
-  cat("### Median CD4 cell count (cells/microL) by Transmission before adjustments")
-  tblOrigTransCD4
-  plotOrigTransCD4
-  
-  if (miPresent) {
-    cat("### Median CD4 cell count (cells/microL) by Transmission after adjustments")
-    tblMITransCD4
-    if (!IsEmptyString(dataMITransCD4List[["Message"]])) {
-      cat(dataMITransCD4List[["Message"]])
-    }
-    plotMITransCD4
-  } else {
-    cat("<p>CD4 cell count after adjustments is not available since no imputations adjustements have been run.</p>")
-  }
-} else {
-  cat("<p>CD4 cell count results are not available due to full missingness of this attribute in the input data.</p>")
+tblMITransCount
+if (!IsEmptyString(dataMITransCountList[["Message"]])) {
+  cat(dataMITransCountList[["Message"]], "\n")
 }
 ```
 
-```{r}
-if (rdPresent) {
-  cat("-----------------------------------------------------------------------")
-  cat("# Comparison of the reported and estimated number of diagnoses per year")
-  tblRd
+## Median CD4 cell count (cells/$\mu$L)
+
+```{r, eval = cd4Present}
+cat("### Before adjustments", "\n")
+plotOrigTransCD4
+tblOrigTransCD4
+```
+
+```{r, eval = cd4Present & miPresent}
+cat("### After adjustments", "\n")
+plotMITransCD4
+tblMITransCD4
+if (!IsEmptyString(dataMITransCD4List[["Message"]])) {
+  cat(dataMITransCD4List[["Message"]], "\n")
 }
+```
+
+```{r, eval = cd4Present & !miPresent}
+cat("CD4 cell count after adjustments is not available since no imputation adjustements have been run.", "\n")
+```
+
+```{r, eval = !cd4Present}
+cat("CD4 cell count results are not available due to full missingness of this attribute in the input data.", "\n")
+```
+
+```{r, eval = rdPresent}
+cat("-------------------------------------------------------------------", "\n")
+cat("\n")
+cat("# Comparison of the reported and estimated number of diagnoses per year", "\n")
+tblRd
 
 ```
