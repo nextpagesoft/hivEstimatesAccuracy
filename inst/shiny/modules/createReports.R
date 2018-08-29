@@ -1,7 +1,7 @@
 # Module globals
 reportFileNames <- GetReportFileNames()
 reportNames <- names(reportFileNames)
-skipWidgetParamNames <- c("AdjustedData", "nsdf")
+skipWidgetParamNames <- c("AdjustedData", "Artifacts", "nsdf")
 
 # User interface
 createReportsUI <- function(id)
@@ -29,7 +29,8 @@ createReports <- function(input, output, session, adjustedData)
   # Store reactive values
   vals <- reactiveValues(selectedReportName = NULL,
                          reportParamsWidgets = list(),
-                         reportParams = list())
+                         reportParams = list(),
+                         reportParamsFull = list())
 
   # Output reports selection
   output[["reportSelection"]] <- renderUI({
@@ -58,16 +59,24 @@ createReports <- function(input, output, session, adjustedData)
   # Get selected report name on change
   observeEvent(input[["select"]], {
     vals$selectedReportName <- req(input$select)
+
+    # Populate widgets with default values for a next dialog open
     reportFileName <- reportFileNames[vals$selectedReportName]
     if (file.exists(reportFileName)) {
       reportMdLines <- readLines(reportFileName, warn = FALSE)
       paramSpecs <- knitr::knit_params(reportMdLines)
+
+      vals$reportParams[[vals$selectedReportName]] <-
+        GetReportDefaultParams(params = paramSpecs,
+                               skipParamNames = skipWidgetParamNames)
 
       vals$reportParamsWidgets <-
         GetParamWidgets(paramSpecs,
                         params = vals$reportParams[[vals$selectedReportName]],
                         skipParamNames = skipWidgetParamNames,
                         ns = ns)
+
+      vals$reportParamsFull <- list()
     }
   })
 
@@ -96,6 +105,7 @@ createReports <- function(input, output, session, adjustedData)
     }
     vals$reportParams[[vals$selectedReportName]] <- reportParams
 
+    # Populate widgets with updated values for a next dialog open
     reportFileName <- reportFileNames[vals$selectedReportName]
     if (file.exists(reportFileName)) {
       reportMdLines <- readLines(reportFileName, warn = FALSE)
@@ -124,6 +134,17 @@ createReports <- function(input, output, session, adjustedData)
                                       vals$reportParams[[vals$selectedReportName]])
 
                      setProgress(0.1)
+
+                     if (is.element(vals$selectedReportName, c("Main Report-new"))) {
+                       params <- GetMainReportArtifacts(params)
+                     }
+
+                     setProgress(0.5)
+
+                     # Store parameters for reuse when downloading
+                     vals$reportParamsFull <- params
+
+                     setProgress(0.7)
 
                      report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
                                                   params = params)
@@ -191,9 +212,9 @@ createReports <- function(input, output, session, adjustedData)
                      detail = "The report file will be available for download shortly.",
                      value = 0, {
 
-          params <- append(list(AdjustedData = adjustedData()),
-                           vals$reportParams[[vals$selectedReportName]])
-          setProgress(0.1)
+          params <- vals$reportParamsFull
+
+          setProgress(0.2)
 
           # Knit the document, passing in the "data" list, and eval it in a
           # child of the global environment (this isolates the code in the document

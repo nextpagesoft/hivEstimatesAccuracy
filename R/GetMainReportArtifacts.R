@@ -38,7 +38,7 @@ GetMainReportArtifacts <- function(params)
         paste(colNamesMapping[-c(1:2)], "[N (%)]")),
       names(colNamesMapping))
 
-  # Functions --------------------------------------------------------------------
+  # Functions ------------------------------------------------------------------
 
   FormatNumbers <- function(
     x,
@@ -73,11 +73,15 @@ GetMainReportArtifacts <- function(params)
     colvar,
     aggrExpr = ".(Count = .N)"
   ) {
+    if (is.null(data)) {
+      return(NULL)
+    }
 
-    aggr1 <- data[, {eval(parse(text = aggrExpr))}, by = c(rowvar, colvar)]
-    aggr2 <- data[, {eval(parse(text = aggrExpr))}, by = c(rowvar)]
-    aggr3 <- data[, {eval(parse(text = aggrExpr))}, by = c(colvar)]
-    aggr4 <- data[, {eval(parse(text = aggrExpr))}]
+    expr <- parse(text = aggrExpr)
+    aggr1 <- data[, eval(expr), by = c(rowvar, colvar)]
+    aggr2 <- data[, eval(expr), by = c(rowvar)]
+    aggr3 <- data[, eval(expr), by = c(colvar)]
+    aggr4 <- data[, eval(expr)]
 
     aggr2[, (colvar) := "Overall"]
     aggr3[, (rowvar) := "Total"]
@@ -154,6 +158,9 @@ GetMainReportArtifacts <- function(params)
     if (is.null(data)) {
       return(NULL)
     }
+
+    filter <- sprintf("DateOfDiagnosisYear != 'Total' & %s != 'Overall'", colvar)
+    data <- data[eval(parse(text = filter))]
 
     plotObj <- ggplot(data = data,
                       aes(x = as.integer(get(rowvar)),
@@ -233,7 +240,7 @@ GetMainReportArtifacts <- function(params)
 
       betas <- mitools::MIextract(models, fun = coefficients)
       t <- mitools::MIcombine(betas, vars)
-      X <- model.matrix(models$`1`$formula)
+      X <- SparseM::model.matrix(models$`1`$formula)
       linpred <- (X %*% coef(t))^2
       pred <- cbind(dataList$imputations$`1`,
                     Linpred = as.vector(linpred))
@@ -267,7 +274,7 @@ GetMainReportArtifacts <- function(params)
     dt[, (colvar) := droplevels(get(colvar))]
 
     # Fit saturated Poisson model to MI data
-    dataList <- mitools::imputationList(split(data, by = "Imputation"))
+    dataList <- mitools::imputationList(split(dt, by = "Imputation"))
 
     # Main model
     if (optSmoothing) {
@@ -277,7 +284,6 @@ GetMainReportArtifacts <- function(params)
                glm(formula =
                      as.formula(sprintf("Count_Val ~ as.factor(%s) * splines::ns(DY, df = nsdf)",
                                         colvar)),
-                   data = data,
                    family = poisson(link = log)))
       })
     } else {
@@ -287,7 +293,6 @@ GetMainReportArtifacts <- function(params)
                glm(formula =
                      as.formula(sprintf("Count_Val ~ as.factor(%s) * as.factor(DY)",
                                         colvar)),
-                   data = data,
                    family = poisson(link = log)))
       })
     }
@@ -298,7 +303,7 @@ GetMainReportArtifacts <- function(params)
 
     # Rubin's rules applied by MIcombine
     t <- mitools::MIcombine(results = betas, variances = vars)
-    X <- model.matrix(models$`1`$formula)
+    X <- SparseM::model.matrix(models$`1`$formula)
     X <- X[, names(betas$`1`)]
 
     # Linear predictor exponentiated to get predicted counts
@@ -327,21 +332,18 @@ GetMainReportArtifacts <- function(params)
   ) {
     result <- NULL
     message <- NULL
-    badCategories <- NULL
-    thresholds <- sort(distr$Perc)[-length(distr$Perc)]
-    for (threshold in thresholds) {
-      cat("Threshold:", threshold, "\n")
-      badCategories <- distr[Perc < threshold, unique(get(colvar))]
-      cat("Bad categories:", paste(badCategories, collapse = ", "), "\n")
+    badCategories <- c()
+    categories <- distr[order(-Perc), get(colvar)]
+    repeat {
       filteredData <- FilterData(data = data,
                                  colvar = colvar,
                                  badCategories = badCategories)
 
       result <- suppressWarnings({
-        try(modelFunc(colvar = colvar, dt = filteredData, ...), silent = TRUE)
+        try(modelFunc(colvar = colvar, dt = filteredData, ...),
+            silent = TRUE)
       })
 
-      cat("Success:", !inherits(result, "try-error"), "\n")
       if (!inherits(result, "try-error")) {
         if (length(badCategories) > 0) {
           message <-
@@ -351,6 +353,10 @@ GetMainReportArtifacts <- function(params)
                     threshold * 100)
         }
         break
+      } else {
+        badCategories <- tail(categories, 1)
+        categories <- setdiff(categories, badCategories)
+        result <- NULL
       }
     }
 
@@ -387,13 +393,13 @@ GetMainReportArtifacts <- function(params)
                 dtTotals)
     dt[, (numericCols) := lapply(.SD, FormatNumbers), .SDcols = numericCols]
     setorderv(dt, c("DateOfDiagnosisYear"))
-    tableColNames <- c("Diagnosis<br />year",
-                       "Missing<br />details",
+    tableColNames <- c("Diagnosis<br /> year",
+                       "Missing<br /> details",
                        "Reported",
                        "Unreported",
                        "Estimated total",
-                       "Estimated total<br />lower bound",
-                       "Estimated total<br />upper bound")
+                       "Estimated total<br /> lower bound",
+                       "Estimated total<br /> upper bound")
     dt <- knitr::kable(dt,
                        align = rep("r", ncol(dt)),
                        col.names = tableColNames)
@@ -426,7 +432,7 @@ GetMainReportArtifacts <- function(params)
     fullData[, Imputation := 0L]
   }
 
-  if (rdPresent & optReportingDelay) {
+  if (rdPresent && optReportingDelay) {
     fullData[, ModelWeight := Weight]
   } else {
     fullData[, ModelWeight := 1.0]
@@ -471,7 +477,7 @@ GetMainReportArtifacts <- function(params)
           CD4_Low = quant[1],
           CD4_Median = quant[2],
           CD4_High = quant[3])
-      }")
+        }")
 
   dataOrigTrans <-
     GetAggregatedData(
@@ -487,11 +493,11 @@ GetMainReportArtifacts <- function(params)
           CD4_Low = quant[1],
           CD4_Median = quant[2],
           CD4_High = quant[3])
-      }")
+        }")
 
-  dataMIGenderCD4 <- NULL
-  dataMITransCD4 <- NULL
-  dataMITransCount <- NULL
+  dataMIGenderCD4List <- NULL
+  dataMITransCD4List <- NULL
+  dataMITransCountList <- NULL
   if (miPresent) {
     if (cd4Present) {
       # Quantile regressions not possible with rare categories and discrete time
@@ -518,9 +524,6 @@ GetMainReportArtifacts <- function(params)
           nsdf = nsdf,
           colNamesMapping = colNamesMappingTable)
 
-      dataMIGenderCD4 <- dataMIGenderCD4List[["Result"]]
-      dataMITransCD4 <- dataMITransCD4List[["Result"]]
-
       transBadCategories <- dataMITransCD4List[["BadCategories"]]
     } else {
       transBadCategories <- c()
@@ -537,14 +540,14 @@ GetMainReportArtifacts <- function(params)
         data = dataMI,
         modelFunc = GetModelledCountData,
         colvar = "Transmission",
-        distr = dataMITransCountDistr,
+        distr = dataMITransCountDistr[!Transmission %in% transBadCategories],
         nsdf = nsdf)
-    dataMITransCount <-
+    dataMITransCountList[["Result"]] <-
       GetAggregatedData(
         data = dataMITransCountList[["Result"]],
         rowvar = "DateOfDiagnosisYear",
         colvar = "Transmission",
-        aggrExpr = ".(Count_Val = sum(Count_Val, na.rm = TRUE))")
+        aggrExpr = "list(Count_Val = sum(Count_Val, na.rm = TRUE))")
   }
 
   cd4YLim <- NULL
@@ -554,8 +557,8 @@ GetMainReportArtifacts <- function(params)
         GetNiceUpperLimit(max(
           dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
           dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-          dataMIGenderCD4$CD4_Median,
-          dataMITransCD4$CD4_Median,
+          dataMIGenderCD4List[["Result"]]$CD4_Median,
+          dataMITransCD4List[["Result"]]$CD4_Median,
           na.rm = TRUE))
     } else {
       cd4YLim <-
@@ -572,14 +575,18 @@ GetMainReportArtifacts <- function(params)
     rdData <- params[["AdjustedData"]][[rdIdx]][["Artifacts"]][["ReportTableData"]]
   }
 
-  # PRODUCE OUTPUTS --------------------------------------------------------------
+  dataMIGenderCD4 <- dataMIGenderCD4List[["Result"]]
+  dataMITransCD4 <- dataMITransCD4List[["Result"]]
+  dataMITransCount <- dataMITransCountList[["Result"]]
+
+  # PRODUCE OUTPUTS ------------------------------------------------------------
   tblOrigGenderCount <-
     GetReportTable(data = dataOrigGender,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Gender",
                    vvars = c("Count_Val", "Count_Perc"))
   plotOrigGenderCount <-
-    GetReportPlot(data = dataOrigGender[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+    GetReportPlot(data = dataOrigGender,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Gender",
                   vvars = "Count_Val")
@@ -590,7 +597,7 @@ GetMainReportArtifacts <- function(params)
                    colvar = "Gender",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
   plotOrigGenderCD4 <-
-    GetReportPlot(data = dataOrigGender[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+    GetReportPlot(data = dataOrigGender,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Gender",
                   vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
@@ -602,7 +609,7 @@ GetMainReportArtifacts <- function(params)
                    colvar = "Gender",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
   plotMIGenderCD4 <-
-    GetReportPlot(data = dataMIGenderCD4[DateOfDiagnosisYear != "Total" & Gender != "Overall"],
+    GetReportPlot(data = dataMIGenderCD4,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Gender",
                   vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
@@ -615,7 +622,7 @@ GetMainReportArtifacts <- function(params)
                    colvar = "Transmission",
                    vvars = c("Count_Val", "Count_Perc"))
   plotOrigTransCount <-
-    GetReportPlot(data = dataOrigTrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+    GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Transmission",
                   vvars = "Count_Val")
@@ -625,7 +632,7 @@ GetMainReportArtifacts <- function(params)
                    colvar = "Transmission",
                    vvars = c("Count_Val", "Count_Perc"))
   plotMITransCount <-
-    GetReportPlot(data = dataMITransCount[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+    GetReportPlot(data = dataMITransCount,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Transmission",
                   vvars = "Count_Val",
@@ -637,7 +644,7 @@ GetMainReportArtifacts <- function(params)
                    colvar = "Transmission",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
   plotOrigTransCD4 <-
-    GetReportPlot(data = dataOrigTrans[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+    GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Transmission",
                   vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
@@ -649,7 +656,7 @@ GetMainReportArtifacts <- function(params)
                    colvar = "Transmission",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
   plotMITransCD4 <-
-    GetReportPlot(data = dataMITransCD4[DateOfDiagnosisYear != "Total" & Transmission != "Overall"],
+    GetReportPlot(data = dataMITransCD4,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Transmission",
                   vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
@@ -658,19 +665,33 @@ GetMainReportArtifacts <- function(params)
 
   tblRd <- GetRDReportTable(data = rdData)
 
-  return(list(TblOrigGenderCount = tblOrigGenderCount,
-              PlotOrigGenderCount = plotOrigGenderCount,
-              TblOrigGenderCD4 = tblOrigGenderCD4,
-              PlotOrigGenderCD4 = plotOrigGenderCD4,
-              TblMIGenderCD4 = tblMIGenderCD4,
-              PlotMIGenderCD4 = plotMIGenderCD4,
-              TblOrigTransCount = tblOrigTransCount,
-              PlotOrigTransCount = plotOrigTransCount,
-              TblMITransCount = tblMITransCount,
-              PlotMITransCount = plotMITransCount,
-              TblOrigTransCD4 = tblOrigTransCD4,
-              PlotOrigTransCD4 = plotOrigTransCD4,
-              tblMITransCD4 = tblMITransCD4,
-              PlotMITransCD4 = plotMITransCD4,
-              TblRd = tblRd))
+  return(
+    list(
+      ReportingDelay = optReportingDelay,
+      Smoothing = optSmoothing,
+      CD4ConfInt = optCD4ConfInt,
+      Artifacts = list(
+        MIPresent = miPresent,
+        RDPresent = rdPresent,
+        CD4Present = cd4Present,
+        TblOrigGenderCount = tblOrigGenderCount,
+        PlotOrigGenderCount = plotOrigGenderCount,
+        TblOrigGenderCD4 = tblOrigGenderCD4,
+        PlotOrigGenderCD4 = plotOrigGenderCD4,
+        TblMIGenderCD4 = tblMIGenderCD4,
+        PlotMIGenderCD4 = plotMIGenderCD4,
+        TblOrigTransCount = tblOrigTransCount,
+        PlotOrigTransCount = plotOrigTransCount,
+        TblMITransCount = tblMITransCount,
+        PlotMITransCount = plotMITransCount,
+        TblOrigTransCD4 = tblOrigTransCD4,
+        PlotOrigTransCD4 = plotOrigTransCD4,
+        TblMITransCD4 = tblMITransCD4,
+        PlotMITransCD4 = plotMITransCD4,
+        dataMIGenderCD4Message = dataMIGenderCD4List[["Message"]],
+        dataMITransCountMessage = dataMITransCountList[["Message"]],
+        dataMITransCD4Message = dataMITransCD4List[["Message"]],
+        TblRd = tblRd)
+      )
+    )
 }

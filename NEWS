@@ -3,10 +3,11 @@ Version 0.9.10 (2018/08/)
 
 * Do not filter records in RD adjustment.
 * New naming convention for migrant variables.
-* Implement RD missingness plot.
+* Implement RD missingness plot in the summary page.
 * Implement adaptive "badCategories" detection mechanism in the main report.
 * Implement "Download as Latex" option for the main report.
-*
+* Completely redesigned Markdown source report with caching of tables and plots.
+* Redesigned output report with data presented per Gender and Transmission.
 
 
 Version 0.9.9 (2018/07/25)

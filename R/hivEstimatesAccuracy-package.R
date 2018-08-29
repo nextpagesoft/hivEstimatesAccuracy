@@ -17,7 +17,7 @@
 #' @import data.table
 #' @import ggplot2
 #' @importFrom shiny HTML
-#' @importFrom stats setNames lowess quantile sd var acf model.matrix glm poisson
+#' @importFrom stats setNames lowess quantile sd var acf glm poisson
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
 #' @importFrom utils unzip head zip
 #' @importFrom tools file_path_sans_ext

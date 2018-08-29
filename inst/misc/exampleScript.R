@@ -60,7 +60,7 @@ if (!is.null(inputData)) {
                  CD4ConfInt = TRUE)
 
   if (is.element(reportName, c("Main Report-new"))) {
-    reportArtifacts <- GetMainReportArtifacts(params)
+    params <- GetMainReportArtifacts(params)
   }
 
   htmlReportFileName <- RenderReportToFile(
