@@ -1,4 +1,4 @@
-Version 0.9.10 (2018/08/)
+Version 0.9.10 (2018/08/29)
 ------------------------------------------------------------------------------
 
 * Do not filter records in RD adjustment.
@@ -8,6 +8,7 @@ Version 0.9.10 (2018/08/)
 * Implement "Download as Latex" option for the main report.
 * Completely redesigned Markdown source report with caching of tables and plots.
 * Redesigned output report with data presented per Gender and Transmission.
+* Option to include confidence intervals in the report plots.
 
 
 Version 0.9.9 (2018/07/25)
