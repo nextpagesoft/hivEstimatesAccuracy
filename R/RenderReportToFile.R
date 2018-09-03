@@ -45,7 +45,7 @@ RenderReportToFile <- function(
     unlink(reportDirName, recursive = TRUE)
   })
 
-  if (format == "all" && "word_document" %in% format) {
+  if (format == "all" || "word_document" %in% format) {
     dir.create(file.path(reportDirName, "resources"),
                showWarnings = FALSE, recursive = TRUE)
 
