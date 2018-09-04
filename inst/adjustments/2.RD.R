@@ -156,6 +156,7 @@ list(
       fitStratum <- data.table(
         Delay = fit$time,
         P = fit$surv,
+        Weight = 1/fit$surv,
         Var = fit$std.err^2,
         Stratum = factor(rep(seq_along(strata), strata),
                          labels = levels(compData$Stratum)))
@@ -165,6 +166,12 @@ list(
       # Convert "NA" to NA
       fitStratum[, (stratVarNamesImp) := lapply(.SD, function(x) ifelse(x == "NA", NA_character_, x)),
                  .SDcols = stratVarNamesImp]
+
+      # Create final output object
+      outputData[fitStratum[, c("Stratum", "VarT", "Weight"), with = FALSE],
+                 Weight := Weight,
+                 on = .(VarT, Stratum)]
+      outputData[is.na(Weight), Weight := 1]
 
       # Get distribution object as artifact
       varNames <- setdiff(colnames(fitStratum),
@@ -190,17 +197,10 @@ list(
 
       # Compute estimated count and its variance
       agregat[, ":="(
-        EstCount = Count / P,
+        EstCount = Count * Weight,
         EstCountVar = (Count * (Count + 1) / P^4 * Var) + Count * (1 - P) / P^2
       )]
       agregat[, MissingData := is.na(P)]
-
-      # Create final output object
-      outputData <- merge(outputData,
-                          agregat[MissingData == FALSE, .(VarT, Stratum, Weight = 1 / P)],
-                          by = c("VarT", "Stratum"),
-                          all.x = TRUE)
-      outputData[is.na(Weight), Weight := 1]
 
       # C) TOTAL PLOT ----------------------------------------------------------------------------------
       totalPlotData <- GetRDPlotData(data = agregat,
