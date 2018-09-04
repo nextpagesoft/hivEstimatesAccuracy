@@ -19,7 +19,7 @@
 GetMissingnessPlots <- function(
   inputData,
   columnNames = c("Transmission", "GroupedRegionOfOrigin", "Age", "FirstCD4Count"),
-  labels = c("Transm.", "Migrant", "Age", "CD4")
+  labels = c("Transmission", "Migrant", "Age", "CD4")
 )
 {
   stopifnot(!missing(inputData))

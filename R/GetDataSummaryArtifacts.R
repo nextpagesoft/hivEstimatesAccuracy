@@ -36,10 +36,12 @@ GetDataSummaryArtifacts <- function(inputData)
 
   # Reporting delays missingness plots
   missPlotsRD <-
-    GetMissingnessPlots(inputData,
-                        columnNames = c("DateOfDiagnosisYear", "DateOfDiagnosisQuarter",
-                                        "DateOfNotificationYear", "DateOfNotificationQuarter"),
-                        labels = c("Diag. year", "Diag. quarter", "Notif. year", "Notif. quarter"))
+    GetMissingnessPlots(
+      inputData,
+      columnNames = c("DateOfDiagnosisYear", "DateOfDiagnosisQuarter",
+                      "DateOfNotificationYear", "DateOfNotificationQuarter"),
+      labels = c("Diagnosis year", "Diagnosis quarter", "Notification year",
+                 "Notification quarter"))
 
   # Observed delay distribution
   inputData[, ":="(
