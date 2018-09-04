@@ -57,6 +57,8 @@ ui <- tagList(
     ),
     dashboardBody(
       tags$head(
+        tags$script(async = NA, src = "https://www.googletagmanager.com/gtag/js?id=UA-125099925-2"),
+        includeScript(path = "./www/js/google_analytics.js"),
         tags$link(rel = "stylesheet", type = "text/css", href = "./www/css/style.css")
       ),
       tabItems(
