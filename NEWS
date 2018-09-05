@@ -1,7 +1,15 @@
-Version 0.9.11 (2018/09/)
+Version 0.9.11 (2018/09/05)
 --------------------------------------------------------------------------------
 
-* Initial implementation of Google Analytics
+* General: initial implementation of Google Analytics data collection
+* Adjustments: parallel execution disabled for now until it is better tested
+* Main report: show results by Migrant
+* Main report: pre-render plots for faster downloading
+* Main report: adjust total/overall columns/rows in the tables
+* Main report: increase quality of plots in html output (switch from png to svg)
+* Main report: fix printing "mu" (micro) symbol
+* Main report: print estimated unreported and total with confidence interval
+  bounds
 
 
 Version 0.9.10 (2018/08/29)
