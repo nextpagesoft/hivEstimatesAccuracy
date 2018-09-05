@@ -15,13 +15,15 @@
 #'
 #' @export
 GetAdjustmentSpecFileNames <- function(
-  path = system.file("adjustments", package = "hivEstimatesAccuracy"))
-{
+  path = system.file("adjustments", package = "hivEstimatesAccuracy")
+) {
   adjustmentFileNames <- list.files(path,
-                                    pattern = ".R$",
+                                    pattern = "\\.R$",
                                     full.names = TRUE)
 
-  adjustmentNames <- sapply(adjustmentFileNames, GetListObject, section = "Name")
+  adjustmentNames <- sapply(adjustmentFileNames,
+                            GetListObject,
+                            section = "Name")
 
   if (anyDuplicated(adjustmentNames) != 0) {
     stop("Adjustments have duplicated names")
