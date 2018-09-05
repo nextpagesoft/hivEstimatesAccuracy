@@ -10,10 +10,12 @@ output:
     smart: yes
     toc: yes
     number_sections: yes
+    dev: svg
   html_document:
     highlight: null
     mathjax: null
     number_sections: yes
+    dev: svg
     self_contained: yes
     theme: default
     toc: yes
@@ -55,6 +57,7 @@ params:
 
 ```{r setup, eval = TRUE, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
+                      cache = FALSE,
                       results = "asis", 
                       message = FALSE, 
                       warning = FALSE, 
@@ -119,7 +122,7 @@ params$Artifacts$PlotOrigGenderCount
 params$Artifacts$TblOrigGenderCount
 ```
 
-## Median CD4 cell count (cells/$\mu$L)
+## Median CD4 cell count (cells/&micro;L)
 
 ```{r, eval = params$Artifacts$CD4Present}
 cat("### Before adjustments", "\n")
@@ -131,8 +134,8 @@ params$Artifacts$TblOrigGenderCD4
 cat("### After adjustments", " \n")
 params$Artifacts$PlotMIGenderCD4
 params$Artifacts$TblMIGenderCD4
-if (!IsEmptyString(params$Artifacts$dataMIGenderCD4Message)) {
-  cat(params$Artifacts$dataMIGenderCD4Message, "\n")
+if (!IsEmptyString(params$Artifacts$DataMIGenderCD4Message)) {
+  cat(params$Artifacts$DataMIGenderCD4Message, "\n")
 }
 ```
 
@@ -166,7 +169,7 @@ if (!IsEmptyString(params$Artifacts$dataMITransCountMessage)) {
 }
 ```
 
-## Median CD4 cell count (cells/$\mu$L)
+## Median CD4 cell count (cells/&micro;L)
 
 ```{r, eval = params$Artifacts$CD4Present}
 cat("### Before adjustments", "\n")
@@ -178,8 +181,55 @@ params$Artifacts$TblOrigTransCD4
 cat("### After adjustments", "\n")
 params$Artifacts$PlotMITransCD4
 params$Artifacts$TblMITransCD4
-if (!IsEmptyString(params$Artifacts$dataMITransCD4Message)) {
-  cat(params$Artifacts$dataMITransCD4Message, "\n")
+if (!IsEmptyString(params$Artifacts$DataMITransCD4Message)) {
+  cat(params$Artifacts$DataMITransCD4Message, "\n")
+}
+```
+
+```{r, eval = params$Artifacts$CD4Present & !params$Artifacts$MIPresent}
+cat("CD4 cell count after adjustments is not available since no imputation adjustements have been run.", "\n")
+```
+
+```{r, eval = !params$Artifacts$CD4Present}
+cat("CD4 cell count results are not available due to full missingness of this attribute in the input data.", "\n")
+```
+
+--------------------------------------------------------------------------------
+
+# Comparison of data by Migration
+
+## Number of diagnoses per year
+
+### Before adjustments
+
+```{r}
+params$Artifacts$PlotOrigMigrCount
+params$Artifacts$TblOrigMigrCount
+```
+
+```{r, eval = params$Artifacts$MIPresent}
+cat("### After adjustments", "\n")
+params$Artifacts$PlotMIMigrCount
+params$Artifacts$TblMIMigrCount
+if (!IsEmptyString(params$Artifacts$DataMIMigrCountMessage)) {
+  cat(params$Artifacts$DataMIMigrCountMessage, "\n")
+}
+```
+
+## Median CD4 cell count (cells/&micro;L)
+
+```{r, eval = params$Artifacts$CD4Present}
+cat("### Before adjustments", "\n")
+params$Artifacts$PlotOrigMigrCD4
+params$Artifacts$TblOrigMigrCD4
+```
+
+```{r, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
+cat("### After adjustments", "\n")
+params$Artifacts$PlotMIMigrCD4
+params$Artifacts$TblMIMigrCD4
+if (!IsEmptyString(params$Artifacts$DataMIMigrCD4Message)) {
+  cat(params$Artifacts$DataMIMigrCD4Message, "\n")
 }
 ```
 

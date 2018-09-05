@@ -34,12 +34,12 @@ list(
       step = 1L,
       ticks = TRUE,
       round = TRUE,
-      input = "slider"),
+      input = "slider")
     # Parameter 5
-    runInParallel = list(
-      label = "Run in parallel",
-      value = FALSE,
-      input = "checkbox")
+    # runInParallel = list(
+    #   label = "Run in parallel",
+    #   value = FALSE,
+    #   input = "checkbox")
   ),
 
   # Names of packages that must be made available to the adjustment function ----
@@ -153,23 +153,24 @@ list(
     dataSets <- split(dataSets, by = c("Gender"))
 
     # 4. Execute the worker function per data set
-    if (parameters$runInParallel) {
-      # Run in parallel
-      cl <- parallel::makeCluster(2)
-      parallel::clusterExport(cl, c("libPaths", "ConvertDataTableColumns", "dataSets"))
-      parallel::clusterEvalQ(cl, {
-				.libPaths(libPaths)
-        library(data.table)
-      })
-      outputData <- parallel::parLapply(cl,
-                                        seq_along(dataSets),
-                                        workerFunction,
-                                        nburn = parameters$nburn,
-                                        nbetween = parameters$nbetween,
-                                        nimp = parameters$nimp,
-                                        nsdf = parameters$nsdf)
-      parallel::stopCluster(cl)
-    } else {
+#     if (parameters$runInParallel) {
+#       # Run in parallel
+#       libPaths <- .libPaths()
+#       cl <- parallel::makeCluster(2)
+#       parallel::clusterExport(cl, c("libPaths", "ConvertDataTableColumns", "dataSets"))
+#       parallel::clusterEvalQ(cl, {
+# 				.libPaths(libPaths)
+#         library(data.table)
+#       })
+#       outputData <- parallel::parLapply(cl,
+#                                         seq_along(dataSets),
+#                                         workerFunction,
+#                                         nburn = parameters$nburn,
+#                                         nbetween = parameters$nbetween,
+#                                         nimp = parameters$nimp,
+#                                         nsdf = parameters$nsdf)
+#       parallel::stopCluster(cl)
+#     } else {
       # Run sequentially
       outputData <- lapply(seq_along(dataSets),
                            workerFunction,
@@ -177,7 +178,7 @@ list(
                            nbetween = parameters$nbetween,
                            nimp = parameters$nimp,
                            nsdf = parameters$nsdf)
-    }
+    # }
 
     # 5. Combine all data sets
     names(outputData) <- names(dataSets)

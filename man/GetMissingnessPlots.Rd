@@ -5,8 +5,8 @@
 \title{GetMissingnessPlots}
 \usage{
 GetMissingnessPlots(inputData, columnNames = c("Transmission",
-  "GroupedRegionOfOrigin", "Age", "FirstCD4Count"), labels = c("Transm.",
-  "Migrant", "Age", "CD4"))
+  "GroupedRegionOfOrigin", "Age", "FirstCD4Count"),
+  labels = c("Transmission", "Migrant", "Age", "CD4"))
 }
 \arguments{
 \item{inputData}{Pre-processed input data. Required.}
