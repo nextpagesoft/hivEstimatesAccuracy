@@ -14,30 +14,6 @@
 #' @export
 GetMainReportArtifacts <- function(params)
 {
-  colorPalette <- c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce", "#b23A48",
-                    "#7a5980", "#63372c", "#284b63")
-  colNamesMapping <-
-    c(DateOfDiagnosisYear = "Year of diagnosis",
-      Total = "Total",
-      Overall = "Overall",
-      F = "Female",
-      M = "Male",
-      O = "Other",
-      HAEMO = "Haemophilia",
-      HETERO = "Hetero",
-      IDU = "IDU",
-      MTCT = "MTCT",
-      MSM = "MSM",
-      NOSO = "Nosocomial",
-      TRANSFU = "Transfusion",
-      Missing = "Missing")
-  colNamesMappingTable <-
-    setNames(
-      c(colNamesMapping[1],
-        paste(colNamesMapping[2], "[N]"),
-        paste(colNamesMapping[-c(1:2)], "[N (%)]")),
-      names(colNamesMapping))
-
   # Functions ------------------------------------------------------------------
 
   FormatNumbers <- function(
@@ -71,7 +47,9 @@ GetMainReportArtifacts <- function(params)
     data,
     rowvar,
     colvar,
-    aggrExpr = ".(Count = .N)"
+    aggrExpr = ".(Count = .N)",
+    rowvarSummaryName = "Total",
+    colvarSummaryName = "Overall"
   ) {
     if (is.null(data)) {
       return(NULL)
@@ -79,9 +57,26 @@ GetMainReportArtifacts <- function(params)
 
     expr <- parse(text = aggrExpr)
     aggr1 <- data[, eval(expr), by = c(rowvar, colvar)]
+    if ("Count_Val" %in% colnames(aggr1)) {
+      aggr1[,
+            Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
+            by = c(rowvar)]
+    }
+
     aggr2 <- data[, eval(expr), by = c(rowvar)]
+    if ("Count_Val" %in% colnames(aggr2)) {
+      aggr2[, Count_Perc := 100]
+    }
+
     aggr3 <- data[, eval(expr), by = c(colvar)]
+    if ("Count_Val" %in% colnames(aggr3)) {
+      aggr3[, Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100]
+    }
+
     aggr4 <- data[, eval(expr)]
+    if ("Count_Val" %in% colnames(aggr4)) {
+      aggr4[, Count_Perc := 100]
+    }
 
     aggr2[, (colvar) := "Overall"]
     aggr3[, (rowvar) := "Total"]
@@ -98,12 +93,6 @@ GetMainReportArtifacts <- function(params)
 
     dt <- dt[allComb, on = c(rowvar, colvar)]
 
-    if ("Count_Val" %in% colnames(dt)) {
-      dt[,
-         Count_Perc := Count_Val / sum(Count_Val, na.rm = TRUE) * 100,
-         by = c(rowvar)]
-    }
-
     return(dt)
   }
 
@@ -112,8 +101,10 @@ GetMainReportArtifacts <- function(params)
     rowvar,
     colvar,
     vvars,
-    mapping = colNamesMappingTable,
-    digits = 0
+    mapping = colNamesMappingN,
+    digits = 0,
+    overallColName = "Overall",
+    totalRowName = "Total"
   ) {
     if (is.null(data)) {
       return(NULL)
@@ -131,6 +122,10 @@ GetMainReportArtifacts <- function(params)
       dt[, (val) := FormatRangeCols(.SD, digits = digits), .SDcols = valColNames]
     }
     dt <- dt[, c(rowvar, colLevels), with = FALSE]
+    if ("Overall" %in% colnames(dt)) {
+      setnames(dt, old = "Overall", new = overallColName)
+    }
+    dt[get(rowvar) == "Total", (rowvar) := totalRowName]
     if (!is.null(mapping)) {
       mapping <- mapping[names(mapping) %in% colnames(dt)]
       setnames(dt,
@@ -153,7 +148,8 @@ GetMainReportArtifacts <- function(params)
     probsStr = NULL,
     confIntervals = FALSE,
     mapping = colNamesMapping,
-    colors = colorPalette
+    colors = colorPalette,
+    yLabel = expression("Median CD4 cell count (cells/"*mu*"L)")
   ) {
     if (is.null(data)) {
       return(NULL)
@@ -183,7 +179,7 @@ GetMainReportArtifacts <- function(params)
       theme(axis.text.x = element_text(size = 8),
             axis.text.y = element_text(size = 8)) +
       labs(x = "Year",
-           y = expression("Median CD4 cell count (cells/"*mu*"L)"))
+           y = yLabel)
 
     if (confIntervals) {
       plotObj <- plotObj +
@@ -192,6 +188,8 @@ GetMainReportArtifacts <- function(params)
                     alpha = 0.1,
                     colour = NA)
     }
+
+    plotObj <- RecordGgplot(plotObj)
 
     return(plotObj)
   }
@@ -347,10 +345,8 @@ GetMainReportArtifacts <- function(params)
       if (!inherits(result, "try-error")) {
         if (length(badCategories) > 0) {
           message <-
-            sprintf("<p>Persons which were %s anywhere (i.e. even in one imputed dataset) are removed. Threshold of %2.2f%% of count per category within the dataset was applied.</p>",
-                    paste(colNamesMapping[as.character(badCategories)],
-                          collapse = ", "),
-                    threshold * 100)
+            sprintf("<p>Persons which were %s anywhere (i.e. even in one imputed dataset) are removed.</p>",
+                    paste(colNamesMapping[as.character(badCategories)], collapse = ", "))
         }
         break
       } else {
@@ -391,15 +387,22 @@ GetMainReportArtifacts <- function(params)
     ConvertDataTableColumns(dt, c(DateOfDiagnosisYear = "character"))
     dt <- rbind(dt,
                 dtTotals)
-    dt[, (numericCols) := lapply(.SD, FormatNumbers), .SDcols = numericCols]
+    singleValCols <- c("MissingData", "Reported")
+    dt[, (singleValCols) := lapply(.SD, FormatNumbers), .SDcols = singleValCols]
+    dt[, EstUnreported := FormatRangeCols(.SD), .SDcols = c("LowerEstUnreported", "EstUnreported", "UpperEstUnreported")]
+    dt[, EstCount := FormatRangeCols(.SD), .SDcols = c("LowerEstCount", "EstCount", "UpperEstCount")]
+    dt[, ":="(
+      LowerEstCount = NULL,
+      UpperEstCount = NULL,
+      LowerEstUnreported = NULL,
+      UpperEstUnreported = NULL
+    )]
     setorderv(dt, c("DateOfDiagnosisYear"))
     tableColNames <- c("Diagnosis<br /> year",
                        "Missing<br /> details",
-                       "Reported",
-                       "Unreported",
-                       "Estimated total",
-                       "Estimated total<br /> lower bound",
-                       "Estimated total<br /> upper bound")
+                       "Reported<br /> &nbsp;",
+                       "Estimated<br /> unreported [N (L, U)]",
+                       "Estimated<br /> total [N (L, U)]")
     dt <- knitr::kable(dt,
                        align = rep("r", ncol(dt)),
                        col.names = tableColNames)
@@ -442,25 +445,65 @@ GetMainReportArtifacts <- function(params)
   fullData[Transmission %in% c(NA, "NA", ""),
            Transmission := "Missing"]
 
+  fullData[GroupedRegionOfOrigin %in% c(NA, "NA", ""),
+           GroupedRegionOfOrigin := "Missing"]
+
+  colorPalette <- c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce", "#b23A48",
+                    "#7a5980", "#63372c", "#284b63")
+
+  migrVals <- setdiff(fullData[, levels(GroupedRegionOfOrigin)], "Missing")
+  names(migrVals) <- migrVals
+
+  colNamesMapping <-
+    c(DateOfDiagnosisYear = "Year of diagnosis",
+      Total = "Total",
+      Overall = "Overall",
+      F = "Female",
+      M = "Male",
+      O = "Other",
+      HAEMO = "Haemophilia",
+      HETERO = "Hetero",
+      IDU = "IDU",
+      MTCT = "MTCT",
+      MSM = "MSM",
+      NOSO = "Nosocomial",
+      TRANSFU = "Transfusion",
+      Missing = "Missing",
+      migrVals)
+  colNamesMappingN <-
+    setNames(
+      c(colNamesMapping[1],
+        paste(colNamesMapping[-1], "[N (%)]")),
+      names(colNamesMapping))
+  colNamesMappingCD4 <-
+    setNames(
+      c(colNamesMapping[1],
+        paste(colNamesMapping[-1], "[N (L, U)]")),
+      names(colNamesMapping))
+
   # Original data
   dataOrig <- fullData[Imputation == 0L]
   dataOrig[, ':='(
     CD4 = SqCD4^2,
     Transmission = factor(Transmission),
-    Gender = factor(Gender)
+    Gender = factor(Gender),
+    Migration = factor(GroupedRegionOfOrigin)
   )]
 
   # MI data
   dataMI <- fullData[Imputation != 0L]
   dataMI[, ':='(
     Transmission = factor(Transmission),
-    Gender = factor(Gender)
+    Gender = factor(Gender),
+    Migration = factor(GroupedRegionOfOrigin)
   )]
 
   dataMIGenderCountDistr <-
     dataMI[, .(Count = .N), by = .(Gender)][, Perc := Count / sum(Count)]
   dataMITransCountDistr <-
     dataMI[, .(Count = .N), by = .(Transmission)][, Perc := Count / sum(Count)]
+  dataMIMigrCountDistr <-
+    dataMI[, .(Count = .N), by = .(Migration)][, Perc := Count / sum(Count)]
 
   # Unadjusted
   dataOrigGender <-
@@ -495,9 +538,27 @@ GetMainReportArtifacts <- function(params)
           CD4_High = quant[3])
         }")
 
+  dataOrigMigr <-
+    GetAggregatedData(
+      data = dataOrig,
+      rowvar = "DateOfDiagnosisYear",
+      colvar = "Migration",
+      aggrExpr =
+        "{
+        count <- .N
+        quant <- quantile(CD4, na.rm = TRUE, probs = c(0.25, 0.5, 0.75), names = FALSE)
+        list(
+          Count_Val = count,
+          CD4_Low = quant[1],
+          CD4_Median = quant[2],
+          CD4_High = quant[3])
+        }")
+
   dataMIGenderCD4List <- NULL
   dataMITransCD4List <- NULL
   dataMITransCountList <- NULL
+  dataMIMigrCD4List <- NULL
+  dataMIMigrCountList <- NULL
   if (miPresent) {
     if (cd4Present) {
       # Quantile regressions not possible with rare categories and discrete time
@@ -511,8 +572,7 @@ GetMainReportArtifacts <- function(params)
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
           distr = dataMIGenderCountDistr,
-          nsdf = nsdf,
-          colNamesMapping = colNamesMappingTable)
+          nsdf = nsdf)
       dataMITransCD4List <-
         GetModelledDataAdaptive(
           data = dataMI,
@@ -521,12 +581,22 @@ GetMainReportArtifacts <- function(params)
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
           distr = dataMITransCountDistr,
-          nsdf = nsdf,
-          colNamesMapping = colNamesMappingTable)
+          nsdf = nsdf)
+      dataMIMigrCD4List <-
+        GetModelledDataAdaptive(
+          data = dataMI,
+          modelFunc = GetModelledQuantileData,
+          colvar = "Migration",
+          rowvar = "DateOfDiagnosisYear",
+          vvar = "SqCD4",
+          distr = dataMIMigrCountDistr,
+          nsdf = nsdf)
 
       transBadCategories <- dataMITransCD4List[["BadCategories"]]
+      migrBadCategories <- dataMIMigrCD4List[["BadCategories"]]
     } else {
-      transBadCategories <- c()
+      transBadCategories <- NULL
+      migrBadCategories <- NULL
     }
 
     # Prefilter data on the same categories as in CD4 modelling
@@ -548,6 +618,19 @@ GetMainReportArtifacts <- function(params)
         rowvar = "DateOfDiagnosisYear",
         colvar = "Transmission",
         aggrExpr = "list(Count_Val = sum(Count_Val, na.rm = TRUE))")
+    dataMIMigrCountList <-
+      GetModelledDataAdaptive(
+        data = dataMI,
+        modelFunc = GetModelledCountData,
+        colvar = "Migration",
+        distr = dataMIMigrCountDistr[!Migration %in% migrBadCategories],
+        nsdf = nsdf)
+    dataMIMigrCountList[["Result"]] <-
+      GetAggregatedData(
+        data = dataMIMigrCountList[["Result"]],
+        rowvar = "DateOfDiagnosisYear",
+        colvar = "Migration",
+        aggrExpr = "list(Count_Val = sum(Count_Val, na.rm = TRUE))")
   }
 
   cd4YLim <- NULL
@@ -555,16 +638,19 @@ GetMainReportArtifacts <- function(params)
     if (miPresent) {
       cd4YLim <-
         GetNiceUpperLimit(max(
+          dataOrigGender[DateOfDiagnosisYear != "Total", CD4_Median],
           dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-          dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+          dataOrigMigr[DateOfDiagnosisYear != "Total", CD4_Median],
           dataMIGenderCD4List[["Result"]]$CD4_Median,
           dataMITransCD4List[["Result"]]$CD4_Median,
+          dataMIMigrCD4List[["Result"]]$CD4_Median,
           na.rm = TRUE))
     } else {
       cd4YLim <-
         GetNiceUpperLimit(max(
+          dataOrigGender[DateOfDiagnosisYear != "Total", CD4_Median],
           dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
-          dataOrigTrans[DateOfDiagnosisYear != "Total", CD4_Median],
+          dataOrigMigr[DateOfDiagnosisYear != "Total", CD4_Median],
           na.rm = TRUE))
     }
   }
@@ -578,24 +664,31 @@ GetMainReportArtifacts <- function(params)
   dataMIGenderCD4 <- dataMIGenderCD4List[["Result"]]
   dataMITransCD4 <- dataMITransCD4List[["Result"]]
   dataMITransCount <- dataMITransCountList[["Result"]]
+  dataMIMigrCD4 <- dataMIMigrCD4List[["Result"]]
+  dataMIMigrCount <- dataMIMigrCountList[["Result"]]
 
   # PRODUCE OUTPUTS ------------------------------------------------------------
   tblOrigGenderCount <-
     GetReportTable(data = dataOrigGender,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Gender",
-                   vvars = c("Count_Val", "Count_Perc"))
+                   vvars = c("Count_Val", "Count_Perc"),
+                   overallColName = "Total",
+                   mapping = colNamesMappingN)
   plotOrigGenderCount <-
     GetReportPlot(data = dataOrigGender,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Gender",
-                  vvars = "Count_Val")
-
+                  vvars = "Count_Val",
+                  confIntervals = FALSE,
+                  yLabel = "Number of cases")
   tblOrigGenderCD4 <-
     GetReportTable(data = dataOrigGender,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Gender",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingCD4)
   plotOrigGenderCD4 <-
     GetReportPlot(data = dataOrigGender,
                   rowvar = "DateOfDiagnosisYear",
@@ -607,7 +700,8 @@ GetMainReportArtifacts <- function(params)
     GetReportTable(data = dataMIGenderCD4,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Gender",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   mapping = colNamesMappingCD4)
   plotMIGenderCD4 <-
     GetReportPlot(data = dataMIGenderCD4,
                   rowvar = "DateOfDiagnosisYear",
@@ -616,33 +710,39 @@ GetMainReportArtifacts <- function(params)
                   confIntervals = optCD4ConfInt,
                   cd4YLim = cd4YLim)
 
+
   tblOrigTransCount <-
     GetReportTable(data = dataOrigTrans,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
-                   vvars = c("Count_Val", "Count_Perc"))
+                   vvars = c("Count_Val", "Count_Perc"),
+                   totalRowName = "Overall")
   plotOrigTransCount <-
     GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Transmission",
-                  vvars = "Count_Val")
+                  vvars = "Count_Val",
+                  confIntervals = FALSE,
+                  yLabel = "Number of cases")
   tblMITransCount <-
     GetReportTable(data = dataMITransCount,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
-                   vvars = c("Count_Val", "Count_Perc"))
+                   vvars = c("Count_Val", "Count_Perc"),
+                   totalRowName = "Overall")
   plotMITransCount <-
     GetReportPlot(data = dataMITransCount,
                   rowvar = "DateOfDiagnosisYear",
                   colvar = "Transmission",
                   vvars = "Count_Val",
-                  cd4YLim = cd4YLim)
-
+                  confIntervals = FALSE,
+                  yLabel = "Number of cases")
   tblOrigTransCD4 <-
     GetReportTable(data = dataOrigTrans,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   totalRowName = "Overall")
   plotOrigTransCD4 <-
     GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
@@ -662,6 +762,60 @@ GetMainReportArtifacts <- function(params)
                   vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
                   confIntervals = optCD4ConfInt,
                   cd4YLim = cd4YLim)
+
+
+  tblOrigMigrCount <-
+    GetReportTable(data = dataOrigMigr,
+                   rowvar = "DateOfDiagnosisYear",
+                   colvar = "Migration",
+                   vvars = c("Count_Val", "Count_Perc"),
+                   totalRowName = "Overall")
+  plotOrigMigrCount <-
+    GetReportPlot(data = dataOrigMigr,
+                  rowvar = "DateOfDiagnosisYear",
+                  colvar = "Migration",
+                  vvars = "Count_Val",
+                  confIntervals = FALSE,
+                  yLabel = "Number of cases")
+  tblMIMigrCount <-
+    GetReportTable(data = dataMIMigrCount,
+                   rowvar = "DateOfDiagnosisYear",
+                   colvar = "Migration",
+                   vvars = c("Count_Val", "Count_Perc"),
+                   totalRowName = "Overall")
+  plotMIMigrCount <-
+    GetReportPlot(data = dataMIMigrCount,
+                  rowvar = "DateOfDiagnosisYear",
+                  colvar = "Migration",
+                  vvars = "Count_Val",
+                  confIntervals = FALSE,
+                  yLabel = "Number of cases")
+  tblOrigMigrCD4 <-
+    GetReportTable(data = dataOrigMigr,
+                   rowvar = "DateOfDiagnosisYear",
+                   colvar = "Migration",
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   totalRowName = "Overall")
+  plotOrigMigrCD4 <-
+    GetReportPlot(data = dataOrigMigr,
+                  rowvar = "DateOfDiagnosisYear",
+                  colvar = "Migration",
+                  vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                  confIntervals = optCD4ConfInt,
+                  cd4YLim = cd4YLim)
+  tblMIMigrCD4 <-
+    GetReportTable(data = dataMIMigrCD4,
+                   rowvar = "DateOfDiagnosisYear",
+                   colvar = "Migration",
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+  plotMIMigrCD4 <-
+    GetReportPlot(data = dataMIMigrCD4,
+                  rowvar = "DateOfDiagnosisYear",
+                  colvar = "Migration",
+                  vvars = c("CD4_Median", "CD4_Low", "CD4_High"),
+                  confIntervals = optCD4ConfInt,
+                  cd4YLim = cd4YLim)
+
 
   tblRd <- GetRDReportTable(data = rdData)
 
@@ -688,9 +842,19 @@ GetMainReportArtifacts <- function(params)
         PlotOrigTransCD4 = plotOrigTransCD4,
         TblMITransCD4 = tblMITransCD4,
         PlotMITransCD4 = plotMITransCD4,
-        dataMIGenderCD4Message = dataMIGenderCD4List[["Message"]],
-        dataMITransCountMessage = dataMITransCountList[["Message"]],
-        dataMITransCD4Message = dataMITransCD4List[["Message"]],
+        TblOrigMigrCount = tblOrigMigrCount,
+        PlotOrigMigrCount = plotOrigMigrCount,
+        TblMIMigrCount = tblMIMigrCount,
+        PlotMIMigrCount = plotMIMigrCount,
+        TblOrigMigrCD4 = tblOrigMigrCD4,
+        PlotOrigMigrCD4 = plotOrigMigrCD4,
+        TblMIMigrCD4 = tblMIMigrCD4,
+        PlotMIMigrCD4 = plotMIMigrCD4,
+        DataMIGenderCD4Message = dataMIGenderCD4List[["Message"]],
+        DataMITransCountMessage = dataMITransCountList[["Message"]],
+        DataMITransCD4Message = dataMITransCD4List[["Message"]],
+        DataMIMigrCountMessage = dataMITransCountList[["Message"]],
+        DataMIMigrCD4Message = dataMITransCD4List[["Message"]],
         TblRd = tblRd)
       )
     )

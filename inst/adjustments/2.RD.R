@@ -220,10 +220,14 @@ list(
       reportTableData[missRdData,
                       MissingData := Count,
                       on = .(DateOfDiagnosisYear)]
-      reportTableData[, Unreported := na.zero(EstCount) - na.zero(Reported)]
+      reportTableData[, ":="(
+        EstUnreported = na.zero(EstCount) - na.zero(Reported),
+        LowerEstUnreported = na.zero(LowerEstCount) - na.zero(Reported),
+        UpperEstUnreported = na.zero(UpperEstCount) - na.zero(Reported)
+      )]
       setcolorder(reportTableData,
                   c("DateOfDiagnosisYear", "MissingData", "Reported",
-                    "Unreported", "EstCount", "LowerEstCount", "UpperEstCount"))
+                    "EstUnreported", "EstCount", "LowerEstCount", "UpperEstCount"))
 
       # D) STRATIFIED PLOT (OPTIONAL) ------------------------------------------------------------------
       if (length(stratVarNames) > 0) {
