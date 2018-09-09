@@ -86,7 +86,7 @@ dataAdjust <- function(input, output, session, inputData)
       }
     })
 
-    # EVENT: Button "Delete" clicked
+    # EVENT: Button "Remove" clicked
     observeEvent(input[[deleteBtnId]], {
       vals$adjustmentSpecs[[key]] <- NULL
       removeUI(selector = paste0("#", ns(rowId)))
