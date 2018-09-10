@@ -4,12 +4,14 @@
 \alias{GetOriginGroupingMap}
 \title{GetOriginGroupingMap}
 \usage{
-GetOriginGroupingMap(type, distr)
+GetOriginGroupingMap(type, distr, groups)
 }
 \arguments{
 \item{type}{Grouping type}
 
 \item{distr}{Distribution of RegionOfOrigin}
+
+\item{groups}{Groups}
 }
 \description{
 Get mapping from RegionOfOrigin to GroupOfOrigin

@@ -9,7 +9,8 @@ ApplyOriginGroupingMap(inputData, map)
 \arguments{
 \item{inputData}{Input data. Required.}
 
-\item{map}{Data.table object with ,apping from RegionOfOrigin to GroupOfOrigin. Required.}
+\item{map}{Data.table object with mapping from RegionOfOrigin to
+GroupOfOrigin. Required.}
 }
 \value{
 inputData

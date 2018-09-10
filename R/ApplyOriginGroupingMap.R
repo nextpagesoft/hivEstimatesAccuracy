@@ -3,7 +3,8 @@
 #' Applies RegionOfOrigin grouping map to the input data
 #'
 #' @param inputData Input data. Required.
-#' @param map Data.table object with ,apping from RegionOfOrigin to GroupOfOrigin. Required.
+#' @param map Data.table object with mapping from RegionOfOrigin to
+#'   GroupOfOrigin. Required.
 #'
 #' @return inputData
 #'
@@ -15,13 +16,12 @@
 #' @export
 ApplyOriginGroupingMap <- function(inputData, map)
 {
-  oldColOrder <- colnames(inputData$Table)
-  inputData$Table <- merge(inputData$Table,
-                           map,
-                           all.x = TRUE,
-                           by = "FullRegionOfOrigin",
-                           sort = FALSE)
-  setcolorder(inputData$Table, c(oldColOrder, "GroupedRegionOfOrigin"))
+  data <- copy(inputData$Table)
 
+  data[map,
+       GroupedRegionOfOrigin := GroupedRegionOfOrigin,
+       on = "FullRegionOfOrigin"]
+
+  inputData$Table <- data
   return(inputData)
 }

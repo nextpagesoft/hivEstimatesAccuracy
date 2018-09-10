@@ -1,8 +1,8 @@
 # 1. INPUT DATA ----------------------------------------------------------------
 # Set path to the input data file
 # inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL.csv"
-inputDataFilePath <- "/media/sf_VirtualBox_SharedDrive/dummy_miss1.zip"
-# inputDataFilePath <- "/media/sf_VirtualBox_Share/dummy_miss1.zip"
+# inputDataFilePath <- "/media/sf_VirtualBox_SharedDrive/dummy_miss1.zip"
+inputDataFilePath <- "/media/sf_VirtualBox_Share/dummy_miss1.zip"
 
 # 2. ADJUSTMENTS SELECTION -----------------------------------------------------
 # Select adjustments to perform. Order is important. Available adjustment names:
