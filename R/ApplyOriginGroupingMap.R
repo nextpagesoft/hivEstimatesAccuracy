@@ -23,5 +23,6 @@ ApplyOriginGroupingMap <- function(inputData, map)
        on = "FullRegionOfOrigin"]
 
   inputData$Table <- data
+
   return(inputData)
 }

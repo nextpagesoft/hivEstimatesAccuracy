@@ -33,6 +33,18 @@ countryData[Code == "GB", ":="(
   Code = "UK"
 )]
 
+additionalRecords <- data.table(
+  Name = NA_character_,
+  Code = c("ANHH", "BUMM", "CS", "CSXX", "NAM", "SUHH", "XK", "YU", "YUCS"),
+  FormalName = NA_character_,
+  ContinentCode = NA_character_,
+  RegionName = NA_character_,
+  SubRegionName = NA_character_
+)
+
+countryData <- rbind(countryData,
+                     additionalRecords)
+
 countryData[, TESSyCode := NA_character_]
 countryData[
   Code %chin% c('AU', 'CC', 'CX', 'HM', 'NF', 'NZ'),
@@ -46,7 +58,7 @@ countryData[
 ]
 countryData[
   Code %chin% c('AL', 'BA', 'BG', 'CY', 'CZ', 'HR', 'HU', 'ME', 'MK', 'PL', 'RO', 'RS', 'SI', 'SK',
-                'TR'),
+                'TR', 'CS', 'CSXX', 'XK', 'YU', 'YUCS'),
   TESSyCode := "CENTEUR"
 ]
 countryData[
@@ -56,12 +68,12 @@ countryData[
 ]
 countryData[
   Code %chin% c('AM', 'AZ', 'BY', 'EE', 'GE', 'KG', 'KZ', 'LT', 'LV', 'MD', 'RU', 'TJ', 'TM', 'UA',
-                'UZ'),
+                'UZ', 'SUHH'),
   TESSyCode := "EASTEUR"
 ]
 countryData[
   Code %chin% c('AR', 'BO', 'BR', 'BZ', 'CL', 'CO', 'CR', 'EC', 'FK', 'GF', 'GS', 'GT', 'GY', 'HN',
-                'MX', 'NI', 'PA', 'PE', 'PY', 'SR', 'SV', 'UY', 'VE'),
+                'MX', 'NI', 'PA', 'PE', 'PY', 'SR', 'SV', 'UY', 'VE', 'ANHH'),
   TESSyCode := "LATAM"
 ]
 countryData[
@@ -76,14 +88,14 @@ countryData[
 countryData[
   Code %chin% c('AF', 'BD', 'BN', 'BT', 'FM', 'GU', 'ID', 'IN', 'IR', 'KH', 'KI', 'LA', 'LK', 'MH',
                 'MM', 'MP', 'MV', 'MY', 'NC', 'NP', 'NR', 'PH', 'PK', 'PN', 'PW', 'SG', 'TH', 'TL',
-                'UM', 'VN'),
+                'UM', 'VN', 'BUMM'),
   TESSyCode := "SOUTHASIA"
 ]
 countryData[
   Code %chin% c('AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'ER', 'ET',
                 'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'IO', 'KE', 'KM', 'LR', 'LS', 'MG', 'ML', 'MR',
                 'MU', 'MW', 'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SH', 'SL', 'SN', 'SO', 'ST',
-                'SZ', 'TD', 'TF', 'TG', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW'),
+                'SZ', 'TD', 'TF', 'TG', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW', 'NAM'),
   TESSyCode := "SUBAFR"
 ]
 countryData[
@@ -98,5 +110,5 @@ countryData[
 ]
 
 save(countryData,
-     file = "D:/_REPOSITORIES/Github/hivEstimatesAccuracy/data/countryData.rda",
+     file = "~/_REPOSITORIES/hivEstimatesAccuracy/data/countryData.rda",
      compress = "xz")
