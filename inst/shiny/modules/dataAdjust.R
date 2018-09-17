@@ -4,7 +4,9 @@
 libPaths <- .libPaths()
 
 # Module globals
-adjustmentSpecFileNames <- GetAdjustmentSpecFileNames()
+adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
+                          GetListObject)
+adjustmentSpecsType <- lapply(adjustmentSpecs, "[[", "Type")
 
 isLinux <- tolower(Sys.info()[["sysname"]]) == "linux"
 
@@ -21,9 +23,28 @@ dataAdjustUI <- function(id)
       solidHeader = FALSE,
       status = "primary",
       collapsible = TRUE,
-      actionButton(ns("addAdjustBtn"), "Add"),
-      p(""),
-      div(id = ns("adjustmentList")),
+      fluidRow(
+        column(3, "1. Multiple Imputations adjustment", style = "padding-top: 7px"),
+        column(4, selectInput(
+          ns("miSelect"),
+          label = NULL,
+          choices = c(names(adjustmentSpecs[adjustmentSpecsType == "MULTIPLE_IMPUTATIONS"]),
+                      "None"),
+          selected = "None")
+        ),
+        column(2, actionLink(ns("miSelectParam"), "Edit parameters"), style = "padding-top: 7px")
+      ),
+      fluidRow(
+        column(3, "2. Reporting Delays adjustment", style = "padding-top: 7px"),
+        column(4, selectInput(
+          ns("rdSelect"),
+          label = NULL,
+          choices = c(names(adjustmentSpecs[adjustmentSpecsType == "REPORTING_DELAYS"]),
+                      "None"),
+          selected = "None")
+        ),
+        column(2, actionLink(ns("rdSelectParam"), "Edit parameters"), style = "padding-top: 7px")
+      ),
       actionButton(ns("runAdjustBtn"), "Run"),
       shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
     ),
@@ -46,79 +67,44 @@ dataAdjust <- function(input, output, session, inputData)
   adjustedData <- reactiveVal(NULL)
   vals <- reactiveValues(runLog = "",
                          intermReport = "",
-                         adjustmentSpecs = list(),
-                         lastAdjustmentWidgetIndex = 0L,
-                         editedAdjustmentKey = "",
+                         adjustmentSpecs = adjustmentSpecs,
+                         miAdjustmentName = "None",
+                         rdAdjustmentName = "None",
+                         editedAdjustmentName = "None",
                          editedAdjustmentParamsWidgets = list())
 
-  # Get widget for selecting an adjustment
-  GetAdjustmentSelectionWidget <- function() {
-    # Get unique index for the elements
-    index <- vals$lastAdjustmentWidgetIndex + 1
-    key <- as.character(index)
-
-    rowId          <- paste0("row", key)
-    deleteBtnId    <- paste0("deleteBtn", key)
-    adjustSelectId <- paste0("adjustSelect", key)
-    editParamBtnId <- paste0("adjustParamBtn", key)
-
-    # Get widget html
-    widget <- fluidRow(
-      id = ns(rowId),
-      column(1, actionLink(ns(deleteBtnId), "Remove"), style = "padding-top: 7px"),
-      # Selection input
-      column(5, selectInput(ns(adjustSelectId),
-                            label = NULL,
-                            choices = adjustmentSpecFileNames)),
-      # Edit parameters button
-      column(2, actionLink(ns(editParamBtnId), "Edit parameters"), style = "padding-top: 7px")
-    )
-
-    # EVENT: Adjustment selection changed
-    observeEvent(input[[adjustSelectId]], {
-      # Add selected adjustment to the list of adjustments to run
-      selectedAdjustmentFileName <- input[[adjustSelectId]]
-      if (file.exists(selectedAdjustmentFileName)) {
-        # Get adjustment specification and enrich with key for later reference
-        adjustmentSpec <- GetListObject(selectedAdjustmentFileName)
-        adjustmentSpec$Key <- key
-        vals$adjustmentSpecs[[key]] <- adjustmentSpec
-      }
-    })
-
-    # EVENT: Button "Remove" clicked
-    observeEvent(input[[deleteBtnId]], {
-      vals$adjustmentSpecs[[key]] <- NULL
-      removeUI(selector = paste0("#", ns(rowId)))
-    })
-
-    # EVENT: Button "Edit parameters" clicked
-    observeEvent(input[[editParamBtnId]], {
-      vals$editedAdjustmentKey <- key
-    })
-
-    # Store for next adjustment selection widget addition
-    vals$lastAdjustmentWidgetIndex <- index
-
-    return(widget)
-  }
-
-  # Reactive values observers
-  observeEvent(vals$adjustmentSpecs, {
+  # EVENT: MI adjustment selection changed
+  observeEvent(input[["miSelect"]], {
+    adjustmentName <- input[["miSelect"]]
+    vals$miAdjustmentName <- adjustmentName
+    if (adjustmentName != "None") {
+      shinyjs::show("miSelectParam")
+    } else {
+      shinyjs::hide("miSelectParam")
+    }
     adjustedData(NULL)
   })
 
-  # Add adjustment selection widget
-  observeEvent(input[["addAdjustBtn"]], {
-    widget <- GetAdjustmentSelectionWidget()
-    insertUI(selector = paste0("#", ns("adjustmentList")),
-             where = "beforeEnd",
-             ui = widget)
+  # EVENT: RD adjustment selection changed
+  observeEvent(input[["rdSelect"]], {
+    adjustmentName <- input[["rdSelect"]]
+    vals$rdAdjustmentName <- adjustmentName
+    if (adjustmentName != "None") {
+      shinyjs::show("rdSelectParam")
+    } else {
+      shinyjs::hide("rdSelectParam")
+    }
+    adjustedData(NULL)
   })
 
-  # Populate adjustment parameter widgets in the editing dialog
-  output[["adjustmentList"]] <- renderUI({
-    vals$adjustmentSelectionWidgets
+  # EVENT: Button "Edit parameters" clicked
+  observeEvent(input[["miSelectParam"]], {
+    vals$editedAdjustmentName <- vals$miAdjustmentName
+  })
+
+  # EVENT: Button "Edit parameters" clicked
+  observeEvent(input[["rdSelectParam"]], {
+    vals$editedAdjustmentName <- vals$rdAdjustmentName
   })
 
   # Get widgets for editing parameters in a dialog
@@ -137,9 +123,9 @@ dataAdjust <- function(input, output, session, inputData)
   }
 
   # Show adjustment parameters editing dialog
-  observeEvent(vals$editedAdjustmentKey, {
-    if (vals$editedAdjustmentKey != "") {
-      editedAdjustmentSpec <- vals$adjustmentSpecs[[vals$editedAdjustmentKey]]
+  observeEvent(vals$editedAdjustmentName, {
+    if (vals$editedAdjustmentName != "None") {
+      editedAdjustmentSpec <- vals$adjustmentSpecs[[vals$editedAdjustmentName]]
       vals$editedAdjustmentParamsWidgets <- GetAdjustParamsWidgets(editedAdjustmentSpec)
 
       showModal(modalDialog(
@@ -164,15 +150,15 @@ dataAdjust <- function(input, output, session, inputData)
   # Adjustment parameters editing dialog CLOSE through OK event
   observeEvent(input[["paramsDlgOk"]], {
     # Copy parameters from dialog
-    adjustmentParams <- vals$adjustmentSpecs[[vals$editedAdjustmentKey]]$Parameters
+    adjustmentParams <- vals$adjustmentSpecs[[vals$editedAdjustmentName]]$Parameters
     for (paramName in names(vals$editedAdjustmentParamsWidgets)) {
       adjustmentParams[[paramName]]$value <- input[[paramName]]
     }
-    # Save parameters
-    vals$adjustmentSpecs[[vals$editedAdjustmentKey]]$Parameters <- adjustmentParams
+    # Save parameters in the selected adjustment object
+    vals$adjustmentSpecs[[vals$editedAdjustmentName]]$Parameters <- adjustmentParams
 
     # Clean up
-    vals$editedAdjustmentKey <- ""
+    vals$editedAdjustmentName <- "None"
     vals$editedAdjustmentParamsWidgets <- list()
     removeModal()
   })
@@ -180,15 +166,33 @@ dataAdjust <- function(input, output, session, inputData)
   # Adjustment parameters editing dialog CLOSE through Cancel event
   observeEvent(input[["paramsDlgCancel"]], {
     # Clean up
-    vals$editedAdjustmentKey <- ""
+    vals$editedAdjustmentName <- "None"
     vals$editedAdjustmentParamsWidgets <- list()
     removeModal()
+  })
+
+  adjustmentsValid <- reactive({
+    vals$miAdjustmentName != "None" || vals$rdAdjustmentName != "None"
+  })
+
+  observe({
+    if (adjustmentsValid()) {
+      shinyjs::enable("runAdjustBtn")
+    } else {
+      shinyjs::disable("runAdjustBtn")
+    }
   })
 
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
     inputData <- req(inputData())
-    adjustmentSpecs <- req(vals$adjustmentSpecs)
+    adjustmentSpecs <- list()
+    if (vals$miAdjustmentName != "None") {
+      adjustmentSpecs[[vals$miAdjustmentName]] <- vals$adjustmentSpecs[[vals$miAdjustmentName]]
+    }
+    if (vals$rdAdjustmentName != "None") {
+      adjustmentSpecs[[vals$rdAdjustmentName]] <- vals$adjustmentSpecs[[vals$rdAdjustmentName]]
+    }
 
     shinyjs::disable("runAdjustBtn")
     shinyjs::enable("cancelAdjustBtn")
