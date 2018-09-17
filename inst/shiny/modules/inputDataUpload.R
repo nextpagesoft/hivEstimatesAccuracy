@@ -287,12 +287,12 @@ inputDataUpload <- function(input, output, session, appStatus)
       if (attrMappingStatus$Valid) {
         textColor <- "seagreen"
         headerHTML <- span(icon("check"),
-                           "Assignement of input data columns to attributes is valid.",
+                           "Assignment of input data columns to attributes is valid.",
                            style = paste("color:", textColor))
       } else {
         textColor <- "red"
         headerHTML <- span(icon("exclamation"),
-                           "Assignement of input data columns to attributes is not valid.",
+                           "Assignment of input data columns to attributes is not valid.",
                            style = paste("color:", textColor))
       }
 
