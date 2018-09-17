@@ -22,7 +22,7 @@ formatNumbers <- function(x) sprintf("%.2f", x)
 cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
 ```
 
-```{r, fig.height = 4, fig.width = 10}
+```{r, fig.width = 10, fig.height = 4}
 cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**<br />")
 params$InputData$Artifacts$OutputPlotTotal
 ```
@@ -42,5 +42,12 @@ params$InputData$Artifacts$OutputPlotStrat$Transmission
 
 ```{r, fig.width = 10, fig.height = calcFigHeight("GroupedRegionOfOrigin"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin)}}
 params$InputData$Artifacts$OutputPlotStrat$Migr
+```
+
+```{r}
+cat("**Table 1. Univariate analysis of predictors of reporting delay and proportionality assumption test**", "\n")
+dt <- params$InputData$Artifacts$UnivAnalysis
+knitr::kable(dt, align = rep("r", ncol(dt)))
+
 ```
 

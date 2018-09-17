@@ -10,7 +10,7 @@ inputDataFilePath <- "/media/sf_VirtualBox_Share/dummy_miss1.zip"
 # b) " Multiple Imputation using Chained Equations - MICE"
 # c) "Reporting Delays"
 adjustmentNames <- c(
-  "Multiple Imputation using Chained Equations - MICE",
+  # "Multiple Imputation using Chained Equations - MICE",
   "Reporting Delays"
 )
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()

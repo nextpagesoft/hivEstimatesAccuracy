@@ -9,6 +9,7 @@ Version 0.9.12 (2018/09/)
 * Main Report: Change and fix column names of report tables to include proper
   unit indicator
 * Input data: Fix typo in "Assignment of input..."
+* Reporting Delays: Initial implementation of univariate analysis
 
 
 Version 0.9.11 (2018/09/05)

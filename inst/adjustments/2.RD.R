@@ -133,6 +133,40 @@ list(
     # NOTE: Otherwise survival model complains
     compData <- compData[VarXs > VarTs]
 
+    # --------------------------------------------------------------------------
+    model <- compData[Imputation == 0L, survival::Surv(time = VarTs,
+                                                       time2 = VarXs,
+                                                       event = ReportingDelay)]
+    stratVarNamesTrend <- union("DateOfDiagnosisYear", stratVarNames)
+
+    # Defining univariate models
+    univFormulas <- sapply(stratVarNamesTrend,
+                           function(x) as.formula(paste('model~', x)))
+    # Applying univariate models
+    univModels <- lapply(univFormulas,
+                         function(x) survival::coxph(x, data = outputData[Imputation == 0L]))
+
+    # Extract results of univariabl analysis (whether particular covariates are associated with RD)
+    univResults <- lapply(univModels,
+                          function(x) {
+                            y <- summary(x)
+                            z <- survival::cox.zph(x)
+                            res <- merge(as.data.table(y$conf.int),
+                                         as.data.table(y$coefficients))
+                            res <- cbind(res,
+                                         as.data.table(z$table[, "p", drop = FALSE]))
+                            res[, lapply(.SD, signif, 2), .SDcols = colnames(res)]
+                            setnames(res, c("HR", "1/HR", "HR.lower.95",
+                                            "HR.upper.95", "Beta", "SE.Beta",
+                                            "Z", "P.value", "Prop.assumpt.p"))
+                            res <- cbind(Predictor = rownames(y$conf.int),
+                                         res)
+                            return(res)
+                          })
+    univAnalysis <- rbindlist(univResults)
+
+    # --------------------------------------------------------------------------
+
     totalPlot <- NULL
     totalPlotData <- NULL
     rdData <- NULL
@@ -266,7 +300,8 @@ list(
                       OutputPlotStrat = stratPlotList,
                       OutputPlotStratData = stratPlotListData,
                       ReportTableData = reportTableData,
-                      RdDistribution = rdDistribution)
+                      RdDistribution = rdDistribution,
+                      UnivAnalysis = univAnalysis)
 
     cat("No adjustment specific text outputs.\n")
 
