@@ -401,8 +401,8 @@ GetMainReportArtifacts <- function(params)
     tableColNames <- c("Diagnosis<br /> year",
                        "Missing<br /> details",
                        "Reported<br /> &nbsp;",
-                       "Estimated<br /> unreported [N (L, U)]",
-                       "Estimated<br /> total [N (L, U)]")
+                       "Estimated<br /> unreported<br /> [N (95% CI)]",
+                       "Estimated<br /> total<br /> [N (95% CI)]")
     dt <- knitr::kable(dt,
                        align = rep("r", ncol(dt)),
                        col.names = tableColNames)
@@ -478,7 +478,7 @@ GetMainReportArtifacts <- function(params)
   colNamesMappingCD4 <-
     setNames(
       c(colNamesMapping[1],
-        paste(colNamesMapping[-1], "[N (L, U)]")),
+        paste(colNamesMapping[-1], "[Median (IQR)]")),
       names(colNamesMapping))
 
   # Original data
@@ -716,7 +716,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotOrigTransCount <-
     GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
@@ -729,7 +730,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotMITransCount <-
     GetReportPlot(data = dataMITransCount,
                   rowvar = "DateOfDiagnosisYear",
@@ -742,7 +744,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingCD4)
   plotOrigTransCD4 <-
     GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
@@ -754,7 +757,8 @@ GetMainReportArtifacts <- function(params)
     GetReportTable(data = dataMITransCD4,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   mapping = colNamesMappingCD4)
   plotMITransCD4 <-
     GetReportPlot(data = dataMITransCD4,
                   rowvar = "DateOfDiagnosisYear",
@@ -769,7 +773,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotOrigMigrCount <-
     GetReportPlot(data = dataOrigMigr,
                   rowvar = "DateOfDiagnosisYear",
@@ -782,7 +787,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotMIMigrCount <-
     GetReportPlot(data = dataMIMigrCount,
                   rowvar = "DateOfDiagnosisYear",
@@ -795,7 +801,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingCD4)
   plotOrigMigrCD4 <-
     GetReportPlot(data = dataOrigMigr,
                   rowvar = "DateOfDiagnosisYear",
@@ -807,7 +814,8 @@ GetMainReportArtifacts <- function(params)
     GetReportTable(data = dataMIMigrCD4,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   mapping = colNamesMappingCD4)
   plotMIMigrCD4 <-
     GetReportPlot(data = dataMIMigrCD4,
                   rowvar = "DateOfDiagnosisYear",

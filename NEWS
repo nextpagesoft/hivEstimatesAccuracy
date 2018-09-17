@@ -6,6 +6,8 @@ Version 0.9.12 (2018/09/)
 * Input data: additional country codes incorporated
 * Adjustments: Remodel adjustment specification control to have fixed order
 * Main Report: Rename "confidence interval" to "inter-quartile range"
+* Main Report: Change and fix column names of report tables to include proper
+  unit indicator
 
 
 Version 0.9.11 (2018/09/05)

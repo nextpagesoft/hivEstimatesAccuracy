@@ -135,7 +135,7 @@ createReports <- function(input, output, session, adjustedData)
 
                      setProgress(0.1)
 
-                     if (is.element(vals$selectedReportName, c("Main Report-new"))) {
+                     if (is.element(vals$selectedReportName, c("Main Report"))) {
                        params <- GetMainReportArtifacts(params)
                      }
 

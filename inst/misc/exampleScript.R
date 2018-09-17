@@ -59,7 +59,7 @@ if (!is.null(inputData)) {
                  Smoothing = FALSE,
                  CD4ConfInt = TRUE)
 
-  if (is.element(reportName, c("Main Report-new"))) {
+  if (is.element(reportName, c("Main Report"))) {
     params <- GetMainReportArtifacts(params)
   }
 
