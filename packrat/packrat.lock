@@ -106,8 +106,8 @@ Hash: d8736a5fe41e5ebef191c43f5e22652f
 
 Package: digest
 Source: CRAN
-Version: 0.6.16
-Hash: 6a025f0eaa147827d9843f25d86b5d23
+Version: 0.6.17
+Hash: 6bd8bf6c0430a024a994f2481c2d8516
 
 Package: dplyr
 Source: CRAN
