@@ -4,6 +4,8 @@ Version 0.9.12 (2018/09/)
 * UNDER DEVELOPMENT
 * Input data: custom mapping module for GroupedRegionOfOrigin implemented
 * Input data: additional country codes incorporated
+* Adjustments: Remodel adjustment specification control to have fixed order
+* Main Report: Rename "confidence interval" to "inter-quartile range"
 
 
 Version 0.9.11 (2018/09/05)
