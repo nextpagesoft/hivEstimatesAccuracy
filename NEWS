@@ -12,6 +12,7 @@ Version 0.9.12 (2018/09/)
 * Reporting Delays: Initial implementation of univariate analysis
 * Reporting Delays: Initial implementation of modelling time trend
 * Intermediate report for RD: fixes in plotting stratified data
+* Misc: Add "reportingDelaysRegressionScript.R" in inst folder
 
 
 Version 0.9.11 (2018/09/05)
