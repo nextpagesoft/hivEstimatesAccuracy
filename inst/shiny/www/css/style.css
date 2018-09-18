@@ -223,7 +223,7 @@ div.box-body .shiny-input-container h3 {
 #reportDiv table, #adjustments-intermReport table {
     border-spacing: 0;
     border-collapse: separate;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 #reportDiv table td,

@@ -20,11 +20,11 @@ adjustmentSpecs <-
            adjustmentNames)
 
 # Optionally adjust parameters of the adjustments
-# For instance stratify "Reporting Delays" adjustment by Transmission category:
-# adjustmentSpecs[["Reporting Delays"]]$Parameters$stratTrans$value <- TRUE
+# For instance stratify "Reporting Delays" adjustment by Migration category:
+adjustmentSpecs[["Reporting Delays"]]$Parameters$stratMigr$value <- TRUE
 
 # 3. FULLMIGR MAPPING ----------------------------------------------------------
-migrMappingType <- "REPCOUNTRY + UNK + 4 most prevalent other regions"
+migrMappingType <- "REPCOUNTRY + UNK + OTHER"
 
 # 4. FINAL REPORT NAME ---------------------------------------------------------
 reportName <- "Main Report"
