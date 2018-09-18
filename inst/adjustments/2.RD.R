@@ -48,18 +48,12 @@ list(
   AdjustmentFunction = function(inputData, parameters) {
 
     require(data.table)
+    require(survival)
 
     # A) SETUP -------------------------------------------------------------------------------------
 
     # Work on a copy
     compData <- copy(inputData)
-
-    # Initialize output data
-    outputData <- copy(inputData)
-
-    # Separator used for creating a composite of stratum columns. Should not occur in the stratum
-    # values.
-    stratSep <- "_"
 
     # Start year
     startYear <- parameters$startYear
@@ -88,16 +82,9 @@ list(
 
     # Make sure the strata columns exist in the data
     stratVarNames <- stratVarNames[stratVarNames %in% colnames(compData)]
-    stratVarNamesImp <- union(c("Imputation", "ReportingCountry"),
-                              stratVarNames)
+    stratVarNamesTrend <- union("DateOfDiagnosisYear",
+                                stratVarNames)
 
-    # Create a stratum variable - will be used to merge with the estimations,
-    # takes missing categories as separate categories
-    compData[, Stratum := survival::strata(.SD,
-                                           shortlabel = TRUE,
-                                           sep = stratSep,
-                                           na.group = TRUE),
-             .SDcols = stratVarNamesImp]
     # Create intermediate variables
     compData[, ":="(
       NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
@@ -133,85 +120,141 @@ list(
     # NOTE: Otherwise survival model complains
     compData <- compData[VarXs > VarTs]
 
-    # --------------------------------------------------------------------------
-    model <- compData[Imputation == 0L, survival::Surv(time = VarTs,
-                                                       time2 = VarXs,
-                                                       event = ReportingDelay)]
-    stratVarNamesTrend <- union("DateOfDiagnosisYear", stratVarNames)
-
-    # Defining univariate models
-    univFormulas <- sapply(stratVarNamesTrend,
-                           function(x) as.formula(paste('model~', x)))
-    # Applying univariate models
-    univModels <- lapply(univFormulas,
-                         function(x) survival::coxph(x, data = outputData[Imputation == 0L]))
-
-    # Extract results of univariabl analysis (whether particular covariates are associated with RD)
-    univResults <- lapply(univModels,
-                          function(x) {
-                            y <- summary(x)
-                            z <- survival::cox.zph(x)
-                            res <- merge(as.data.table(y$conf.int),
-                                         as.data.table(y$coefficients))
-                            res <- cbind(res,
-                                         as.data.table(z$table[, "p", drop = FALSE]))
-                            res[, lapply(.SD, signif, 2), .SDcols = colnames(res)]
-                            setnames(res, c("HR", "1/HR", "HR.lower.95",
-                                            "HR.upper.95", "Beta", "SE.Beta",
-                                            "Z", "P.value", "Prop.assumpt.p"))
-                            res <- cbind(Predictor = rownames(y$conf.int),
-                                         res)
-                            return(res)
-                          })
-    univAnalysis <- rbindlist(univResults)
-
-    # --------------------------------------------------------------------------
-
     totalPlot <- NULL
     totalPlotData <- NULL
-    rdData <- NULL
     stratPlotList <- NULL
     stratPlotListData <- NULL
     rdDistribution <- NULL
+    reportTableData <- NULL
+    univAnalysis <- NULL
     if (nrow(compData) > 0) {
-      # Fit a stratified survival model
-      model <- compData[, survival::Surv(time = VarTs,
-                                         time2 = VarXs,
-                                         event = ReportingDelay)]
-      fit <- compData[, survival::survfit(model ~ Stratum)]
-      if (is.null(fit$strata) & length(levels(compData$Stratum)) == 1) {
-        strata <- c(1L)
-        names(strata) <- paste0("Stratum=", levels(outputData$Stratum)[1])
-      } else {
-        strata <- fit$strata
+      # ------------------------------------------------------------------------
+      # Prepare diagnostic table based on original data
+      model <- compData[Imputation == 0L,
+                        Surv(time = VarTs,
+                             time2 = VarXs,
+                             event = ReportingDelay)]
+
+      # Defining univariate models
+      univFormulas <- lapply(
+        stratVarNamesTrend,
+        function(x) as.formula(sprintf("model ~ %s", x)))
+
+      # Applying univariate models
+      univModels <- lapply(
+        univFormulas,
+        function(x) coxph(x, data = compData[Imputation == 0L]))
+
+      # Extract results of univariable analysis (whether particular covariates
+      # are associated with RD)
+      univAnalysis <- rbindlist(lapply(
+        univModels,
+        function(x) {
+          y <- summary(x)
+          z <- cox.zph(x)
+          res <- merge(as.data.table(y$conf.int),
+                       as.data.table(y$coefficients))
+          res <- cbind(res,
+                       as.data.table(z$table[rownames(z$table) != "GLOBAL", "p", drop = FALSE]))
+          res[, lapply(.SD, signif, 2), .SDcols = colnames(res)]
+          setnames(res, c("HR", "1/HR", "HR.lower.95",
+                          "HR.upper.95", "Beta", "SE.Beta",
+                          "Z", "P.value", "Prop.assumpt.p"))
+          res <- cbind(Predictor = rownames(y$conf.int),
+                       res)
+          return(res)}))
+
+      # ------------------------------------------------------------------------
+      # RD estimation with time trend
+
+      # Define parameters
+      lastYear <- compData[, max(DateOfDiagnosisYear)]
+      years <- (lastYear - 4):lastYear
+      tGroups <- 1:3
+      imputations <- compData[, sort(unique(Imputation))]
+      formula <- as.formula(sprintf("Surv(time = VarTs, time2 = VarXs, event = ReportingDelay) ~ (%s):strata(tgroup)",
+                                    paste(stratVarNamesTrend, collapse = " + ")))
+      cuts <- compData[, c(max(VarXs) - 10,
+                           max(VarXs) - 3)]
+
+      # Run fitting per imputation separately
+      fitStratum <- list()
+      for (imputation in imputations) {
+        compDataSplit <- setDT(survSplit(
+          formula = Surv(time = VarTs, time2 = VarXs, event = ReportingDelay) ~ .,
+          data = compData[Imputation == imputation],
+          cut = cuts,
+          episode = "tgroup"))
+
+        fitCox <- coxph(formula,
+                        data = compDataSplit)
+
+        estFrame <- CJ(DateOfDiagnosisYear = years,
+                       tgroup = tGroups)
+
+        estCov <- na.omit(unique(compData[, ..stratVarNames]))
+        if (nrow(estCov) > 0) {
+          estFrame[, MergeDummy := 1]
+          estCov[, MergeDummy := 1]
+          estFrame <- estFrame[estCov,
+                               on = .(MergeDummy),
+                               allow.cartesian = TRUE]
+          estFrame[, MergeDummy := NULL]
+        }
+
+        estFrame[, ":="(
+          Id = rep(seq_len(.N/length(tGroups)), each = length(tGroups)),
+          VarTs = ifelse(tgroup == 1,  0, ifelse(tgroup == 2, 52, ifelse(tgroup == 3, 59, NA))),
+          VarXs = ifelse(tgroup == 1, 52, ifelse(tgroup == 2, 59, ifelse(tgroup == 3, 62, NA))),
+          ReportingDelay = 0
+        )]
+
+        fit <- survfit(fitCox,
+                       newdata = estFrame,
+                       id = Id)
+
+        fitStratumImp <- data.table(
+          Imputation = imputation,
+          Delay = fit$time,
+          P = fit$surv,
+          Weight = 1/fit$surv,
+          Var = fit$std.err^2,
+          unique(estFrame[, ..stratVarNamesTrend])[rep(seq_len(.N), fit$strata)])
+        fitStratumImp[, VarT := max(Delay) - Delay]
+
+        # Store this imputation results
+        fitStratum[[as.character(imputation)]] <- fitStratumImp[VarT >= 0]
       }
+      fitStratum <- rbindlist(fitStratum)
 
-      # Recreating stratum variables to assign them to the delay distribution dataset
-      fitStratum <- data.table(
-        Delay = fit$time,
-        P = fit$surv,
-        Weight = 1/fit$surv,
-        Var = fit$std.err^2,
-        Stratum = factor(rep(seq_along(strata), strata),
-                         labels = levels(compData$Stratum)))
-      fitStratum[, (stratVarNamesImp) := tstrsplit(Stratum, stratSep)]
-      fitStratum[, VarT := max(Delay) - Delay]
-      fitStratum <- fitStratum[VarT >= 0]
-      # Convert "NA" to NA
-      fitStratum[, (stratVarNamesImp) := lapply(.SD, function(x) ifelse(x == "NA", NA_character_, x)),
-                 .SDcols = stratVarNamesImp]
-
-      # Create final output object
-      outputData[fitStratum[, c("Stratum", "VarT", "Weight"), with = FALSE],
-                 Weight := Weight,
-                 on = .(VarT, Stratum)]
+      # Merge P, Weight and Var with outputData object
+      mergeVars <- union(stratVarNamesTrend,
+                         c("VarT", "Imputation"))
+      outputData[, ":="(
+        DateOfDiagnosisYearOrig = DateOfDiagnosisYear,
+        DateOfDiagnosisYear = pmax.int(lastYear - 4, DateOfDiagnosisYear),
+        Source = ifelse(Imputation == 0, "Reported", "Imputed")
+      )]
+      outputData <- merge(outputData,
+                          fitStratum[, c(..mergeVars, "P", "Weight", "Var")],
+                          by = mergeVars,
+                          all.x = TRUE)
+      outputData[, MissingData := is.na(Weight)]
       outputData[is.na(Weight), Weight := 1]
+      outputData[is.na(P), P := 1]
+      outputData[is.na(Var), Var := 0]
+      outputData[, ":="(
+        DateOfDiagnosisYear = DateOfDiagnosisYearOrig,
+        DateOfDiagnosisYearOrig = NULL
+      )]
+
+      # ------------------------------------------------------------------------
 
       # Get distribution object as artifact
       varNames <- setdiff(colnames(fitStratum),
-                          c("Delay", "P", "Var", "Stratum", "VarT"))
+                          c("Delay", "P", "Weight", "Var", "VarT"))
       rdDistribution <- fitStratum[VarT > 0,
-                                   union(varNames, c("VarT", "P", "Var")),
+                                   union(varNames, c("VarT", "P", "Weight", "Var")),
                                    with = FALSE]
       setnames(rdDistribution,
                old = "VarT",
@@ -219,24 +262,19 @@ list(
       setorderv(rdDistribution, union(varNames, "Quarter"))
 
       # Aggregate and keep only required dimensions
-      agregat <- outputData[, .(Count = .N),
-                            by = .(DateOfDiagnosisYear,
-                                   VarT,
-                                   Stratum,
-                                   Source = ifelse(Imputation == 0, "Reported", "Imputed"))]
-
-      # Merge fit data
-      agregat <- fitStratum[agregat,
-                            on = .(VarT, Stratum)]
+      agregat <- outputData[, .(Count = .N,
+                                P = mean(P),
+                                Weight = mean(Weight),
+                                Var = mean(Var)),
+                            by = c(mergeVars, "Source", "MissingData")]
 
       # Compute estimated count and its variance
       agregat[, ":="(
         EstCount = Count * Weight,
         EstCountVar = (Count * (Count + 1) / P^4 * Var) + Count * (1 - P) / P^2
       )]
-      agregat[, MissingData := is.na(P)]
 
-      # C) TOTAL PLOT ----------------------------------------------------------------------------------
+      # C) TOTAL PLOT ----------------------------------------------------------
       totalPlotData <- GetRDPlotData(data = agregat,
                                      by = c("MissingData", "Source", "Imputation",
                                             "DateOfDiagnosisYear"))
@@ -263,18 +301,17 @@ list(
                   c("DateOfDiagnosisYear", "MissingData", "Reported",
                     "EstUnreported", "EstCount", "LowerEstCount", "UpperEstCount"))
 
-      # D) STRATIFIED PLOT (OPTIONAL) ------------------------------------------------------------------
+      # D) STRATIFIED PLOT (OPTIONAL) ------------------------------------------
       if (length(stratVarNames) > 0) {
         # Stratification
         colNames <- union(c("MissingData", "Source", "DateOfDiagnosisYear", "Count", "EstCount",
                             "EstCountVar"),
-                          stratVarNamesImp)
+                          c(stratVarNamesTrend, "Imputation"))
         # Keep only required columns, convert data to "long" format...
         agregatLong <- melt(agregat[, ..colNames],
                             measure.vars = stratVarNames,
                             variable.name = "Stratum",
                             value.name = "StratumValue")
-        agregatLong[, StratumValue := factor(StratumValue)]
 
         stratPlotListData <- GetRDPlotData(data = agregatLong,
                                            by = c("MissingData", "Source", "Imputation",
@@ -292,7 +329,7 @@ list(
 
     # Keep only columns present in the input object plus the weight
     outColNames <- union(colnames(inputData),
-                         c("VarT", "Stratum", "Weight"))
+                         c("VarT", "Weight"))
     outputData <- outputData[, ..outColNames]
 
     artifacts <- list(OutputPlotTotal = totalPlot,
