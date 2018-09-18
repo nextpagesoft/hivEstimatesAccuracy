@@ -30,6 +30,7 @@ GetRDPlots <- function(
 {
   if (!is.null(stratum)) {
     localPlotData <- plotData[Stratum == stratum]
+    localPlotData[, StratumValue := factor(StratumValue)]
   } else {
     localPlotData <- plotData
   }
@@ -73,7 +74,7 @@ GetRDPlots <- function(
   if (!is.null(stratum)) {
     plot <-
       plot +
-      ggtitle(paste("Reported and estimated total count of cases, by", stratum)) +
+      ggtitle(paste("Reported and estimated total count of cases by", stratum)) +
       facet_wrap(~StratumValue, ncol = 2, drop = FALSE, shrink = FALSE)
   } else {
     plot <- plot +
