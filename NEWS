@@ -13,6 +13,9 @@ Version 0.9.12 (2018/09/)
 * Reporting Delays: Initial implementation of modelling time trend
 * Intermediate report for RD: fixes in plotting stratified data
 * Misc: Add "reportingDelaysRegressionScript.R" in inst folder
+* Input data summary: titles of plots adjusted, comments added. PLot for trends
+  in reporting delay for last 5 years removed. Histogram of data below filter
+  added.
 
 
 Version 0.9.11 (2018/09/05)

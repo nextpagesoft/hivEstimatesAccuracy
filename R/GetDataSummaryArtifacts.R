@@ -75,37 +75,8 @@ GetDataSummaryArtifacts <- function(inputData)
       ggtitle("Density of Reporting Delay\n") +
       xlab("Delay in quarters of the year") +
       ylab("Proportion reported with the delay")
-
-    shortData <- inputData[DateOfDiagnosisYear < max(DateOfDiagnosisYear) - 5]
-    quant95 <- quantile(shortData$VarX, probs = 0.95, na.rm = TRUE)
-    quant99 <- quantile(shortData$VarX, probs = 0.99, na.rm = TRUE)
-    delayDensShortPlot <- ggplot(data = shortData, mapping = aes(x = VarX)) +
-      geom_density(fill = colors[2], alpha = 0.6, adjust = 4, size = 1, colour = colors[1]) +
-      geom_vline(xintercept = quant95, linetype = "dashed") +
-      annotate("text",
-               label = paste("95% of cases reported \nby", prettyNum(quant95), "quarters"),
-               fontface = "italic",
-               x = quant95 + 0.5,
-               y = -Inf,
-               hjust = 0,
-               vjust = -1) +
-      expand_limits(x = c(0, max(30, ceiling(quant99)))) +
-      scale_x_continuous(expand = c(0, 0)) +
-      theme_classic() +
-      theme(text = element_text(size = 14),
-            panel.grid = element_blank(),
-            axis.line = element_line(colour = "#888888"),
-            axis.ticks = element_line(colour = "#888888")) +
-      ggtitle("Density of Reporting Delay with last 5 years deleted") +
-      xlab("Delay in quarters of the year") +
-      ylab("Proportion reported with the delay")
-    if (nrow(shortData) > 0) {
-      delayDensShortPlot <- delayDensShortPlot +
-        scale_y_continuous(expand = c(0, 0))
-    }
   } else {
     delayDensFullPlot <- NULL
-    delayDensShortPlot <- NULL
   }
 
   # Mean delay plot
@@ -151,6 +122,5 @@ GetDataSummaryArtifacts <- function(inputData)
               MissPlotsByGender = missPlotsByGender,
               MissPlotsRD = missPlotsRD,
               DelayDensFullPlot = delayDensFullPlot,
-              DelayDensShortPlot = delayDensShortPlot,
               MeanDelayPlot = meanDelayPlot))
 }
