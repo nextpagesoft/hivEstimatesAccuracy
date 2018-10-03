@@ -9,7 +9,7 @@ GetGroupingTable <- function(type, distr, map) {
   groupDistr <- groupDistr[, .(
     FullRegionOfOrigin = paste(FullRegionOfOrigin, collapse = ", "),
     Count = sum(Count)
-    ), by = GroupedRegionOfOrigin]
+    ), by = .(GroupedRegionOfOrigin = as.character(GroupedRegionOfOrigin))]
   groupDistr <- groupDistr[order(-Count)]
   groupDistr <- rbind(groupDistr[GroupedRegionOfOrigin == "REPCOUNTRY"],
                       groupDistr[!GroupedRegionOfOrigin %chin% c("REPCOUNTRY", "UNK", "OTHER")],
