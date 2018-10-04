@@ -15,8 +15,8 @@ Hash: 60a5c75e57aae4a0ce76cb7422939aaf
 
 Package: R6
 Source: CRAN
-Version: 2.2.2
-Hash: b2366cd9d2f3851a5704b4e192b985c2
+Version: 2.3.0
+Hash: 8eccabbf292b5aba632985cde6406fc3
 
 Package: RColorBrewer
 Source: CRAN
@@ -270,8 +270,8 @@ Requires: colorspace
 
 Package: nloptr
 Source: CRAN
-Version: 1.2.0
-Hash: ae8013e3413b7c7cc38a3edd7119cebb
+Version: 1.2.1
+Hash: c2b0475b9a177d3331957e366a7059a0
 
 Package: numDeriv
 Source: CRAN
