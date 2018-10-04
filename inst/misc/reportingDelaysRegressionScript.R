@@ -13,11 +13,10 @@ startYear <- 2000L
 endQrt <- 2017.25
 
 # Stratifiation columns
-# stratVarNames <- c("Gender", "Transmission")
-stratVarNames <- c()
+stratVarNames <- c("Gender", "Transmission")
 
 # Run mice adjustment before RD
-runMice <- FALSE
+runMice <- TRUE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
@@ -86,7 +85,7 @@ compData[, ":="(
 outputData <- copy(compData)
 outputData[, MaxNotificationTime := max(NotificationTime, na.rm = TRUE),
            by = .(ReportingCountry)]
-outputData[, VarT := 4 * (pmin(MaxNotificationTime, endQrt) - DiagnosisTime) + 1]
+outputData[, VarT := 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1]
 
 # Filter
 compData <- compData[!is.na(DiagnosisTime) & !is.na(NotificationTime)]
@@ -112,7 +111,19 @@ compData[, ":="(
 compData <- compData[VarXs > VarTs]
 
 # ------------------------------------------------------------------------
+
 # Prepare diagnostic table based on original data
+if (compData[, "M" %in% levels(Gender)]) {
+  compData[, Gender := relevel(Gender, ref = "M")]
+}
+if (compData[, "MSM" %in% levels(Transmission)]) {
+  compData[, Transmission := relevel(Transmission, ref = "MSM")]
+}
+if (compData[, "REPCOUNTRY" %in% levels(GroupedRegionOfOrigin)]) {
+  compData[, GroupedRegionOfOrigin := relevel(GroupedRegionOfOrigin,
+                                              ref = "REPCOUNTRY")]
+}
+
 model <- compData[Imputation == 0L,
                   Surv(time = VarTs,
                        time2 = VarXs,
@@ -143,7 +154,17 @@ univAnalysis <- rbindlist(lapply(
     setnames(res, c("HR", "1/HR", "HR.lower.95",
                     "HR.upper.95", "Beta", "SE.Beta",
                     "Z", "P.value", "Prop.assumpt.p"))
-    res <- cbind(Predictor = rownames(y$conf.int),
+
+    if (!is.null(x$xlevels)) {
+      varName <- names(x$xlevels)[1]
+      refLevel <- x$xlevels[[varName]][1]
+      compLevels <- x$xlevels[[varName]][-1]
+      predictor <- sprintf("%s (%s vs %s)", varName, compLevels, refLevel)
+    } else {
+      predictor <- rownames(y$conf.int)
+    }
+
+    res <- cbind(Predictor = predictor,
                  res)
     return(res)}))
 
@@ -215,7 +236,7 @@ mergeVars <- union(stratVarNamesTrend,
                    c("VarT", "Imputation"))
 outputData[, ":="(
   DateOfDiagnosisYearOrig = DateOfDiagnosisYear,
-  DateOfDiagnosisYear = pmax.int(lastYear - 4, DateOfDiagnosisYear),
+  DateOfDiagnosisYear = pmax.int(lastYear - 4L, DateOfDiagnosisYear),
   Source = ifelse(Imputation == 0, "Reported", "Imputed")
 )]
 outputData <- merge(outputData,
@@ -223,7 +244,6 @@ outputData <- merge(outputData,
                     by = mergeVars,
                     all.x = TRUE)
 outputData[, MissingData := is.na(Weight)]
-# outputData[, MissingData := FALSE]
 outputData[is.na(Weight), Weight := 1]
 outputData[is.na(P), P := 1]
 outputData[is.na(Var), Var := 0]
@@ -260,24 +280,24 @@ agregat[, ":="(
 
 # D) TOTAL PLOT ----------------------------------------------------------
 totalPlotData <- GetRDPlotData(data = agregat,
-                               by = c("MissingData", "Source", "Imputation",
+                               by = c("Source", "MissingData", "Imputation",
                                       "DateOfDiagnosisYear"))
-setorderv(totalPlotData, c("MissingData", "DateOfDiagnosisYear"))
+setorderv(totalPlotData, c("Source", "MissingData", "DateOfDiagnosisYear"))
 totalPlot <- GetRDPlots(plotData = totalPlotData,
                         isOriginalData = isOriginalData)
 
-reportTableData <- dcast(totalPlotData,
-                         DateOfDiagnosisYear + EstCount + LowerEstCount +
-                           UpperEstCount ~ MissingData,
+reportTableData <- dcast(totalPlotData[Source == "Reported"],
+                         DateOfDiagnosisYear + EstCount +
+                           LowerEstCount + UpperEstCount ~ MissingData,
                          value.var = "Count",
                          fun.aggregate = sum)
 setnames(reportTableData,
          old = c("FALSE", "TRUE"),
          new = c("Reported", "MissingData"))
-reportTableData[, lapply(.SD, sum),
-                by = DateOfDiagnosisYear,
-                .SDcols = setdiff(colnames(reportTableData),
-                                  "DateOfDiagnosisYear")]
+reportTableData <- reportTableData[, lapply(.SD, sum),
+                                   by = DateOfDiagnosisYear,
+                                   .SDcols = setdiff(colnames(reportTableData),
+                                                     "DateOfDiagnosisYear")]
 reportTableData[, ":="(
   EstUnreported = EstCount - (Reported + MissingData),
   LowerEstUnreported = LowerEstCount - (Reported + MissingData),

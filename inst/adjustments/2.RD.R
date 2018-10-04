@@ -130,6 +130,18 @@ list(
     if (nrow(compData) > 0) {
       # ------------------------------------------------------------------------
       # Prepare diagnostic table based on original data
+
+      if (compData[, "M" %in% levels(Gender)]) {
+        compData[, Gender := relevel(Gender, ref = "M")]
+      }
+      if (compData[, "MSM" %in% levels(Transmission)]) {
+        compData[, Transmission := relevel(Transmission, ref = "MSM")]
+      }
+      if (compData[, "REPCOUNTRY" %in% levels(GroupedRegionOfOrigin)]) {
+        compData[, GroupedRegionOfOrigin := relevel(GroupedRegionOfOrigin,
+                                                    ref = "REPCOUNTRY")]
+      }
+
       model <- compData[Imputation == 0L,
                         Surv(time = VarTs,
                              time2 = VarXs,
@@ -160,7 +172,17 @@ list(
           setnames(res, c("HR", "1/HR", "HR.lower.95",
                           "HR.upper.95", "Beta", "SE.Beta",
                           "Z", "P.value", "Prop.assumpt.p"))
-          res <- cbind(Predictor = rownames(y$conf.int),
+
+          if (!is.null(x$xlevels)) {
+            varName <- names(x$xlevels)[1]
+            refLevel <- x$xlevels[[varName]][1]
+            compLevels <- x$xlevels[[varName]][-1]
+            predictor <- sprintf("%s (%s vs %s)", varName, compLevels, refLevel)
+          } else {
+            predictor <- rownames(y$conf.int)
+          }
+
+          res <- cbind(Predictor = predictor,
                        res)
           return(res)}))
 
@@ -282,7 +304,7 @@ list(
       totalPlot <- GetRDPlots(plotData = totalPlotData,
                               isOriginalData = isOriginalData)
 
-      reportTableData <- dcast(totalPlotData,
+      reportTableData <- dcast(totalPlotData[Source == "Reported"],
                                DateOfDiagnosisYear + EstCount + LowerEstCount +
                                  UpperEstCount ~ MissingData,
                                value.var = "Count",
@@ -290,10 +312,10 @@ list(
       setnames(reportTableData,
                old = c("FALSE", "TRUE"),
                new = c("Reported", "MissingData"))
-      reportTableData[, lapply(.SD, sum),
-                      by = DateOfDiagnosisYear,
-                      .SDcols = setdiff(colnames(reportTableData),
-                                        "DateOfDiagnosisYear")]
+      reportTableData <- reportTableData[, lapply(.SD, sum),
+                                         by = DateOfDiagnosisYear,
+                                         .SDcols = setdiff(colnames(reportTableData),
+                                                           "DateOfDiagnosisYear")]
       reportTableData[, ":="(
         EstUnreported = EstCount - (Reported + MissingData),
         LowerEstUnreported = LowerEstCount - (Reported + MissingData),
