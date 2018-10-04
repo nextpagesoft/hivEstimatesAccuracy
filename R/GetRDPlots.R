@@ -28,12 +28,21 @@ GetRDPlots <- function(
                    "Imputed" = "#9d8b56")
 )
 {
+  keyCols <- c("Source", "DateOfDiagnosisYear")
+
   if (!is.null(stratum)) {
     localPlotData <- plotData[Stratum == stratum]
     localPlotData[, StratumValue := factor(StratumValue)]
+    keyCols <- union(keyCols, "StratumValue")
   } else {
     localPlotData <- plotData
   }
+
+  localPlotData <-
+    localPlotData[, lapply(.SD, sum),
+                  by = keyCols,
+                  .SDcols = c("Count", "EstCount", "EstCountVar", "LowerEstCount",
+                              "UpperEstCount")]
 
   localConfBoundsPlotData <- localPlotData[Source == ifelse(isOriginalData,
                                                             "Reported",

@@ -13,10 +13,11 @@ startYear <- 2000L
 endQrt <- 2017.25
 
 # Stratifiation columns
-stratVarNames <- c("Gender", "Transmission", "GroupedRegionOfOrigin")
+# stratVarNames <- c("Gender", "Transmission")
+stratVarNames <- c()
 
 # Run mice adjustment before RD
-runMice <- TRUE
+runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
@@ -222,6 +223,7 @@ outputData <- merge(outputData,
                     by = mergeVars,
                     all.x = TRUE)
 outputData[, MissingData := is.na(Weight)]
+# outputData[, MissingData := FALSE]
 outputData[is.na(Weight), Weight := 1]
 outputData[is.na(P), P := 1]
 outputData[is.na(Var), Var := 0]
@@ -261,23 +263,25 @@ totalPlotData <- GetRDPlotData(data = agregat,
                                by = c("MissingData", "Source", "Imputation",
                                       "DateOfDiagnosisYear"))
 setorderv(totalPlotData, c("MissingData", "DateOfDiagnosisYear"))
-totalPlot <- GetRDPlots(plotData = totalPlotData[MissingData == FALSE],
+totalPlot <- GetRDPlots(plotData = totalPlotData,
                         isOriginalData = isOriginalData)
 
-reportTableData <-
-  totalPlotData[Source == "Reported" & MissingData == FALSE,
-                .(DateOfDiagnosisYear, Reported = Count, EstCount,
-                  LowerEstCount, UpperEstCount)]
-missRdData <-
-  totalPlotData[Source == "Reported" & MissingData == TRUE,
-                .(DateOfDiagnosisYear, Count)]
-reportTableData[missRdData,
-                MissingData := Count,
-                on = .(DateOfDiagnosisYear)]
+reportTableData <- dcast(totalPlotData,
+                         DateOfDiagnosisYear + EstCount + LowerEstCount +
+                           UpperEstCount ~ MissingData,
+                         value.var = "Count",
+                         fun.aggregate = sum)
+setnames(reportTableData,
+         old = c("FALSE", "TRUE"),
+         new = c("Reported", "MissingData"))
+reportTableData[, lapply(.SD, sum),
+                by = DateOfDiagnosisYear,
+                .SDcols = setdiff(colnames(reportTableData),
+                                  "DateOfDiagnosisYear")]
 reportTableData[, ":="(
-  EstUnreported = na.zero(EstCount) - na.zero(Reported),
-  LowerEstUnreported = na.zero(LowerEstCount) - na.zero(Reported),
-  UpperEstUnreported = na.zero(UpperEstCount) - na.zero(Reported)
+  EstUnreported = EstCount - (Reported + MissingData),
+  LowerEstUnreported = LowerEstCount - (Reported + MissingData),
+  UpperEstUnreported = UpperEstCount - (Reported + MissingData)
 )]
 setcolorder(reportTableData,
             c("DateOfDiagnosisYear", "MissingData", "Reported",
@@ -300,7 +304,7 @@ if (length(stratVarNames) > 0) {
                                             "DateOfDiagnosisYear", "Stratum", "StratumValue"))
   stratPlotList <- lapply(stratVarNames,
                           GetRDPlots,
-                          plotData = stratPlotListData[MissingData == FALSE],
+                          plotData = stratPlotListData,
                           isOriginalData = isOriginalData)
 
   names(stratPlotList) <- stratVarNames
