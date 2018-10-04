@@ -25,12 +25,12 @@ cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
 ```
 
 ```{r, fig.width = 10, fig.height = 4, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}}
-cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**", "\n")
+cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**", "\n\n")
 params$InputData$Artifacts$OutputPlotTotal
 ```
 
 ```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat)}}
-cat("**Figure 2. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year and stratum.**", "\n")
+cat("**Figure 2. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year and stratum.**", "\n\n")
 ```
 
 ```{r, fig.width = 10, fig.height = calcFigHeight("Gender"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Gender)}}
