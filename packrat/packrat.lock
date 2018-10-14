@@ -106,8 +106,8 @@ Hash: 67c877937c790a0cadb71284febb6b34
 
 Package: digest
 Source: CRAN
-Version: 0.6.17
-Hash: 6bd8bf6c0430a024a994f2481c2d8516
+Version: 0.6.18
+Hash: 65f62365ec69ddd17230d2ffe891a6ab
 
 Package: dplyr
 Source: CRAN
@@ -118,14 +118,13 @@ Requires: BH, R6, Rcpp, assertthat, bindrcpp, glue, magrittr,
 
 Package: evaluate
 Source: CRAN
-Version: 0.11
-Hash: 2d90e734f5c12a3473f4be8ef3c15ebb
-Requires: stringr
+Version: 0.12
+Hash: c32505adba4f6eca5aa20dd32300b019
 
 Package: fansi
 Source: CRAN
-Version: 0.3.0
-Hash: 8d0a24d8245abbfa2b030460734495ab
+Version: 0.4.0
+Hash: f147621f72b561485bfffcae78c4f5d5
 
 Package: forcats
 Source: CRAN
@@ -242,8 +241,8 @@ Requires: Rcpp, broom, dplyr, mitml, rlang, survival
 
 Package: mime
 Source: CRAN
-Version: 0.5
-Hash: 463550cf44fb6f0a2359368f42eebe62
+Version: 0.6
+Hash: 2ed8f98b8284ad733f3907fc6e2f1334
 
 Package: minqa
 Source: CRAN
@@ -453,8 +452,8 @@ Requires: Rcpp, dplyr, glue, magrittr, purrr, rlang, stringi, tibble,
 
 Package: tidyselect
 Source: CRAN
-Version: 0.2.4
-Hash: 740eee0076ff08393a3f2df26e7566ab
+Version: 0.2.5
+Hash: e8f4a27878a2753b69376c7121c4bb0a
 Requires: Rcpp, glue, purrr, rlang
 
 Package: tinytex
