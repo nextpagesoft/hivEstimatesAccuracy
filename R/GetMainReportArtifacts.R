@@ -381,13 +381,14 @@ GetMainReportArtifacts <- function(params)
     }
 
     dt <- copy(data)
+
     numericCols <- setdiff(colnames(dt), c("DateOfDiagnosisYear"))
     dtTotals <- dt[, lapply(.SD, sum, na.rm = TRUE), .SDcols = numericCols]
     dtTotals[, DateOfDiagnosisYear := "Total"]
     ConvertDataTableColumns(dt, c(DateOfDiagnosisYear = "character"))
     dt <- rbind(dt,
                 dtTotals)
-    singleValCols <- c("MissingData", "Reported")
+    singleValCols <- c("Reported", "RDWeightEstimated", "RDWeightNotEstimated")
     dt[, (singleValCols) := lapply(.SD, FormatNumbers), .SDcols = singleValCols]
     dt[, EstUnreported := FormatRangeCols(.SD), .SDcols = c("LowerEstUnreported", "EstUnreported", "UpperEstUnreported")]
     dt[, EstCount := FormatRangeCols(.SD), .SDcols = c("LowerEstCount", "EstCount", "UpperEstCount")]
@@ -399,8 +400,9 @@ GetMainReportArtifacts <- function(params)
     )]
     setorderv(dt, c("DateOfDiagnosisYear"))
     tableColNames <- c("Diagnosis<br /> year",
-                       "Missing<br /> details",
                        "Reported<br /> &nbsp;",
+                       "Weight<br /> estimated",
+                       "Weight<br /> not estimated",
                        "Estimated<br /> unreported<br /> [N (95% CI)]",
                        "Estimated<br /> total<br /> [N (95% CI)]")
     dt <- knitr::kable(dt,

@@ -20,7 +20,7 @@ runMice <- TRUE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "/media/sf_VirtualBox_Share/dummy_miss1.zip"
+inputDataFilePath <- "~/share/dummy_miss1.zip"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -99,8 +99,8 @@ compData[, ":="(
   MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
 ), by = .(ReportingCountry)]
 compData[, ":="(
-  VarT = 4 * (pmin(MaxNotificationTime, endQrt) - DiagnosisTime) + 1,
-  Tf = 4 * (pmin(MaxNotificationTime, endQrt) - pmax(MinNotificationTime, startYear)),
+  VarT = 4 * (pmin(MaxNotificationTime, endQrt) - DiagnosisTime),
+  Tf = 4 * (pmin(MaxNotificationTime, endQrt) - pmax(MinNotificationTime, startYear + 0.25)),
   ReportingDelay = 1L
 )]
 compData[, ":="(
@@ -179,7 +179,8 @@ imputations <- compData[, sort(unique(Imputation))]
 formula <- as.formula(sprintf("Surv(time = VarTs, time2 = VarXs, event = ReportingDelay) ~ (%s):strata(tgroup)",
                               paste(stratVarNamesTrend, collapse = " + ")))
 cuts <- compData[, c(max(VarXs) - 10,
-                     max(VarXs) - 3)]
+                     max(VarXs) - 3,
+                     max(VarXs))]
 
 # Run fitting per imputation separately
 fitStratum <- list()
@@ -208,8 +209,8 @@ for (imputation in imputations) {
 
   estFrame[, ":="(
     Id = rep(seq_len(.N/length(tGroups)), each = length(tGroups)),
-    VarTs = ifelse(tgroup == 1,  0, ifelse(tgroup == 2, 52, ifelse(tgroup == 3, 59, NA))),
-    VarXs = ifelse(tgroup == 1, 52, ifelse(tgroup == 2, 59, ifelse(tgroup == 3, 62, NA))),
+    VarTs = c(0, cuts)[tgroup],
+    VarXs = cuts[tgroup],
     ReportingDelay = 0
   )]
 
@@ -293,19 +294,22 @@ reportTableData <- dcast(totalPlotData[Source == "Reported"],
                          fun.aggregate = sum)
 setnames(reportTableData,
          old = c("FALSE", "TRUE"),
-         new = c("Reported", "MissingData"))
+         new = c("RDWeightEstimated", "RDWeightNotEstimated"))
 reportTableData <- reportTableData[, lapply(.SD, sum),
                                    by = DateOfDiagnosisYear,
                                    .SDcols = setdiff(colnames(reportTableData),
                                                      "DateOfDiagnosisYear")]
+reportTableData[, Reported := RDWeightEstimated + RDWeightNotEstimated]
 reportTableData[, ":="(
-  EstUnreported = EstCount - (Reported + MissingData),
-  LowerEstUnreported = LowerEstCount - (Reported + MissingData),
-  UpperEstUnreported = UpperEstCount - (Reported + MissingData)
+  EstUnreported = EstCount - Reported,
+  LowerEstUnreported = LowerEstCount - Reported,
+  UpperEstUnreported = UpperEstCount - Reported
 )]
 setcolorder(reportTableData,
-            c("DateOfDiagnosisYear", "MissingData", "Reported",
-              "EstUnreported", "EstCount", "LowerEstCount", "UpperEstCount"))
+            c("DateOfDiagnosisYear",
+              "Reported", "RDWeightEstimated", "RDWeightNotEstimated",
+              "EstUnreported", "LowerEstUnreported", "UpperEstUnreported",
+              "EstCount", "LowerEstCount", "UpperEstCount"))
 
 # E) STRATIFIED PLOT (OPTIONAL) ------------------------------------------
 if (length(stratVarNames) > 0) {
