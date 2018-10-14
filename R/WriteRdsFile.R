@@ -14,12 +14,12 @@
 #' }
 #'
 #' @export
-WriteRdsFile <- function(data, fileName, ...)
+WriteRdsFile <- function(data, fileName, compress = "xz", ...)
 {
   stopifnot(!missing(data))
   stopifnot(!missing(fileName))
 
-  saveRDS(data, fileName, ...)
+  saveRDS(data, fileName, compress = compress, ...)
 
   return(NULL)
 }
