@@ -57,7 +57,7 @@ inputDataUploadMigrantUI <- function(id)
 }
 
 # Server logic
-inputDataUploadMigrant <- function(input, output, session, inputData)
+inputDataUploadMigrant <- function(input, output, session, appStatus, inputDataBeforeGrouping)
 {
   # Get namespace
   ns <- session$ns
@@ -153,7 +153,7 @@ inputDataUploadMigrant <- function(input, output, session, inputData)
   }
 
   distr <- reactive({
-    inputData <- req(inputData()$Table)
+    inputData <- req(inputDataBeforeGrouping()$Table)
     GetOriginDistribution(inputData)
   })
 
@@ -162,7 +162,7 @@ inputDataUploadMigrant <- function(input, output, session, inputData)
   })
 
   observe({
-    type <- req(input$groupSelect)
+    type <- req(input[['groupSelect']])
     distr <- req(distr())
     groupRegions <- req(vals$groupRegions)
     groupNames <- req(vals$groupNames)
@@ -234,11 +234,11 @@ inputDataUploadMigrant <- function(input, output, session, inputData)
              session = session)
   })
 
-  inputDataWithMapping <- reactive({
-    inputData <- req(inputData())
+  observe({
+    inputData <- req(inputDataBeforeGrouping())
     map <- req(vals$map)
-    ApplyOriginGroupingMap(inputData, map)
+    appStatus$InputData <- ApplyOriginGroupingMap(inputData, map)
   })
 
-  return(inputDataWithMapping)
+  return(NULL)
 }

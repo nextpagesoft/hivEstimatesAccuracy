@@ -54,7 +54,7 @@ dataAdjustUI <- function(id)
 }
 
 # Server logic
-dataAdjust <- function(input, output, session, inputData)
+dataAdjust <- function(input, output, session, appStatus)
 {
   # Get namespace
   ns <- session$ns
@@ -64,7 +64,7 @@ dataAdjust <- function(input, output, session, inputData)
   task <- NULL
 
   # Store reactive values
-  adjustedData <- reactiveVal(NULL)
+  #adjustedData <- reactiveVal(NULL)
   vals <- reactiveValues(runLog = "",
                          intermReport = "",
                          adjustmentSpecs = adjustmentSpecs,
@@ -82,7 +82,7 @@ dataAdjust <- function(input, output, session, inputData)
     } else {
       shinyjs::hide("miSelectParam")
     }
-    adjustedData(NULL)
+    appStatus$AdjustedData <- NULL
   })
 
   # EVENT: RD adjustment selection changed
@@ -94,7 +94,7 @@ dataAdjust <- function(input, output, session, inputData)
     } else {
       shinyjs::hide("rdSelectParam")
     }
-    adjustedData(NULL)
+    appStatus$AdjustedData <- NULL
   })
 
   # EVENT: Button "Edit parameters" clicked
@@ -185,7 +185,7 @@ dataAdjust <- function(input, output, session, inputData)
 
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
-    inputData <- req(inputData())
+    inputData <- req(appStatus$InputData)
     adjustmentSpecs <- list()
     if (vals$miAdjustmentName != "None") {
       adjustmentSpecs[[vals$miAdjustmentName]] <- vals$adjustmentSpecs[[vals$miAdjustmentName]]
@@ -197,7 +197,7 @@ dataAdjust <- function(input, output, session, inputData)
     shinyjs::disable("runAdjustBtn")
     shinyjs::enable("cancelAdjustBtn")
 
-    adjustedData(NULL)
+    appStatus$AdjustedData <- NULL
 
     vals$runLog <- ""
     vals$intermReport <- ""
@@ -232,7 +232,7 @@ dataAdjust <- function(input, output, session, inputData)
       adjustedData <- task$result()
       task <<- NULL
       if (is.list(adjustedData)) {
-        adjustedData(adjustedData)
+        appStatus$AdjustedData <- adjustedData
 
         intermReport <- RenderReportToHTML(
           reportFilePath = system.file("reports/intermediate/0.PreProcess.Rmd",
@@ -309,5 +309,5 @@ dataAdjust <- function(input, output, session, inputData)
     return(runLogHTML)
   })
 
-  return(adjustedData)
+  return(NULL)
 }

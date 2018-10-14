@@ -22,7 +22,7 @@ createReportsUI <- function(id)
 }
 
 # Server logic
-createReports <- function(input, output, session, adjustedData)
+createReports <- function(input, output, session, appStatus)
 {
   ns <- session$ns
 
@@ -123,38 +123,35 @@ createReports <- function(input, output, session, adjustedData)
 
   # EVENT: Button "Create report" clicked
   report <- eventReactive(input[["createReportBtn"]], {
+    adjustedData <- req(appStatus$AdjustedData)
+    withProgress(message = "Creating report",
+                 detail = "The report will be displayed shortly.",
+                 value = 0, {
+                   # Define parameters
+                   params <- append(list(AdjustedData = adjustedData),
+                                    vals$reportParams[[vals$selectedReportName]])
 
-    adjustedData <- adjustedData()
-    if (!is.null(adjustedData)) {
-      withProgress(message = "Creating report",
-                   detail = "The report will be displayed shortly.",
-                   value = 0, {
-                     # Define parameters
-                     params <- append(list(AdjustedData = adjustedData()),
-                                      vals$reportParams[[vals$selectedReportName]])
+                   setProgress(0.1)
 
-                     setProgress(0.1)
+                   if (is.element(vals$selectedReportName, c("Main Report"))) {
+                     params <- GetMainReportArtifacts(params)
+                   }
 
-                     if (is.element(vals$selectedReportName, c("Main Report"))) {
-                       params <- GetMainReportArtifacts(params)
-                     }
+                   setProgress(0.5)
 
-                     setProgress(0.5)
+                   # Store parameters for reuse when downloading
+                   vals$reportParamsFull <- params
 
-                     # Store parameters for reuse when downloading
-                     vals$reportParamsFull <- params
+                   setProgress(0.7)
 
-                     setProgress(0.7)
+                   report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
+                                                params = params)
 
-                     report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
-                                                  params = params)
+                   setProgress(1)
+                 })
 
-                     setProgress(1)
-                   })
-
-      # Create report
-      return(report)
-    }
+    # Create report
+    return(report)
   })
 
   # Output report when it has changed
@@ -235,5 +232,5 @@ createReports <- function(input, output, session, adjustedData)
   output[["downloadLatexReport"]] <- reportDownloadHandler("latex_document")
   output[["downloadWordReport"]] <- reportDownloadHandler("word_document")
 
-  return(report)
+  return(NULL)
 }

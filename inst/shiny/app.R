@@ -78,13 +78,16 @@ ui <- tagList(
 server <- function(input, output, session)
 {
   appStatus <- reactiveValues(InputDataUploaded = FALSE,
-                              AttributeMappingValid = FALSE)
+                              AttributeMappingValid = FALSE,
+                              OriginalData = NULL,
+                              InputData = NULL,
+                              AdjustedData = NULL)
 
-  inputData <- callModule(inputDataUpload, "upload", appStatus)
-  callModule(dataSummary, "summary", appStatus, inputData)
-  adjustedData <- callModule(dataAdjust, "adjustments", inputData)
-  callModule(createReports, "reports", adjustedData)
-  callModule(outputs, "outputs", adjustedData)
+  callModule(inputDataUpload, "upload", appStatus)
+  callModule(dataSummary, "summary", appStatus)
+  callModule(dataAdjust, "adjustments", appStatus)
+  callModule(createReports, "reports", appStatus)
+  callModule(outputs, "outputs", appStatus)
   callModule(manual, "manual")
 
   if (!isServer) {

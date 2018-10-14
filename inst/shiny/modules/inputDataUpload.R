@@ -90,20 +90,19 @@ inputDataUpload <- function(input, output, session, appStatus)
   # Get namespace
   ns <- session$ns
 
-  # Data related reactive values
-  originalData <- reactiveVal(NULL)
-  inputData <- reactiveVal(NULL)
-  inputDataTest <- reactiveVal(NULL)
+  inputDataBeforeGrouping <- reactiveVal(NULL)
 
   # Local state reactive values
   vals <- reactiveValues(AttrMapping = list(),
                          DefaultValues = list(),
                          OriginalDataAttrs = c(),
                          AttrMappingStatus = NULL,
-                         InputDataTestStatus = NULL)
+                         InputDataTest = NULL,
+                         InputDataTestStatus = NULL,
+                         InputDataBeforeGrouping = NULL)
 
   # EVENT: Input data file name changed
-  originalData <- eventReactive(input[["fileInput"]], {
+  observeEvent(input[["fileInput"]], {
     # Get reference to file input
     fileInput <- input$fileInput
 
@@ -126,30 +125,32 @@ inputDataUpload <- function(input, output, session, appStatus)
         originalDataAttrs[tolower(originalDataAttrs) == "cd4_num"][1]
     }
 
+    appStatus$OriginalData <- originalData
+    appStatus$InputData <- NULL
     appStatus$InputDataUploaded <- TRUE
     appStatus$AttributeMappingValid <- FALSE
 
-    return(originalData)
+    vals$InputDataTestState <- NULL
+    vals$InputDataTest <- NULL
+    vals$InputDataBeforeGrouping <- NULL
   }, ignoreNULL = TRUE)
 
   # Show attributes mapping section
   observe({
-    originalData <- originalData()
+    originalData <- appStatus$OriginalData
     if (is.null(originalData)) {
       shinyjs::hide("attrMappingBox", anim = TRUE, animType = "fade")
       shinyjs::hide("migrantModule", anim = TRUE, animType = "fade")
-      # shinyjs::show("introductionBox")
     } else {
       shinyjs::show("attrMappingBox")
       shinyjs::show("migrantModule")
-      # shinyjs::hide("introductionBox", anim = TRUE, animType = "slide", time = 2)
     }
   })
 
   # Output original data details when they have changed
   output[["origDataDetails"]] <- renderUI({
     # Respond to originalData change
-    originalData <- originalData()
+    originalData <- req(appStatus$OriginalData)
 
     isolate({
       # Get reference to file input
@@ -176,7 +177,7 @@ inputDataUpload <- function(input, output, session, appStatus)
   # Generate attributes mapping table
   output[["attrMappingTableDiv"]] <- renderUI({
     # Respond to originalData change
-    originalData()
+    req(appStatus$OriginalData)
 
     isolate({
 
@@ -251,7 +252,7 @@ inputDataUpload <- function(input, output, session, appStatus)
   observeEvent(input[["applyMappingBtn"]], {
     withProgress(message = "Attributes mapping",
                  value = 0, {
-                   originalData <- originalData()
+                   originalData <- appStatus$OriginalData
                    setProgress(0.1, detail = "Applying mapping")
 
                    inputDataTest <- ApplyAttributesMapping(originalData,
@@ -264,11 +265,10 @@ inputDataUpload <- function(input, output, session, appStatus)
 
                    vals$AttrMappingStatus <- GetAttrMappingStatus(vals$AttrMapping)
                    vals$InputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
+                   vals$InputDataTest <- inputDataTest
 
                    setProgress(1, detail = "Done")
                  })
-
-    inputDataTest(inputDataTest)
   })
 
   # Populate attribute mapping status UI
@@ -321,11 +321,7 @@ inputDataUpload <- function(input, output, session, appStatus)
 
   output[["valueCheckStatusBox"]] <- renderUI({
     # Respond to InputDataTestStatus change
-    inputDataTestStatus <- vals$InputDataTestStatus
-
-    if (is.null(inputDataTestStatus)) {
-      return(NULL)
-    }
+    inputDataTestStatus <- req(vals$InputDataTestStatus)
 
     isolate({
       wrongValuesCols <- Filter(function(x) length(x$WrongValues) != 0,
@@ -368,19 +364,19 @@ inputDataUpload <- function(input, output, session, appStatus)
 
   observeEvent(
     c(vals$InputDataTestStatus$Valid, vals$AttrMappingStatus$Valid), {
-    if (is.null(vals$AttrMappingStatus) | is.null(vals$InputDataTestStatus)) {
-      inputData(NULL)
-      appStatus$AttributeMappingValid <- FALSE
-    } else if (vals$AttrMappingStatus$Valid & vals$InputDataTestStatus$Valid) {
-      inputData(inputDataTest())
-      appStatus$AttributeMappingValid <- TRUE
-    } else {
-      inputData(NULL)
-      appStatus$AttributeMappingValid <- FALSE
-    }
+      if (is.null(vals$AttrMappingStatus) | is.null(vals$InputDataTestStatus)) {
+        inputDataBeforeGrouping(NULL)
+        appStatus$AttributeMappingValid <- FALSE
+      } else if (vals$AttrMappingStatus$Valid & vals$InputDataTestStatus$Valid) {
+        inputDataBeforeGrouping(vals$InputDataTest)
+        appStatus$AttributeMappingValid <- TRUE
+      } else {
+        inputDataBeforeGrouping(NULL)
+        appStatus$AttributeMappingValid <- FALSE
+      }
   })
 
-  inputDataWithMapping <- callModule(inputDataUploadMigrant, "migrant", inputData)
+  callModule(inputDataUploadMigrant, "migrant", appStatus, inputDataBeforeGrouping)
 
-  return(inputDataWithMapping)
+  return(NULL)
 }

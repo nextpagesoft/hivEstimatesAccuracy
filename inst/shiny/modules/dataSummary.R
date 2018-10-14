@@ -44,18 +44,18 @@ dataSummaryUI <- function(id)
 }
 
 # Server logic
-dataSummary <- function(input, output, session, appStatus, inputData)
+dataSummary <- function(input, output, session, appStatus)
 {
   # Get namespace
   ns <- session$ns
 
   dataSelection <- reactive({
-    yearRange <- req(input$yearRange)
-    req(inputData()$Table)[, DateOfDiagnosisYear %between% yearRange]
+    yearRange <- req(input[['yearRange']])
+    req(appStatus$InputData$Table)[, DateOfDiagnosisYear %between% yearRange]
   })
 
   artifacts <- reactive({
-    GetDataSummaryArtifacts(inputData()$Table[dataSelection()])
+    GetDataSummaryArtifacts(appStatus$InputData$Table[dataSelection()])
   })
 
   output[["filterInfo"]] <- renderText({
@@ -64,15 +64,15 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["diagYearDensityOutput"]] <- renderUI({
-    req(inputData()$Table)
-    req(input$yearRange)
+    req(appStatus$InputData$Table)
+    req(input[['yearRange']])
     plotOutput(ns("diagYearDensityPlot"),
                width = "700px",
                height = "150px")
   })
 
   output[["diagYearDensityPlot"]] <- renderPlot({
-    GetDiagnosisYearDensityPlot(plotData = inputData()$Table,
+    GetDiagnosisYearDensityPlot(plotData = appStatus$InputData$Table,
                                 markerLocations = input$yearRange)
   })
 
@@ -201,7 +201,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
     }
   })
 
-  output[["inputDataTable"]] <- renderDataTable(inputData()$Table,
+  output[["inputDataTable"]] <- renderDataTable(appStatus$InputData$Table,
                                                 options = list(
                                                   dom = '<"top">lirt<"bottom">p',
                                                   autoWidth = FALSE,
