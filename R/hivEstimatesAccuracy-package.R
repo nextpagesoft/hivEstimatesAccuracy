@@ -17,10 +17,11 @@
 #' @import data.table
 #' @import ggplot2
 #' @importFrom shiny HTML
-#' @importFrom stats setNames lowess quantile sd var acf glm poisson
+#' @importFrom stats setNames lowess quantile sd var acf glm poisson as.formula coef coefficients vcov
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
-#' @importFrom utils unzip head zip
+#' @importFrom utils unzip head zip tail
 #' @importFrom tools file_path_sans_ext
+#' @importFrom grDevices dev.control dev.off pdf recordPlot
 #'
 NULL
 

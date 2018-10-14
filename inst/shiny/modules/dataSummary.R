@@ -78,7 +78,7 @@ dataSummary <- function(input, output, session, appStatus)
 
   output[["missPlotDiv"]] <- renderUI({
     widgets <- tagList()
-    if (appStatus[["AttributeMappingValid"]]) {
+    if (appStatus[["AttrMappingValid"]]) {
       missPlotsTotal <- artifacts()$MissPlotsTotal
       missPlotsByGender <- artifacts()$MissPlotsByGender
       plotCounter <- 0
@@ -144,7 +144,7 @@ dataSummary <- function(input, output, session, appStatus)
   })
 
   output[["delayDensityOutput"]] <- renderUI({
-    if (appStatus$AttributeMappingValid) {
+    if (appStatus$AttrMappingValid) {
       delayDensFullPlot <- artifacts()$DelayDensFullPlot
       delayDensShortPlot <- artifacts()$DelayDensFullPlot
       if (!is.null(delayDensShortPlot) & !is.null(delayDensShortPlot)) {
@@ -167,7 +167,7 @@ dataSummary <- function(input, output, session, appStatus)
   })
 
   output[["meanDelayOutput"]] <- renderUI({
-    if (appStatus$AttributeMappingValid) {
+    if (appStatus$AttrMappingValid) {
       meanDelayPlot <- artifacts()$MeanDelayPlot
       if (!is.null(meanDelayPlot)) {
         elem <- plotOutput(ns("meanDelayPlot"))
@@ -189,7 +189,7 @@ dataSummary <- function(input, output, session, appStatus)
   })
 
   output[["inputDataTableBox"]] <- renderUI({
-    if (appStatus$AttributeMappingValid) {
+    if (appStatus$AttrMappingValid) {
       box(
         width = 12,
         title = "Input data records pre-processed",

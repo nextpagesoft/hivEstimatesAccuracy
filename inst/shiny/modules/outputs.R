@@ -36,12 +36,7 @@ outputs <- function(input, output, session, appStatus)
 
   # EVENT: Button "Download csv/stata data" clicked
   DownloadData <- function(type = "ADJUSTED_DATA", format) {
-
-    if (type == "STATE_DATA") {
-      downloadData <- appStatus
-      fileNamePrefix <- "StateData"
-      timeStamp <- GetTimeStamp()
-    } else if (type == "ADJUSTED_DATA") {
+    if (type == "ADJUSTED_DATA") {
       downloadData <- finalData()
       fileNamePrefix <- "AdjustedData"
       timeStamp <- finalData()$TimeStamp
@@ -92,7 +87,23 @@ outputs <- function(input, output, session, appStatus)
     })
   })
 
-  output[['downloadStateRdsBtn']] <- DownloadData(type = "STATE_DATA", format = "rds")
+  output[['downloadStateRdsBtn']] <- downloadHandler(
+    filename = function() {
+      fileName <- sprintf("StateData_%s.rds",
+                          GetTimeStamp())
+      return(fileName)
+    },
+    content = function(file) {
+      withProgress(message = "Creating state file",
+                   detail = "The file will be available for download shortly.",
+                   value = 0, {
+                     setProgress(0)
+                     WriteDataFile(reactiveValuesToList(appStatus), file)
+                     setProgress(1)
+                   })
+      return(NULL)
+    }
+  )
 
   output[["downloadLinks"]] <- renderUI({
     finalData <- finalData()

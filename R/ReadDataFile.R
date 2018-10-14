@@ -56,6 +56,7 @@ ReadDataFile <- function(fileName, fileType, ...)
                  "xlsx" = ReadExcelFile(localFileName, fileType, ...),
                  "txt"  = ReadTextFile(localFileName, colClasses = 'character', ...),
                  "csv"  = ReadTextFile(localFileName, colClasses = 'character', ...),
+                 "rds"  = ReadRdsFile(localFileName, ...),
                  {"Unsupported file extension"})
 
   return(data)

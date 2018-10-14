@@ -4,12 +4,14 @@
 \alias{WriteRdsFile}
 \title{WriteRdsFile}
 \usage{
-WriteRdsFile(data, fileName, ...)
+WriteRdsFile(data, fileName, compress = "xz", ...)
 }
 \arguments{
 \item{data}{Object to save. Required.}
 
 \item{fileName}{Name of the saved file. Required.}
+
+\item{compress}{See \code{\link{saveRDS}}. Optional. Default = "xz".}
 
 \item{...}{Additional parameters passed to \code{saveRDS}. Optional.}
 }

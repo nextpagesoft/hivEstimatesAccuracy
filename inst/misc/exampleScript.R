@@ -6,7 +6,13 @@ library(hivEstimatesAccuracy)
 source("/home/daniel/_REPOSITORIES/hivEstimatesAccuracy/inst/misc/runSettings.R")
 
 # 3. READ INPUT DATA -------------------------------------------------------------------------------
-originalData <- ReadDataFile(inputDataFilePath)
+uploadedData <- ReadDataFile(inputDataFilePath)
+if (GetIsState(uploadedData)) {
+  originalData <- uploadedData$OriginalData
+} else {
+  originalData <- uploadedData
+}
+
 
 # 4. PRE-PROCESS DATA ------------------------------------------------------------------------------
 attrMapping <- GetPreliminaryAttributesMapping(originalData)

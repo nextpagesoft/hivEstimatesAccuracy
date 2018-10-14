@@ -1,7 +1,7 @@
 # Store libPaths of the master process.
 # They are set on the spawned R processes created by parallel.
 # Otherwise, libraries installed in packrat folder cannot be found by those processes.
-libPaths <- .libPaths()
+# libPaths <- .libPaths()
 
 # Module globals
 adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
@@ -64,19 +64,24 @@ dataAdjust <- function(input, output, session, appStatus)
   task <- NULL
 
   # Store reactive values
-  #adjustedData <- reactiveVal(NULL)
   vals <- reactiveValues(runLog = "",
                          intermReport = "",
-                         adjustmentSpecs = adjustmentSpecs,
-                         miAdjustmentName = "None",
-                         rdAdjustmentName = "None",
                          editedAdjustmentName = "None",
                          editedAdjustmentParamsWidgets = list())
+
+  observeEvent(c(appStatus$StateUploading), {
+    if (appStatus$StateUploading) {
+      updateSelectInput(session,
+                        "rdSelect",
+                        selected = appStatus$RDAdjustmentName)
+      # appStatus$StateUploading <- FALSE
+    }
+  })
 
   # EVENT: MI adjustment selection changed
   observeEvent(input[["miSelect"]], {
     adjustmentName <- input[["miSelect"]]
-    vals$miAdjustmentName <- adjustmentName
+    appStatus$MIAdjustmentName <- adjustmentName
     if (adjustmentName != "None") {
       shinyjs::show("miSelectParam")
     } else {
@@ -88,7 +93,7 @@ dataAdjust <- function(input, output, session, appStatus)
   # EVENT: RD adjustment selection changed
   observeEvent(input[["rdSelect"]], {
     adjustmentName <- input[["rdSelect"]]
-    vals$rdAdjustmentName <- adjustmentName
+    appStatus$RDAdjustmentName <- adjustmentName
     if (adjustmentName != "None") {
       shinyjs::show("rdSelectParam")
     } else {
@@ -99,12 +104,12 @@ dataAdjust <- function(input, output, session, appStatus)
 
   # EVENT: Button "Edit parameters" clicked
   observeEvent(input[["miSelectParam"]], {
-    vals$editedAdjustmentName <- vals$miAdjustmentName
+    vals$editedAdjustmentName <- appStatus$MIAdjustmentName
   })
 
   # EVENT: Button "Edit parameters" clicked
   observeEvent(input[["rdSelectParam"]], {
-    vals$editedAdjustmentName <- vals$rdAdjustmentName
+    vals$editedAdjustmentName <- appStatus$RDAdjustmentName
   })
 
   # Get widgets for editing parameters in a dialog
@@ -125,7 +130,7 @@ dataAdjust <- function(input, output, session, appStatus)
   # Show adjustment parameters editing dialog
   observeEvent(vals$editedAdjustmentName, {
     if (vals$editedAdjustmentName != "None") {
-      editedAdjustmentSpec <- vals$adjustmentSpecs[[vals$editedAdjustmentName]]
+      editedAdjustmentSpec <- appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]
       vals$editedAdjustmentParamsWidgets <- GetAdjustParamsWidgets(editedAdjustmentSpec)
 
       showModal(modalDialog(
@@ -150,12 +155,12 @@ dataAdjust <- function(input, output, session, appStatus)
   # Adjustment parameters editing dialog CLOSE through OK event
   observeEvent(input[["paramsDlgOk"]], {
     # Copy parameters from dialog
-    adjustmentParams <- vals$adjustmentSpecs[[vals$editedAdjustmentName]]$Parameters
+    adjustmentParams <- appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]$Parameters
     for (paramName in names(vals$editedAdjustmentParamsWidgets)) {
       adjustmentParams[[paramName]]$value <- input[[paramName]]
     }
     # Save parameters in the selected adjustment object
-    vals$adjustmentSpecs[[vals$editedAdjustmentName]]$Parameters <- adjustmentParams
+    appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]$Parameters <- adjustmentParams
 
     # Clean up
     vals$editedAdjustmentName <- "None"
@@ -172,7 +177,7 @@ dataAdjust <- function(input, output, session, appStatus)
   })
 
   adjustmentsValid <- reactive({
-    vals$miAdjustmentName != "None" || vals$rdAdjustmentName != "None"
+    appStatus$MIAdjustmentName != "None" || appStatus$RDAdjustmentName != "None"
   })
 
   observe({
@@ -187,11 +192,11 @@ dataAdjust <- function(input, output, session, appStatus)
   observeEvent(input[["runAdjustBtn"]], {
     inputData <- req(appStatus$InputData)
     adjustmentSpecs <- list()
-    if (vals$miAdjustmentName != "None") {
-      adjustmentSpecs[[vals$miAdjustmentName]] <- vals$adjustmentSpecs[[vals$miAdjustmentName]]
+    if (appStatus$MIAdjustmentName != "None") {
+      adjustmentSpecs[[appStatus$MIAdjustmentName]] <- appStatus$AdjustmentSpecs[[appStatus$MIAdjustmentName]]
     }
-    if (vals$rdAdjustmentName != "None") {
-      adjustmentSpecs[[vals$rdAdjustmentName]] <- vals$adjustmentSpecs[[vals$rdAdjustmentName]]
+    if (appStatus$RDAdjustmentName != "None") {
+      adjustmentSpecs[[appStatus$RDAdjustmentName]] <- appStatus$AdjustmentSpecs[[appStatus$RDAdjustmentName]]
     }
 
     shinyjs::disable("runAdjustBtn")

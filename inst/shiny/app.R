@@ -31,8 +31,8 @@ source(file.path(modulesPath, "manual.R"))
 
 # App globals
 titleString <- "HIV Estimates Accuracy"
-versionString <- sprintf("v. %s", as.character(packageDescription(pkg = "hivEstimatesAccuracy",
-                                                                  fields = "Version")))
+version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy",
+                                           fields = "Version"))
 addResourcePath("www", system.file("shiny/www/", package = "hivEstimatesAccuracy"))
 
 # Define application user interface
@@ -43,7 +43,7 @@ ui <- tagList(
     dashboardHeader(title = titleString,
                     titleWidth = 600,
                     .list = tagList(tags$li(tags$a(href = "#",
-                                                   span(versionString)),
+                                                   span( sprintf("v. %s", version))),
                                             class = "dropdown"))),
     dashboardSidebar(
       sidebarMenu(
@@ -77,18 +77,31 @@ ui <- tagList(
 # Define application server logic
 server <- function(input, output, session)
 {
-  appStatus <- reactiveValues(InputDataUploaded = FALSE,
-                              AttributeMappingValid = FALSE,
-                              OriginalData = NULL,
-                              InputData = NULL,
-                              AdjustedData = NULL)
+  appStatus <- reactiveValues(
+    CreateTime = Sys.time(),
+    Version = version,
+    StateUploading = FALSE,
+    InputDataUploaded = FALSE,
+    OriginalData = NULL,
+    DefaultValues = list(),
+    OriginalDataAttrs = c(),
+    AttrMapping = list(),
+    AttrMappingStatus = NULL,
+    AttrMappingValid = FALSE,
+    InputDataTest = NULL,
+    InputDataTestStatus = NULL,
+    InputData = NULL,
+    AdjustedData = NULL,
+    AdjustmentSpecs = adjustmentSpecs,
+    MIAdjustmentName = "None",
+    RDAdjustmentName = "None")
 
-  callModule(inputDataUpload, "upload", appStatus)
-  callModule(dataSummary, "summary", appStatus)
-  callModule(dataAdjust, "adjustments", appStatus)
-  callModule(createReports, "reports", appStatus)
-  callModule(outputs, "outputs", appStatus)
-  callModule(manual, "manual")
+  callModule(inputDataUpload, "upload",      appStatus)
+  callModule(dataSummary,     "summary",     appStatus)
+  callModule(dataAdjust,      "adjustments", appStatus)
+  callModule(createReports,   "reports",     appStatus)
+  callModule(outputs,         "outputs",     appStatus)
+  callModule(manual,          "manual")
 
   if (!isServer) {
     session$onSessionEnded(stopApp)

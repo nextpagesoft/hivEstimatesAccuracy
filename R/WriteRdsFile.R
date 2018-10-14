@@ -4,6 +4,7 @@
 #'
 #' @param data Object to save. Required.
 #' @param fileName Name of the saved file. Required.
+#' @param compress See \code{\link{saveRDS}}. Optional. Default = "xz".
 #' @param ... Additional parameters passed to \code{saveRDS}. Optional.
 #'
 #' @return NULL (invisibly)

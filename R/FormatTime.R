@@ -11,6 +11,7 @@
 #' FormatTime(x)
 #'
 #' @export
-FormatTime <- function(x) {
+FormatTime <- function(x)
+{
   format(x, "%Y/%m/%d %H:%M:%S")
 }
