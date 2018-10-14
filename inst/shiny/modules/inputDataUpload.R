@@ -430,7 +430,6 @@ inputDataUpload <- function(input, output, session, appStatus)
       inputDataBeforeGrouping(NULL)
       appStatus$AttrMappingValid <- FALSE
     } else if (appStatus$AttrMappingStatus$Valid && appStatus$InputDataTestStatus$Valid) {
-      print('here')
       inputDataBeforeGrouping(appStatus$InputDataTest)
       appStatus$AttrMappingValid <- TRUE
     } else {

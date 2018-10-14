@@ -74,7 +74,9 @@ dataAdjust <- function(input, output, session, appStatus)
       updateSelectInput(session,
                         "rdSelect",
                         selected = appStatus$RDAdjustmentName)
-      # appStatus$StateUploading <- FALSE
+      updateSelectInput(session,
+                        "miSelect",
+                        selected = appStatus$MIAdjustmentName)
     }
   })
 
@@ -87,7 +89,9 @@ dataAdjust <- function(input, output, session, appStatus)
     } else {
       shinyjs::hide("miSelectParam")
     }
-    appStatus$AdjustedData <- NULL
+    if (!appStatus$StateUploading) {
+      appStatus$AdjustedData <- NULL
+    }
   })
 
   # EVENT: RD adjustment selection changed
@@ -99,7 +103,9 @@ dataAdjust <- function(input, output, session, appStatus)
     } else {
       shinyjs::hide("rdSelectParam")
     }
-    appStatus$AdjustedData <- NULL
+    if (!appStatus$StateUploading) {
+      appStatus$AdjustedData <- NULL
+    }
   })
 
   # EVENT: Button "Edit parameters" clicked
