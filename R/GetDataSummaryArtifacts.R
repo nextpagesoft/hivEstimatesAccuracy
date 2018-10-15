@@ -68,7 +68,8 @@ GetDataSummaryArtifacts <- function(inputData)
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
-      theme(text = element_text(size = 14),
+      theme(plot.title = element_text(size = 12, face = "plain"),
+            text = element_text(size = 12, face = "plain"),
             panel.grid = element_blank(),
             axis.line = element_line(colour = "#888888"),
             axis.ticks = element_line(colour = "#888888")) +
@@ -104,7 +105,8 @@ GetDataSummaryArtifacts <- function(inputData)
       scale_x_continuous(expand = c(0, 0), breaks = meanDelay[, sort(unique(round(NotificationTime)))]) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
-      theme(text = element_text(size = 14),
+      theme(plot.title = element_text(size = 12, face = "plain"),
+            text = element_text(size = 12, face = "plain"),
             panel.grid = element_blank(),
             axis.line = element_line(colour = "#888888"),
             axis.ticks = element_line(colour = "#888888"),

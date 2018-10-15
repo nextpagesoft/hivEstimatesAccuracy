@@ -176,8 +176,10 @@ GetMainReportArtifacts <- function(params)
                         labels = mapping,
                         values = colors) +
       theme_classic() +
-      theme(axis.text.x = element_text(size = 8),
-            axis.text.y = element_text(size = 8)) +
+      theme(plot.title = element_text(size = 9, face = "plain"),
+            text = element_text(size = 9, face = "plain"),
+            axis.text.x = element_text(size = 7),
+            axis.text.y = element_text(size = 7)) +
       labs(x = "Year",
            y = yLabel)
 

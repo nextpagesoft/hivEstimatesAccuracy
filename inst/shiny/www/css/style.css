@@ -7,12 +7,12 @@
 /* Tags */
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
   color: #333;
 }
 
 body p {
-  font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
@@ -88,7 +88,7 @@ pre {
 .skin-blue .main-header .navbar .nav>li>a:active,
 .skin-blue .main-header .navbar .nav>li>a:hover
 {
-  font-size: 14px;
+  font-size: 13px;
   color: rgb(51, 51, 51);
   background: white;
   cursor: default;
@@ -196,6 +196,10 @@ pre {
 /* Inputs */
 div.box-body .shiny-input-container h3 {
   font-size: 16px;
+}
+
+.form-control {
+  font-size: 13px;
 }
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -309,19 +313,19 @@ div.box-body .shiny-input-container h3 {
 
 /* Data table */
 
-#summary-inputDataTable, #outputs-adjustedDataTableBox {
+#upload-inputDataTable, #outputs-adjustedDataTableBox {
   font-size: 12px;
 }
 
-#summary-inputDataTable table, #outputs-adjustedDataTableBox table {
+#upload-inputDataTable table, #outputs-adjustedDataTableBox table {
   white-space: nowrap;
 }
 
-#summary-inputDataTable tr, #outputs-adjustedDataTableBox tr {
+#upload-inputDataTable tr, #outputs-adjustedDataTableBox tr {
   height: 30px;
 }
 
-#summary-inputDataTable td, #outputs-adjustedDataTableBox td {
+#upload-inputDataTable td, #outputs-adjustedDataTableBox td {
   text-align: right;
   padding: 5px;
   font-size: 11px;
