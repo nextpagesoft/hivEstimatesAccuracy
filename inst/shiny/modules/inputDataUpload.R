@@ -43,11 +43,15 @@ inputDataUploadUI <- function(id)
                          label = "File input:"),
                p("Maximum file size: 70MB",
                  tags$br(),
-                 "Supported files types: rds, txt, csv, xls, xlsx (uncompressed and zip archives)")),
+                 "Supported files types: rds, txt, csv, xls, xlsx (uncompressed and zip archives)")
+        ),
         column(width = 8,
                withSpinner(uiOutput(ns("origDataDetails")),
                            type = 7,
-                           proxy.height = "50px")))),
+                           proxy.height = "50px")
+        )
+      )
+    ),
     shinyjs::hidden(
       div(
         id = ns("attrMappingBox"),
@@ -65,19 +69,14 @@ inputDataUploadUI <- function(id)
               )
             )
           ),
-          fluidRow(
-            column(2,
-                   actionButton(ns("applyMappingBtn"),
-                                label = "Apply mapping",
-                                style = "margin-bottom: 15px; background-color: #7cbdc1; color: white")),
-            column(10,
-                   uiOutput(ns("attrMappingInfoDiv"))
-            )
-          ),
+          actionButton(ns("applyMappingBtn"),
+                       label = "Apply mapping",
+                       style = "margin-bottom: 15px; background-color: #7cbdc1; color: white"),
           fluidRow(
             column(8,
                    uiOutput(ns("attrMappingTableDiv"))),
             column(4,
+                   uiOutput(ns("attrMappingInfoDiv")),
                    uiOutput(ns("attrMappingStatusBox")),
                    uiOutput(ns("valueCheckStatusBox"))
             )
@@ -90,7 +89,8 @@ inputDataUploadUI <- function(id)
         id = ns("migrantModule"),
         inputDataUploadMigrantUI(ns("migrant"))
       )
-    )
+    ),
+    uiOutput(ns("inputDataTableBox"))
   )
 }
 
@@ -302,14 +302,20 @@ inputDataUpload <- function(input, output, session, appStatus)
     valid <- appStatus$AttrMappingValid
 
     isolate({
-      widget <- NULL
+      text <- NULL
       if (valid) {
-        widget <- span("Mapping applied and is valid. You can proceeed to \"Migrant variable regrouping\" section below or other tabs.", style = "color: seagreen")
+        text <- span(icon("check"),
+                     "Applied mapping is valid. You can proceeed to \"Migrant variable regrouping\" section below or other tabs.",
+                     style = "color: seagreen")
       } else {
-        widget <- span("Input data has to be mapped to internal attributes and validated. Adjust mapping and press \"Apply mapping\" button to the left")
+        text <- span("Input data has to be mapped to internal attributes and validated. Adjust mapping and press \"Apply mapping\" button to the left.")
       }
 
-      return(widget)
+      attrMappingInfoBox <- box(width = 12,
+                                style = "background-color: ghostwhite;",
+                                text)
+
+      return(attrMappingInfoBox)
     })
   })
 
@@ -437,6 +443,29 @@ inputDataUpload <- function(input, output, session, appStatus)
       appStatus$AttrMappingValid <- FALSE
     }
   })
+
+  output[["inputDataTableBox"]] <- renderUI({
+    if (appStatus$AttrMappingValid) {
+      box(
+        width = 12,
+        title = "Input data records pre-processed",
+        solidHeader = FALSE,
+        status = "warning",
+        collapsible = TRUE,
+        dataTableOutput(ns("inputDataTable"))
+      )
+    }
+  })
+
+  output[["inputDataTable"]] <- renderDataTable(appStatus$InputData$Table,
+                                                options = list(
+                                                  dom = '<"top">lirt<"bottom">p',
+                                                  autoWidth = FALSE,
+                                                  pageLength = 15,
+                                                  scrollX = TRUE,
+                                                  deferRender = TRUE,
+                                                  serverSide = TRUE,
+                                                  scroller = FALSE))
 
   callModule(inputDataUploadMigrant, "migrant", appStatus, inputDataBeforeGrouping)
 

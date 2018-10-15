@@ -29,7 +29,13 @@ dataSummaryUI <- function(id)
         style = "margin-left: 22px"
       ),
       uiOutput(ns("diagYearDensityOutput")),
-      tags$small(textOutput(ns("filterInfo"))),
+      div(
+        textOutput(ns("filterInfo")),
+        checkboxInput(ns("filterChkBox"),
+                      "Apply filter in adjustments",
+                      FALSE),
+        style = "margin-left: 22px"
+      ),
       tagList(
         uiOutput(ns("missPlotDiv")),
         uiOutput(ns("missPlotRDOutput")),
@@ -38,8 +44,7 @@ dataSummaryUI <- function(id)
       ),
       type = 7,
       proxy.height = "60px"
-    ),
-    uiOutput(ns("inputDataTableBox"))
+    )
   )
 }
 
@@ -56,6 +61,16 @@ dataSummary <- function(input, output, session, appStatus)
 
   artifacts <- reactive({
     GetDataSummaryArtifacts(appStatus$InputData$Table[dataSelection()])
+  })
+
+  observeEvent(c(input[['filterChkBox']], input[['yearRange']]), {
+    applyFilter <- input[['filterChkBox']]
+    if (applyFilter) {
+      yearRange <- input[['yearRange']]
+      appStatus$YearRange <- yearRange
+    } else {
+      appStatus$YearRange <- NULL
+    }
   })
 
   output[["filterInfo"]] <- renderText({
@@ -111,19 +126,19 @@ dataSummary <- function(input, output, session, appStatus)
   output[["missPlotsTotal"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsTotal,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["missPlotsGenderF"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$F,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["missPlotsGenderM"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$M,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["missPlotRDOutput"]] <- renderUI({
@@ -140,7 +155,7 @@ dataSummary <- function(input, output, session, appStatus)
   output[["MissPlotsRD"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsRD,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["delayDensityOutput"]] <- renderUI({
@@ -187,27 +202,4 @@ dataSummary <- function(input, output, session, appStatus)
   output[["meanDelayPlot"]] <- renderPlot({
     artifacts()$MeanDelayPlot
   })
-
-  output[["inputDataTableBox"]] <- renderUI({
-    if (appStatus$AttrMappingValid) {
-      box(
-        width = 12,
-        title = "Input data records pre-processed",
-        solidHeader = FALSE,
-        status = "warning",
-        collapsible = TRUE,
-        dataTableOutput(ns("inputDataTable"))
-      )
-    }
-  })
-
-  output[["inputDataTable"]] <- renderDataTable(appStatus$InputData$Table,
-                                                options = list(
-                                                  dom = '<"top">lirt<"bottom">p',
-                                                  autoWidth = FALSE,
-                                                  pageLength = 15,
-                                                  scrollX = TRUE,
-                                                  deferRender = TRUE,
-                                                  serverSide = TRUE,
-                                                  scroller = FALSE))
 }

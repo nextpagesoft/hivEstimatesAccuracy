@@ -90,6 +90,7 @@ server <- function(input, output, session)
     AttrMappingValid = FALSE,
     InputDataTest = NULL,
     InputDataTestStatus = NULL,
+    YearRange = NULL,
     InputData = NULL,
     AdjustedData = NULL,
     AdjustmentSpecs = adjustmentSpecs,

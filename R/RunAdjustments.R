@@ -4,6 +4,8 @@
 #'
 #' @param data data table object on which adjustments should be applied. Required.
 #' @param adjustmentSpecs List of adjustment specifications to execute. Optional. Default = \code{list()}.
+#' @param yearRange Numeric cector of length two with lower and upper bound for diagnosis year.
+#'   Optional. Default = \code{NULL}.
 #'
 #' @return data table object after adjustments applied.
 #'
@@ -13,7 +15,7 @@
 #' }
 #'
 #' @export
-RunAdjustments <- function(data, adjustmentSpecs = list())
+RunAdjustments <- function(data, adjustmentSpecs = list(), yearRange = NULL)
 {
   stopifnot(!missing(data))
 
@@ -21,6 +23,9 @@ RunAdjustments <- function(data, adjustmentSpecs = list())
   # We make a copy of the data to make sure the input object is not changed by the adjustment
   # procedures.
   data <- list(Table = copy(data))
+  if (!is.null(yearRange)) {
+    data$Table <- data$Table[DateOfDiagnosisYear %between% yearRange]
+  }
 
   results <- list()
   # Process adjustments

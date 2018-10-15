@@ -4,12 +4,15 @@
 \alias{RunAdjustments}
 \title{RunAdjustments}
 \usage{
-RunAdjustments(data, adjustmentSpecs = list())
+RunAdjustments(data, adjustmentSpecs = list(), yearRange = NULL)
 }
 \arguments{
 \item{data}{data table object on which adjustments should be applied. Required.}
 
 \item{adjustmentSpecs}{List of adjustment specifications to execute. Optional. Default = \code{list()}.}
+
+\item{yearRange}{Numeric cector of length two with lower and upper bound for diagnosis year.
+Optional. Default = \code{NULL}.}
 }
 \value{
 data table object after adjustments applied.

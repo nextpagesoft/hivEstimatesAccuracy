@@ -197,6 +197,7 @@ dataAdjust <- function(input, output, session, appStatus)
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
     inputData <- req(appStatus$InputData)
+    yearRange <- appStatus$YearRange
     adjustmentSpecs <- list()
     if (appStatus$MIAdjustmentName != "None") {
       adjustmentSpecs[[appStatus$MIAdjustmentName]] <- appStatus$AdjustmentSpecs[[appStatus$MIAdjustmentName]]
@@ -223,15 +224,19 @@ dataAdjust <- function(input, output, session, appStatus)
       task <<- CreateTask({
         RunAdjustments(
           inputData$Table,
-          adjustmentSpecs = adjustmentSpecs)
+          adjustmentSpecs = adjustmentSpecs,
+          yearRange = yearRange)
       })
     } else {
-      task <<- CreateTask(function(x, y) {
+      task <<- CreateTask(function(x, y, yearRange) {
         hivEstimatesAccuracy::RunAdjustments(
           data = x,
-          adjustmentSpecs = y)
+          adjustmentSpecs = y,
+          yearRange = yearRange)
       },
-      args = list(inputData$Table, adjustmentSpecs))
+      args = list(inputData$Table,
+                  adjustmentSpecs,
+                  yearRange))
     }
 
     o <- observe({
