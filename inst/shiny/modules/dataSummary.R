@@ -1,6 +1,3 @@
-# Module globals
-currYear <- year(Sys.time())
-
 # User interface
 dataSummaryUI <- function(id)
 {
@@ -20,7 +17,7 @@ dataSummaryUI <- function(id)
           label = h3("Filter data on year of diagnosis"),
           min = 1980,
           max = 2025,
-          value = c(2000, currYear),
+          value = c(2000, 2018),
           step = 1,
           sep = "",
           width = "612px",
@@ -54,6 +51,26 @@ dataSummary <- function(input, output, session, appStatus)
   # Get namespace
   ns <- session$ns
 
+  # Store filter settings
+  observeEvent(input[['filterChkBox']], {
+    appStatus$YearRangeApply <- input[['filterChkBox']]
+  })
+
+  observeEvent(input[['yearRange']], {
+    appStatus$YearRange <- input[['yearRange']]
+  })
+
+  # Restore filter settings
+  observeEvent(appStatus$YearRange, {
+    freezeReactiveValue(input, 'yearRange')
+    updateSliderInput(session, 'yearRange', value = appStatus$YearRange)
+  })
+
+  observeEvent(appStatus$YearRangeApply, {
+    freezeReactiveValue(input, 'filterChkBox')
+    updateCheckboxInput(session, 'filterChkBox', value = appStatus$YearRangeApply)
+  })
+
   dataSelection <- reactive({
     yearRange <- req(input[['yearRange']])
     req(appStatus$InputData$Table)[, DateOfDiagnosisYear %between% yearRange]
@@ -61,16 +78,6 @@ dataSummary <- function(input, output, session, appStatus)
 
   artifacts <- reactive({
     GetDataSummaryArtifacts(appStatus$InputData$Table[dataSelection()])
-  })
-
-  observeEvent(c(input[['filterChkBox']], input[['yearRange']]), {
-    applyFilter <- input[['filterChkBox']]
-    if (applyFilter) {
-      yearRange <- input[['yearRange']]
-      appStatus$YearRange <- yearRange
-    } else {
-      appStatus$YearRange <- NULL
-    }
   })
 
   output[["filterInfo"]] <- renderText({

@@ -2,6 +2,9 @@
 adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
                           GetListObject)
 
+# Module globals
+currYear <- year(Sys.time())
+
 # Load application modules
 modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
 source(file.path(modulesPath, "inputDataUpload-Migrant.R"))
@@ -12,6 +15,7 @@ inputDataUploadUI <- function(id)
   ns <- NS(id)
 
   tagList(
+    tags$a(id = "new_session", href = "./", target = "_blank", list(icon("plus"), "New window")),
     div(style = "margin-top: 15px"),
     div(
       id = ns("introductionBox"),
@@ -128,6 +132,8 @@ inputDataUpload <- function(input, output, session, appStatus)
       adjustmentSpecs      <- uploadedData$AdjustmentSpecs
       miAdjustmentName     <- uploadedData$MIAdjustmentName
       rdAdjustmentName     <- uploadedData$RDAdjustmentName
+      yearRange            <- uploadedData$YearRange
+      yearRangeApply       <- uploadedData$YearRangeApply
       appStatus$StateUploading  <- TRUE
     } else {
       originalData      <- req(uploadedData)
@@ -151,22 +157,26 @@ inputDataUpload <- function(input, output, session, appStatus)
       adjustmentSpecs      <- adjustmentSpecs
       miAdjustmentName     <- "None"
       rdAdjustmentName     <- "None"
+      yearRange            <- c(2000, currYear)
+      yearRangeApply       <- FALSE
       appStatus$StateUploading  <- FALSE
     }
 
-    appStatus$OriginalData         <- originalData
-    appStatus$OriginalDataAttrs    <- originalDataAttrs
-    appStatus$DefaultValues        <- defaultValues
-    appStatus$AttrMapping          <- attrMapping
-    appStatus$AttrMappingStatus    <- attrMappingStatus
-    appStatus$AttrMappingValid     <- attrMappingValid
-    appStatus$InputDataTest        <- inputDataTest
-    appStatus$InputDataTestStatus  <- inputDataTestStatus
-    appStatus$InputData            <- inputData
-    appStatus$AdjustedData         <- adjustedData
-    appStatus$AdjustmentSpecs      <- adjustmentSpecs
-    appStatus$MIAdjustmentName     <- miAdjustmentName
-    appStatus$RDAdjustmentName     <- rdAdjustmentName
+    appStatus$OriginalData        <- originalData
+    appStatus$OriginalDataAttrs   <- originalDataAttrs
+    appStatus$DefaultValues       <- defaultValues
+    appStatus$AttrMapping         <- attrMapping
+    appStatus$AttrMappingStatus   <- attrMappingStatus
+    appStatus$AttrMappingValid    <- attrMappingValid
+    appStatus$InputDataTest       <- inputDataTest
+    appStatus$InputDataTestStatus <- inputDataTestStatus
+    appStatus$InputData           <- inputData
+    appStatus$AdjustedData        <- adjustedData
+    appStatus$AdjustmentSpecs     <- adjustmentSpecs
+    appStatus$MIAdjustmentName    <- miAdjustmentName
+    appStatus$RDAdjustmentName    <- rdAdjustmentName
+    appStatus$YearRange           <- yearRange
+    appStatus$YearRangeApply      <- yearRangeApply
     inputDataBeforeGrouping(NULL)
   }, ignoreNULL = TRUE)
 

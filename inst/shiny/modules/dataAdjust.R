@@ -197,7 +197,12 @@ dataAdjust <- function(input, output, session, appStatus)
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
     inputData <- req(appStatus$InputData)
-    yearRange <- appStatus$YearRange
+    if (appStatus$YearRangeApply) {
+      yearRange <- appStatus$YearRange
+    } else {
+      yearRange <-  NULL
+    }
+
     adjustmentSpecs <- list()
     if (appStatus$MIAdjustmentName != "None") {
       adjustmentSpecs[[appStatus$MIAdjustmentName]] <- appStatus$AdjustmentSpecs[[appStatus$MIAdjustmentName]]

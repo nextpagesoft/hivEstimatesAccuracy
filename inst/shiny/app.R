@@ -91,11 +91,13 @@ server <- function(input, output, session)
     InputDataTest = NULL,
     InputDataTestStatus = NULL,
     YearRange = NULL,
+    YearRangeApply = FALSE,
     InputData = NULL,
     AdjustedData = NULL,
     AdjustmentSpecs = adjustmentSpecs,
     MIAdjustmentName = "None",
-    RDAdjustmentName = "None")
+    RDAdjustmentName = "None"
+  )
 
   callModule(inputDataUpload, "upload",      appStatus)
   callModule(dataSummary,     "summary",     appStatus)
@@ -112,4 +114,5 @@ server <- function(input, output, session)
 # Run application
 shinyApp(ui, server,
          options = c(display.mode = "normal",
-                     test.mode = FALSE))
+                     test.mode = FALSE),
+         enableBookmarking = "url")
