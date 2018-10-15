@@ -16,7 +16,7 @@ endQrt <- 2017.25
 stratVarNames <- c("Gender", "Transmission")
 
 # Run mice adjustment before RD
-runMice <- TRUE
+runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
@@ -113,15 +113,18 @@ compData <- compData[VarXs > VarTs]
 # ------------------------------------------------------------------------
 
 # Prepare diagnostic table based on original data
-if (compData[, "M" %in% levels(Gender)]) {
-  compData[, Gender := relevel(Gender, ref = "M")]
+mostPrevGender <- compData[!is.na(Gender), .N, by = .(Gender)][frank(-N, ties.method = "first") == 1, as.character(Gender)]
+mostPrevTrans <- compData[!is.na(Transmission), .N, by = .(Transmission)][frank(-N, ties.method = "first") == 1, as.character(Transmission)]
+mostPrevRegion <- compData[!is.na(GroupedRegionOfOrigin), .N, by = .(GroupedRegionOfOrigin)][frank(-N, ties.method = "first") == 1, as.character(GroupedRegionOfOrigin)]
+
+if (!IsEmptyString(mostPrevGender)) {
+  compData[, Gender := relevel(Gender, ref = mostPrevGender)]
 }
-if (compData[, "MSM" %in% levels(Transmission)]) {
-  compData[, Transmission := relevel(Transmission, ref = "MSM")]
+if (!IsEmptyString(mostPrevTrans)) {
+  compData[, Transmission := relevel(Transmission, ref = mostPrevTrans)]
 }
-if (compData[, "REPCOUNTRY" %in% levels(GroupedRegionOfOrigin)]) {
-  compData[, GroupedRegionOfOrigin := relevel(GroupedRegionOfOrigin,
-                                              ref = "REPCOUNTRY")]
+if (!IsEmptyString(mostPrevRegion)) {
+  compData[, GroupedRegionOfOrigin := relevel(GroupedRegionOfOrigin, ref = mostPrevRegion)]
 }
 
 model <- compData[Imputation == 0L,

@@ -10,11 +10,14 @@
 #' IsEmptyString(NULL)
 #' IsEmptyString("")
 #' IsEmptyString(NA)
+#' IsEmptyString(character())
+#' IsEmptyString(5)
+#' IsEmptyString("5")
 #' IsEmptyString("text")
 #'
 #' @export
 IsEmptyString <- function(text) {
   stopifnot(!missing(text))
 
-  return(is.null(text) || text == "" || is.na(text))
+  return(!is.character(text) || text == "" || is.na(text) || length(text) == 0L)
 }
