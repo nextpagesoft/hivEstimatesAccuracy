@@ -40,11 +40,17 @@ ui <- tagList(
   shinyjs::useShinyjs(),
 
   dashboardPage(
-    dashboardHeader(title = titleString,
-                    titleWidth = 600,
-                    .list = tagList(tags$li(tags$a(href = "#",
-                                                   span( sprintf("v. %s", version))),
-                                            class = "dropdown"))),
+    tags$header(
+      class = "main-header",
+      span(class = "logo", titleString),
+      tags$nav(
+        class = "navbar navbar-static-top",
+        div(class = "navbar-custom-menu",
+            div(sprintf("v. %s", version)),
+            div(tags$a(href = "./", target = "_blank", list(icon("external-link"), "Open new window")))
+        )
+      )
+    ),
     dashboardSidebar(
       sidebarMenu(
         menuItem("Input data upload",  tabName = "upload",      icon = icon("upload")),

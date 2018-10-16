@@ -37,69 +37,43 @@ pre {
   background-image: url("../images/ECDC_logo.svg");
   background-repeat: no-repeat;
   background-size: 110px;
+  background-color: white;
   background-position: left 15px center;
   max-height: 120px;
   height: 120px;
+  font-weight: bold;
+  color: #333;
+  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
 }
 
-.main-header .sidebar-toggle {
-  display: none;
-}
-
-.left-side, .main-sidebar {
-  padding-top: 120px;
-}
-
-.skin-blue .main-header .logo,
-.skin-blue .main-header .logo:hover,
-.skin-blue .main-header .navbar
+.skin-blue .main-header .logo
 {
   background-color: transparent !important;
   line-height: 120px;
   height: 120px;
+  width: 600px;
   padding-left: 125px;
   font-size: 32pt;
   font-weight: bold;
-  color: rgb(51, 51, 51);
+  color: #333;
   font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
 }
 
-.skin-blue .main-header .logo:hover
-{
-  background-color: #c9e2b0;
+.skin-blue .main-header .navbar {
+  background-color: transparent;
+  margin-left: 725px;
 }
 
-.skin-blue .main-header .navbar .sidebar-toggle,
-.skin-blue .main-header .navbar .nav>li>a
-{
-  color: rgb(51, 51, 51);
-}
-
-.skin-blue .main-header .navbar .sidebar-toggle:hover,
-.skin-blue .main-header .navbar .nav>li>a:hover
-{
-  background-color: #c9e2b0;
-  color: rgb(51, 51, 51);
-}
-
-.skin-blue .main-header .navbar .navbar-custom-menu,
-.skin-blue .main-header .navbar .navbar-custom-menu:hover,
-.skin-blue .main-header .navbar .nav>li>a,
-.skin-blue .main-header .navbar .nav>li>a:active,
-.skin-blue .main-header .navbar .nav>li>a:hover
-{
-  font-size: 13px;
-  color: rgb(51, 51, 51);
-  background: white;
-  cursor: default;
+.navbar-custom-menu {
+  text-align: right;
+  margin-right: 10px;
+  line-height: 25px;
 }
 
 /* Sidebar */
-.skin-blue .left-side,
-.skin-blue .main-sidebar,
-.skin-blue .wrapper
-{
-  background-color: #fff;
+.left-side, .main-sidebar {
+  padding-top: 120px;
+  background-color: #fff !important;
 }
 
 .skin-blue .sidebar-menu > li > a

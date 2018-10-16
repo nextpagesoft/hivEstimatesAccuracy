@@ -15,7 +15,6 @@ inputDataUploadUI <- function(id)
   ns <- NS(id)
 
   tagList(
-    tags$a(id = "new_session", href = "./", target = "_blank", list(icon("plus"), "New window")),
     div(style = "margin-top: 15px"),
     div(
       id = ns("introductionBox"),
