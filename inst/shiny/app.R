@@ -4,11 +4,6 @@ options(shiny.maxRequestSize = 70 * 1024^2)
 # Determine if the app is run on the server or locally
 isServer <- tolower(Sys.info()[["nodename"]]) == "shinyserver"
 
-# Server specific code
-if (isServer) {
-  # .libPaths(c("/home/daniel/R/devel/hivEstimatesAccuracy/packrat/lib/x86_64-pc-linux-gnu/3.4.3"))
-}
-
 # Load standard libraries
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(shinydashboard))
@@ -120,5 +115,4 @@ server <- function(input, output, session)
 # Run application
 shinyApp(ui, server,
          options = c(display.mode = "normal",
-                     test.mode = FALSE),
-         enableBookmarking = "url")
+                     test.mode = FALSE))

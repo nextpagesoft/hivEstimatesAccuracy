@@ -124,6 +124,8 @@ createReports <- function(input, output, session, appStatus)
   # EVENT: Button "Create report" clicked
   report <- eventReactive(input[["createReportBtn"]], {
     adjustedData <- req(appStatus$AdjustedData)
+    yearRangeApply <- appStatus$YearRangeApply
+    yearRange <- appStatus$YearRange
     withProgress(message = "Creating report",
                  detail = "The report will be displayed shortly.",
                  value = 0, {
@@ -136,6 +138,11 @@ createReports <- function(input, output, session, appStatus)
                    if (is.element(vals$selectedReportName, c("Main Report"))) {
                      params <- GetMainReportArtifacts(params)
                    }
+
+                   params <- modifyList(params,
+                                        list(Artifacts =
+                                               list(YearRange = yearRange,
+                                                    YearRangeApply = yearRangeApply)))
 
                    setProgress(0.5)
 

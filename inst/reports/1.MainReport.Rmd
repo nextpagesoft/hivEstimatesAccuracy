@@ -82,6 +82,12 @@ cat(sprintf("* %s",
                    "Reporting Delays adjustment performed.",
                    "Reporting Delays adjustment not performed.")),
     "\n")
+cat(sprintf("* %s", 
+            ifelse(params$Artifacts$YearRangeApply, 
+                   sprintf("Filter on diagnosis year applied: [%s]", paste(params$Artifacts$YearRange, collapse = ", ")),
+                   "No filter on diagnosis year applied.")),
+    "\n")
+
 
 cat("\n", "Selected report options:", "\n\n") 
 cat(sprintf("* %s", 

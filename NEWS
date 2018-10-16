@@ -1,7 +1,6 @@
-Version 0.9.12 (2018/09/)
+Version 0.10.0 (2018/10/16)
 --------------------------------------------------------------------------------
 
-* UNDER DEVELOPMENT
 * Input data: custom mapping module for GroupedRegionOfOrigin implemented
 * Input data: additional country codes incorporated
 * Adjustments: Remodel adjustment specification control to have fixed order
@@ -16,6 +15,9 @@ Version 0.9.12 (2018/09/)
 * Input data summary: titles of plots adjusted, comments added. PLot for trends
   in reporting delay for last 5 years removed. Histogram of data below filter
   added.
+* Misc: Initial implementation of application state saving
+* Adjustments: Allow filtering adjusted data
+* Misc: Implement opening a new window
 
 
 Version 0.9.11 (2018/09/05)
