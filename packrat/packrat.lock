@@ -111,8 +111,8 @@ Hash: 65f62365ec69ddd17230d2ffe891a6ab
 
 Package: dplyr
 Source: CRAN
-Version: 0.7.6
-Hash: 573a83f1ea22db0d4378ce312b2203b6
+Version: 0.7.7
+Hash: de28d320520b5fa55b725d4653f88941
 Requires: BH, R6, Rcpp, assertthat, bindrcpp, glue, magrittr,
     pkgconfig, plogr, rlang, tibble, tidyselect
 
@@ -329,8 +329,8 @@ Requires: R6, Rcpp, later, magrittr, rlang
 
 Package: ps
 Source: CRAN
-Version: 1.1.0
-Hash: 730119cd27ec2d3270bc572a532e3f81
+Version: 1.2.0
+Hash: 74783b96567e137000f5706e8f391d5f
 
 Package: purrr
 Source: CRAN
