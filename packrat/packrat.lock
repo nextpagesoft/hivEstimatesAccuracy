@@ -369,8 +369,8 @@ Requires: Rcpp, plyr, stringr
 
 Package: rlang
 Source: CRAN
-Version: 0.2.2
-Hash: 49b735b7b1d14f561d21cce12c6703df
+Version: 0.3.0
+Hash: 14e2b2e471fd3f38e060517411a108ca
 
 Package: rmarkdown
 Source: CRAN
@@ -406,9 +406,9 @@ Requires: digest, glue, shiny
 
 Package: shinydashboard
 Source: CRAN
-Version: 0.7.0
-Hash: 5b865adc8fe7461ccc7a257f600112f8
-Requires: htmltools, shiny
+Version: 0.7.1
+Hash: 9ff3e3d1aa83d9ae9b75c6f31e982aa6
+Requires: htmltools, promises, shiny
 
 Package: shinyjs
 Source: CRAN
