@@ -1,0 +1,52 @@
+---
+name: "Reporting Delays Intermediate"
+author: "HIV Estimates Accuracy tool"
+title: "Reporting Delays"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_fragment:
+    number_sections: no
+    smart: yes
+    fig_caption: yes
+params:
+  InputData: NA
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include = FALSE}
+require(hivEstimatesAccuracy, quietly = TRUE)
+knitr::opts_chunk$set(echo = FALSE, results = "asis", message = FALSE, warning = FALSE, include = TRUE)
+calcFigHeight <- function(stratum) ((length(levels(params$InputData$Table[[stratum]])) + 1) %/% 2) * 3
+formatNumbers <- function(x) sprintf("%.2f", x)
+```
+
+```{r}
+cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
+```
+
+```{r, fig.width = 10, fig.height = 4, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}}
+cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**", "\n\n")
+params$InputData$Artifacts$OutputPlotTotal
+```
+
+```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat)}}
+cat("**Figure 2. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year and stratum.**", "\n\n")
+```
+
+```{r, fig.width = 10, fig.height = calcFigHeight("Gender"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Gender)}}
+params$InputData$Artifacts$OutputPlotStrat$Gender
+```
+
+```{r, fig.width = 10, fig.height = calcFigHeight("Transmission"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Transmission)}}
+params$InputData$Artifacts$OutputPlotStrat$Transmission
+```
+
+```{r, fig.width = 10, fig.height = calcFigHeight("GroupedRegionOfOrigin"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin)}}
+params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin
+```
+
+```{r, eval = {!is.null(params$InputData$Artifacts$UnivAnalysis)}}
+cat("**Table 1. Univariate analysis of predictors of reporting delay and proportionality assumption test**", "\n")
+dt <- params$InputData$Artifacts$UnivAnalysis
+knitr::kable(dt, align = rep("r", ncol(dt)))
+```

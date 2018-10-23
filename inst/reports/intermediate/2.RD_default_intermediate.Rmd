@@ -50,4 +50,3 @@ cat("**Table 1. Univariate analysis of predictors of reporting delay and proport
 dt <- params$InputData$Artifacts$UnivAnalysis
 knitr::kable(dt, align = rep("r", ncol(dt)))
 ```
-

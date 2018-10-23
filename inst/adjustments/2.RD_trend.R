@@ -1,12 +1,12 @@
 list(
   # Adjustment name ----
-  Name = "Reporting Delays",
+  Name = "Reporting Delays with trend",
 
   # Adjustment type ----
   Type = "REPORTING_DELAYS",
 
   # Adjustment subtype ----
-  SubType = "DEFAULT",
+  SubType = "TREND",
 
   # Input parameters to the adjustment function ----
   Parameters = list(
