@@ -23,16 +23,18 @@ dataSummaryUI <- function(id)
           width = "612px",
           round = TRUE
         ),
-        style = "margin-left: 22px"
+        div(
+          checkboxInput(ns("filterChkBox"),
+                        "Apply filter in adjustments",
+                        FALSE),
+          textOutput(ns("filterInfo")),
+          style = "position: absolute; top: 62px; left: 700px"
+        ),
+        style = "margin-left: 22px; position: relative"
       ),
       uiOutput(ns("diagYearDensityOutput")),
-      div(
-        textOutput(ns("filterInfo")),
-        checkboxInput(ns("filterChkBox"),
-                      "Apply filter in adjustments",
-                      FALSE),
-        style = "margin-left: 22px"
-      ),
+      # div(textOutput(ns("filterInfo"))
+      #     style = "margin-left: 22px"),
       tagList(
         uiOutput(ns("missPlotDiv")),
         uiOutput(ns("missPlotRDOutput")),
