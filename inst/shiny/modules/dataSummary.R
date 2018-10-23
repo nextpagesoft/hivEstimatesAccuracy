@@ -149,7 +149,7 @@ dataSummary <- function(input, output, session, appStatus)
   })
 
   output[["missPlotRDOutput"]] <- renderUI({
-    req(appStatus[["AttributeMappingValid"]])
+    req(appStatus[["AttrMappingValid"]])
     req(artifacts()$MissPlotsRD)
 
     tagList(

@@ -45,6 +45,7 @@ dataAdjustUI <- function(id)
         ),
         column(2, actionLink(ns("rdSelectParam"), "Edit parameters"), style = "padding-top: 7px")
       ),
+      uiOutput(ns("rerunInfo")),
       actionButton(ns("runAdjustBtn"), "Run"),
       shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
     ),
@@ -69,7 +70,14 @@ dataAdjust <- function(input, output, session, appStatus)
                          editedAdjustmentName = "None",
                          editedAdjustmentParamsWidgets = list())
 
-  observeEvent(c(appStatus$StateUploading), {
+  invalidateAdjustments <- function() {
+    appStatus$AdjustedData <- NULL
+    appStatus$Report <- NULL
+    vals$runLog <- ""
+    vals$intermReport <- ""
+  }
+
+  observeEvent(appStatus$StateUploading, {
     if (appStatus$StateUploading) {
       updateSelectInput(session,
                         "rdSelect",
@@ -90,7 +98,7 @@ dataAdjust <- function(input, output, session, appStatus)
       shinyjs::hide("miSelectParam")
     }
     if (!appStatus$StateUploading) {
-      appStatus$AdjustedData <- NULL
+      invalidateAdjustments()
     }
   })
 
@@ -105,6 +113,7 @@ dataAdjust <- function(input, output, session, appStatus)
     }
     if (!appStatus$StateUploading) {
       appStatus$AdjustedData <- NULL
+      invalidateAdjustments()
     }
   })
 
@@ -171,6 +180,7 @@ dataAdjust <- function(input, output, session, appStatus)
     # Clean up
     vals$editedAdjustmentName <- "None"
     vals$editedAdjustmentParamsWidgets <- list()
+    invalidateAdjustments()
     removeModal()
   })
 
@@ -293,6 +303,19 @@ dataAdjust <- function(input, output, session, appStatus)
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["cancelAdjustBtn"]], {
     req(task)$cancel()
+  })
+
+  output[["rerunInfo"]] <- renderUI({
+    inputDataAvailable <- appStatus$AttrMappingValid
+    adjustedDataAvailable <- !is.null(appStatus$AdjustedData)
+
+    if (!inputDataAvailable) {
+      return(p("Please, apply attribute mapping before proceeding with adjustments."))
+    } else if (!adjustedDataAvailable) {
+      return(p("Input data or adjustment parameters changed. Please, re-run adjustments."))
+    } else {
+      return(NULL)
+    }
   })
 
   # Output intermediate report when it has changed

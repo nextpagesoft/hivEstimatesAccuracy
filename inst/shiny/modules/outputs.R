@@ -76,14 +76,19 @@ outputs <- function(input, output, session, appStatus)
   }
 
   observe({
-    adjustedData <- req(appStatus$AdjustedData)
+    adjustedData <- appStatus$AdjustedData
     isolate({
-      finalData(adjustedData[[length(adjustedData)]])
-
-      rdAdjIdx <- which(sapply(adjustedData, "[[", "Type") == "REPORTING_DELAYS")
-      if (length(rdAdjIdx) > 0 && rdAdjIdx > 0) {
-        rdDistribution(adjustedData[[rdAdjIdx]]$Artifacts$RdDistribution)
+      if (!is.null(adjustedData)) {
+        finalData(adjustedData[[length(adjustedData)]])
+        rdAdjIdx <- which(sapply(adjustedData, "[[", "Type") == "REPORTING_DELAYS")
+        if (length(rdAdjIdx) > 0 && rdAdjIdx > 0) {
+          rdDistribution(adjustedData[[rdAdjIdx]]$Artifacts$RdDistribution)
+        }
+      } else {
+        finalData(NULL)
+        rdDistribution(NULL)
       }
+
     })
   })
 

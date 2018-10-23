@@ -16,7 +16,21 @@ createReportsUI <- function(id)
       solidHeader = FALSE,
       collapsible = TRUE,
       status = "primary",
-      uiOutput(ns("reportSelection"))),
+      fluidRow(
+        column(6,
+               selectInput(ns("select"),
+                           label = NULL,
+                           choices = reportNames,
+                           selected = 1,
+                           selectize = TRUE)),
+        column(6,
+               actionLink(ns("openParamsDlg"), "Edit parameters"),
+               style = "padding-top: 7px"),
+        column(12,
+               uiOutput(ns("rerunInfo")),
+               actionButton(ns("createReportBtn"), "Create")
+        )
+      )),
     uiOutput(ns("report"))
   )
 }
@@ -32,28 +46,20 @@ createReports <- function(input, output, session, appStatus)
                          reportParams = list(),
                          reportParamsFull = list())
 
-  # Output reports selection
-  output[["reportSelection"]] <- renderUI({
-    isolate({
+  invalidateReport <- function() {
+    appStatus$Report <- NULL
+  }
 
-      # Get adjustment list
-      reportSelection <- fluidRow(
-        column(6,
-               selectInput(ns("select"),
-                           label = NULL,
-                           choices = reportNames,
-                           selected = 1,
-                           selectize = TRUE)),
-        column(6,
-               actionLink(ns("openParamsDlg"), "Edit parameters"),
-               style = "padding-top: 7px"),
-        column(12,
-          actionButton(ns("createReportBtn"), "Create")
-        )
-      )
+  adjustedDataAvailable <- reactive({
+    !is.null(appStatus$AdjustedData)
+  })
 
-      return(reportSelection)
-    })
+  observe({
+    if (adjustedDataAvailable()) {
+      shinyjs::enable("createReportBtn")
+    } else {
+      shinyjs::disable("createReportBtn")
+    }
   })
 
   # Get selected report name on change
@@ -118,11 +124,24 @@ createReports <- function(input, output, session, appStatus)
                         ns = session$ns)
     }
 
+    invalidateReport()
     removeModal()
   })
 
+  output[["rerunInfo"]] <- renderUI({
+    adjustedDataAvailable <- adjustedDataAvailable()
+
+    if (!adjustedDataAvailable) {
+      return(p("Adjusted data is not available for report. Please, re-run adjustments first."))
+    } else if (IsEmptyString(appStatus$Report)) {
+      return(p("Adjusted data or report parameters have changed. Please, re-create the report."))
+    } else {
+      return(NULL)
+    }
+  })
+
   # EVENT: Button "Create report" clicked
-  report <- eventReactive(input[["createReportBtn"]], {
+  observeEvent(input[["createReportBtn"]], {
     adjustedData <- req(appStatus$AdjustedData)
     yearRangeApply <- appStatus$YearRangeApply
     yearRange <- appStatus$YearRange
@@ -158,13 +177,13 @@ createReports <- function(input, output, session, appStatus)
                  })
 
     # Create report
-    return(report)
+    appStatus$Report <- report
   })
 
   # Output report when it has changed
   output[["report"]] <- renderUI({
     # Respond to report change
-    report <- report()
+    report <- req(appStatus$Report)
     if (!is.null(report)) {
       isolate({
         ns <- session$ns

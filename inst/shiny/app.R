@@ -97,7 +97,8 @@ server <- function(input, output, session)
     AdjustedData = NULL,
     AdjustmentSpecs = adjustmentSpecs,
     MIAdjustmentName = "None",
-    RDAdjustmentName = "None"
+    RDAdjustmentName = "None",
+    Report = ""
   )
 
   callModule(inputDataUpload, "upload",      appStatus)
