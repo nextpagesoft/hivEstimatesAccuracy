@@ -72,20 +72,23 @@ dataAdjust <- function(input, output, session, appStatus)
 
   invalidateAdjustments <- function() {
     appStatus$AdjustedData <- NULL
-    appStatus$Report <- NULL
-    vals$runLog <- ""
-    vals$intermReport <- ""
   }
 
-  observeEvent(appStatus$StateUploading, {
-    if (appStatus$StateUploading) {
-      updateSelectInput(session,
-                        "rdSelect",
-                        selected = appStatus$RDAdjustmentName)
-      updateSelectInput(session,
-                        "miSelect",
-                        selected = appStatus$MIAdjustmentName)
+  observeEvent(appStatus$AdjustedData, {
+    if (is.null(appStatus$AdjustedData)) {
+      vals$runLog <- ""
+      vals$intermReport <- ""
+      appStatus$Report <- NULL
     }
+  }, ignoreNULL = FALSE)
+
+  observeEvent(appStatus$InputUploading, {
+    updateSelectInput(session,
+                      "rdSelect",
+                      selected = appStatus$RDAdjustmentName)
+    updateSelectInput(session,
+                      "miSelect",
+                      selected = appStatus$MIAdjustmentName)
   })
 
   # EVENT: MI adjustment selection changed
@@ -112,7 +115,6 @@ dataAdjust <- function(input, output, session, appStatus)
       shinyjs::hide("rdSelectParam")
     }
     if (!appStatus$StateUploading) {
-      appStatus$AdjustedData <- NULL
       invalidateAdjustments()
     }
   })
@@ -192,12 +194,9 @@ dataAdjust <- function(input, output, session, appStatus)
     removeModal()
   })
 
-  adjustmentsValid <- reactive({
-    appStatus$MIAdjustmentName != "None" || appStatus$RDAdjustmentName != "None"
-  })
-
   observe({
-    if (adjustmentsValid()) {
+    if ((appStatus$MIAdjustmentName != "None" || appStatus$RDAdjustmentName != "None") &&
+        appStatus$AttrMappingValid) {
       shinyjs::enable("runAdjustBtn")
     } else {
       shinyjs::disable("runAdjustBtn")

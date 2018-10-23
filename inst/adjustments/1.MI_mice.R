@@ -29,7 +29,12 @@ list(
       step = 1L,
       ticks = TRUE,
       round = TRUE,
-      input = "slider")
+      input = "slider"),
+    # Parameter 4
+    imputeRD = list(
+      label = "Impute reporting delays inputs",
+      value = TRUE,
+      input = "checkbox")
     # Parameter 5
     # runInParallel = list(
     #   label = "Run in parallel",
@@ -47,7 +52,7 @@ list(
 
     # Perform imputations per data set.
     # This is the actual worker function.
-    workerFunction <- function(i, nit, nimp, nsdf) {
+    workerFunction <- function(i, nit, nimp, nsdf, imputeRD) {
 
       cat("\n")
       cat(sprintf("Processing gender: %s\n", names(dataSets)[i]))
@@ -60,6 +65,11 @@ list(
       xColNamesAll <- c("AIDS")
       # Define outcomes
       yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
+
+      if (imputeRD) {
+        xColNamesAll <- union(xColNamesAll, c("MaxPossibleDelay"))
+        yColNamesAll <- union(yColNamesAll, c("VarX"))
+      }
 
       # Determine which columns to pass to the mice package
 
@@ -162,7 +172,8 @@ list(
                            workerFunction,
                            nit = parameters$nit,
                            nimp = parameters$nimp,
-                           nsdf = parameters$nsdf)
+                           nsdf = parameters$nsdf,
+                           imputeRD = parameters$imputeRD)
     # }
 
     # 5. Combine all data sets

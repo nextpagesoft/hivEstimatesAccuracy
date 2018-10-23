@@ -106,9 +106,24 @@ PreProcessInputData <- function(inputData)
   inputDataGender <- inputData[, .(Gender = as.factor(Gender),
                                    DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
                                    Transmission)]
-  miceImputation <- mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE)
+  miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE))
   inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
   inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
+
+  # Support imputing reporting delay -----------------------------------------------
+  # Create intermediate variables
+  inputData[, ":="(
+    NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
+    DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
+  )]
+
+  # Create reporting delay in quarters called VarX
+  inputData[, VarX := 4 * (NotificationTime - DiagnosisTime)]
+  inputData[VarX < 0, VarX := NA]
+  inputData[, ":="(
+    MinNotificationTime = min(NotificationTime, na.rm = TRUE),
+    MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
+  ), by = .(ReportingCountry)]
 
   # Transform columns to factor
   inputData[, Gender := factor(Gender)]

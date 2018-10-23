@@ -116,6 +116,7 @@ inputDataUpload <- function(input, output, session, appStatus)
     # Read input data
     uploadedData <- req(ReadDataFile(fileInput$datapath))
     stateFile <- GetIsState(uploadedData)
+    appStatus$InputUploading <- TRUE
 
     if (stateFile) {
       originalData         <- req(uploadedData$OriginalData)
@@ -346,6 +347,7 @@ inputDataUpload <- function(input, output, session, appStatus)
                    appStatus$AttrMappingStatus <- GetAttrMappingStatus(appStatus$AttrMapping)
                    appStatus$InputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
                    appStatus$InputDataTest <- inputDataTest
+                   appStatus$InputUploading <- FALSE
                    appStatus$StateUploading <- FALSE
 
                    setProgress(1, detail = "Done")

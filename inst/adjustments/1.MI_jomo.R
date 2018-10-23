@@ -34,8 +34,13 @@ list(
       step = 1L,
       ticks = TRUE,
       round = TRUE,
-      input = "slider")
+      input = "slider"),
     # Parameter 5
+    imputeRD = list(
+      label = "Impute reporting delays inputs",
+      value = TRUE,
+      input = "checkbox")
+    # Parameter 6
     # runInParallel = list(
     #   label = "Run in parallel",
     #   value = FALSE,
@@ -52,7 +57,7 @@ list(
 
     # Perform imputations per data set.
     # This is the actual worker function.
-    workerFunction <- function(i, nburn, nbetween, nimp, nsdf) {
+    workerFunction <- function(i, nburn, nbetween, nimp, nsdf, imputeRD) {
 
       cat("\n")
       cat(sprintf("Processing gender: %s\n", names(dataSets)[i]))
@@ -65,6 +70,34 @@ list(
       xColNamesAll <- c("AIDS")
       # Define outcomes
       yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
+
+      if (imputeRD) {
+        # Create logit transform of VarX
+        dataSet[, LogitVarX := {
+          maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
+                                     4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
+                                     4 * (MaxNotificationTime - DiagnosisTime))
+          maxPossibleDelay <- ifelse(is.na(DateOfDiagnosisYear),
+                                     4 * (NotificationTime - MinNotificationTime),
+                                     maxPossibleDelay)
+          maxPossibleDelay <- ifelse(is.na(maxPossibleDelay),
+                                     4 * (MaxNotificationTime - MinNotificationTime),
+                                     maxPossibleDelay)
+
+          tweakedVarX <- ifelse(VarX == 0, 0.01, VarX)
+          tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
+                                maxPossibleDelay - 0.01,
+                                tweakedVarX)
+          tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
+                                            0.02,
+                                            maxPossibleDelay)
+          p <- tweakedVarX/tweakedMaxPossibleDelay
+          log(p/(1-p))
+        }]
+
+        xColNamesAll <- union(xColNamesAll, c("MaxPossibleDelay"))
+        yColNamesAll <- union(yColNamesAll, c("LogitVarX"))
+      }
 
       # Determine which columns to pass to the jomo package
 
@@ -134,6 +167,14 @@ list(
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])
 
+      # Convert LogitVarX back to VarX
+      if ("LogitVarX" %in% colnames(mi)) {
+        mi[Imputation != 0 & is.na(VarX),
+           VarX := MaxPossibleDelay * exp(LogitVarX)/(1 + LogitVarX)]
+        mi[, LogitVarX := NULL]
+        impColNames <- setdiff(impColNames, "LogitVarX")
+      }
+
       setcolorder(mi, union(indexColNames, names(dataSet)))
 
       ConvertDataTableColumns(mi, c(Imputation = "integer"))
@@ -177,7 +218,8 @@ list(
                            nburn = parameters$nburn,
                            nbetween = parameters$nbetween,
                            nimp = parameters$nimp,
-                           nsdf = parameters$nsdf)
+                           nsdf = parameters$nsdf,
+                           imputeRD = parameters$imputeRD)
     # }
 
     # 5. Combine all data sets

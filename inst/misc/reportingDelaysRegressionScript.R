@@ -16,11 +16,11 @@ endQrt <- 2017.25
 stratVarNames <- c("Gender", "Transmission")
 
 # Run mice adjustment before RD
-runMice <- FALSE
+runMice <- TRUE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "~/share/dummy_miss1.zip"
+inputDataFilePath <- "~/share/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -75,16 +75,8 @@ stratVarNames <- stratVarNames[stratVarNames %in% colnames(compData)]
 stratVarNamesTrend <- union("DateOfDiagnosisYear",
                             stratVarNames)
 
-# Create intermediate variables
-compData[, ":="(
-  NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
-  DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
-)]
-
 # Create dimensions to match the weights later
 outputData <- copy(compData)
-outputData[, MaxNotificationTime := max(NotificationTime, na.rm = TRUE),
-           by = .(ReportingCountry)]
 outputData[, VarT := 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1]
 
 # Filter
@@ -92,15 +84,9 @@ compData <- compData[!is.na(DiagnosisTime) & !is.na(NotificationTime)]
 compData <- compData[DiagnosisTime >= max(startYear + 0.25,
                                           min(NotificationTime, na.rm = TRUE)) &
                        NotificationTime <= endQrt]
-compData[, VarX := 4 * (NotificationTime - DiagnosisTime)]
-compData[VarX < 0, VarX := NA]
 compData[, ":="(
-  MinNotificationTime = min(NotificationTime, na.rm = TRUE),
-  MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
-), by = .(ReportingCountry)]
-compData[, ":="(
-  VarT = 4 * (pmin(MaxNotificationTime, endQrt) - DiagnosisTime),
-  Tf = 4 * (pmin(MaxNotificationTime, endQrt) - pmax(MinNotificationTime, startYear + 0.25)),
+  VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
+  Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(MinNotificationTime, startYear + 0.25)),
   ReportingDelay = 1L
 )]
 compData[, ":="(

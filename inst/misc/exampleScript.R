@@ -13,7 +13,6 @@ if (GetIsState(uploadedData)) {
   originalData <- uploadedData
 }
 
-
 # 4. PRE-PROCESS DATA ------------------------------------------------------------------------------
 attrMapping <- GetPreliminaryAttributesMapping(originalData)
 # Map "FirstCD4Count" to "cd4_num" if not mapped yet
