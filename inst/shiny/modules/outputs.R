@@ -94,7 +94,7 @@ outputs <- function(input, output, session, appStatus)
 
   output[['downloadStateRdsBtn']] <- downloadHandler(
     filename = function() {
-      fileName <- sprintf("StateData_%s.rds",
+      fileName <- sprintf("HIV_state_%s.rds",
                           GetTimeStamp())
       return(fileName)
     },

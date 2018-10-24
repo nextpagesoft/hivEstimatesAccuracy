@@ -61,7 +61,8 @@ ui <- tagList(
       tags$head(
         tags$script(async = NA, src = "https://www.googletagmanager.com/gtag/js?id=UA-125099925-2"),
         includeScript(path = file.path(wwwPath, "/js/google_analytics.js")),
-        tags$link(rel = "stylesheet", type = "text/css", href = "./www/css/style.css")
+        tags$link(rel = "stylesheet", type = "text/css", href = "./www/css/style.css"),
+        tags$title("HIV Estimates Accuracy")
       ),
       tabItems(
         tabItem(tabName = "upload",      fluidRow(inputDataUploadUI("upload"))),
@@ -98,6 +99,8 @@ server <- function(input, output, session)
     AdjustmentSpecs = adjustmentSpecs,
     MIAdjustmentName = "None",
     RDAdjustmentName = "None",
+    RunLog = "",
+    IntermReport = "",
     Report = ""
   )
 

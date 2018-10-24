@@ -73,29 +73,14 @@ list(
 
       if (imputeRD) {
         # Create logit transform of VarX
-        dataSet[, LogitVarX := {
-          maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
-                                     4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
-                                     4 * (MaxNotificationTime - DiagnosisTime))
-          maxPossibleDelay <- ifelse(is.na(DateOfDiagnosisYear),
-                                     4 * (NotificationTime - MinNotificationTime),
-                                     maxPossibleDelay)
-          maxPossibleDelay <- ifelse(is.na(maxPossibleDelay),
-                                     4 * (MaxNotificationTime - MinNotificationTime),
-                                     maxPossibleDelay)
-
-          tweakedVarX <- ifelse(VarX == 0, 0.01, VarX)
-          tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
-                                maxPossibleDelay - 0.01,
-                                tweakedVarX)
-          tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
-                                            0.02,
-                                            maxPossibleDelay)
-          p <- tweakedVarX/tweakedMaxPossibleDelay
-          log(p/(1-p))
+        dataSet[, c("LogitVarX", "LogMaxPossibleDelay") := {
+          p <- TweakedVarX / TweakedMaxPossibleDelay
+          logitVarX <- log(p / (1 - p))
+          logMaxPossibleDelay <- log(MaxPossibleDelay)
+          list(logitVarX, logMaxPossibleDelay)
         }]
 
-        xColNamesAll <- union(xColNamesAll, c("MaxPossibleDelay"))
+        xColNamesAll <- union(xColNamesAll, c("LogMaxPossibleDelay"))
         yColNamesAll <- union(yColNamesAll, c("LogitVarX"))
       }
 
@@ -162,7 +147,8 @@ list(
 
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
-      dataSetColNames <- setdiff(colnames(dataSet), yColNames)
+      dataSetColNames <- setdiff(colnames(dataSet),
+                                 union(yColNames, "LogMaxPossibleDelay"))
 
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])
@@ -170,12 +156,11 @@ list(
       # Convert LogitVarX back to VarX
       if ("LogitVarX" %in% colnames(mi)) {
         mi[Imputation != 0 & is.na(VarX),
-           VarX := MaxPossibleDelay * exp(LogitVarX)/(1 + LogitVarX)]
+           VarX := round(MaxPossibleDelay * exp(LogitVarX)/(1 + LogitVarX))]
         mi[, LogitVarX := NULL]
-        impColNames <- setdiff(impColNames, "LogitVarX")
       }
 
-      setcolorder(mi, union(indexColNames, names(dataSet)))
+      setcolorder(mi, union(indexColNames, dataSetColNames))
 
       ConvertDataTableColumns(mi, c(Imputation = "integer"))
 

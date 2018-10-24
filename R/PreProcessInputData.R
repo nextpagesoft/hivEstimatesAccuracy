@@ -117,13 +117,41 @@ PreProcessInputData <- function(inputData)
     DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
   )]
 
-  # Create reporting delay in quarters called VarX
-  inputData[, VarX := 4 * (NotificationTime - DiagnosisTime)]
-  inputData[VarX < 0, VarX := NA]
+  # Create Min and Max notification time
   inputData[, ":="(
     MinNotificationTime = min(NotificationTime, na.rm = TRUE),
     MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
   ), by = .(ReportingCountry)]
+
+  # Create VarX, MaxPossibleDelay
+  inputData[, c("VarX", "TweakedVarX", "MaxPossibleDelay", "TweakedMaxPossibleDelay") := {
+    # Compute MaxPossibleDelay
+    maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
+                               4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
+                               4 * (MaxNotificationTime - DiagnosisTime))
+    maxPossibleDelay <- ifelse(is.na(DateOfDiagnosisYear),
+                               4 * (NotificationTime - MinNotificationTime),
+                               maxPossibleDelay)
+    maxPossibleDelay <- ifelse(is.na(maxPossibleDelay),
+                               4 * (MaxNotificationTime - MinNotificationTime),
+                               maxPossibleDelay)
+
+    # Compute VarX
+    varX <- 4 * (NotificationTime - DiagnosisTime)
+    tweakedVarX <- ifelse(varX == 0, 0.01, varX)
+    tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
+                          maxPossibleDelay - 0.01,
+                          varX)
+
+    # Tweak MaxPossibleDelay
+    tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
+                                      0.02,
+                                      maxPossibleDelay)
+
+    list(varX, tweakedVarX, maxPossibleDelay, tweakedMaxPossibleDelay)
+  }]
+
+
 
   # Transform columns to factor
   inputData[, Gender := factor(Gender)]

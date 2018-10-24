@@ -53,24 +53,38 @@ dataSummary <- function(input, output, session, appStatus)
   # Get namespace
   ns <- session$ns
 
+  invalidateAdjustments <- function() {
+    appStatus$AdjustedData <- NULL
+  }
+
   # Store filter settings
   observeEvent(input[['filterChkBox']], {
+    freezeReactiveValue(appStatus, 'YearRangeApply')
     appStatus$YearRangeApply <- input[['filterChkBox']]
+    invalidateAdjustments()
   })
 
   observeEvent(input[['yearRange']], {
+    freezeReactiveValue(appStatus, 'YearRange')
     appStatus$YearRange <- input[['yearRange']]
+    if (appStatus$YearRangeApply) {
+      invalidateAdjustments()
+    }
   })
 
   # Restore filter settings
   observeEvent(appStatus$YearRange, {
     freezeReactiveValue(input, 'yearRange')
     updateSliderInput(session, 'yearRange', value = appStatus$YearRange)
+    if (appStatus$YearRangeApply) {
+      invalidateAdjustments()
+    }
   })
 
   observeEvent(appStatus$YearRangeApply, {
     freezeReactiveValue(input, 'filterChkBox')
     updateCheckboxInput(session, 'filterChkBox', value = appStatus$YearRangeApply)
+    invalidateAdjustments()
   })
 
   dataSelection <- reactive({

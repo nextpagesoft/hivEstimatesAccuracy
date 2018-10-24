@@ -1,7 +1,7 @@
 groupingNames <-
   c("REPCOUNTRY + UNK + OTHER",
     "REPCOUNTRY + UNK + SUBAFR + OTHER",
-    "REPCOUNTRY + UNK + 4 most prevalent other regions",
+    "REPCOUNTRY + UNK + 3 most prevalent regions + OTHER",
     "Custom")
 
 GetGroupingTable <- function(type, distr, map) {

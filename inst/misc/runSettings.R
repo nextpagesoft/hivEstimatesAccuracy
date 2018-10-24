@@ -1,7 +1,8 @@
 # 1. INPUT DATA ----------------------------------------------------------------
 # Set path to the input data file
 # inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL.csv"
-inputDataFilePath <- "~/share/PLtest.csv"
+# inputDataFilePath <- "~/share/PLtest.csv"
+inputDataFilePath <- "~/share/dummy_miss1.zip"
 # inputDataFilePath <- "~/share/StateTestings/StateData_20181014212132.rds"
 # inputDataFilePath <- "/media/sf_VirtualBox_Share/hiv_2017.zip"
 
@@ -11,7 +12,8 @@ inputDataFilePath <- "~/share/PLtest.csv"
 # b) " Multiple Imputation using Chained Equations - MICE"
 # c) "Reporting Delays"
 adjustmentNames <- c(
-  "Multiple Imputation using Chained Equations - MICE",
+  # "Joint Modelling Multiple Imputation",
+  # "Multiple Imputation using Chained Equations - MICE",
   "Reporting Delays"
 )
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
@@ -22,7 +24,7 @@ adjustmentSpecs <-
 
 # Optionally adjust parameters of the adjustments
 # For instance stratify "Reporting Delays" adjustment by Migration category:
-adjustmentSpecs[["Joint Modelling Multiple Imputation"]]$Parameters$imputeRD$value <- TRUE
+# adjustmentSpecs[["Joint Modelling Multiple Imputation"]]$Parameters$imputeRD$value <- TRUE
 adjustmentSpecs[["Reporting Delays"]]$Parameters$stratMigr$value <- TRUE
 
 # 3. FULLMIGR MAPPING ----------------------------------------------------------

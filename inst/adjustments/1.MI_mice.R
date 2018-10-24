@@ -67,7 +67,9 @@ list(
       yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
 
       if (imputeRD) {
-        xColNamesAll <- union(xColNamesAll, c("MaxPossibleDelay"))
+        dataSet[, LogMaxPossibleDelay := log(MaxPossibleDelay)]
+
+        xColNamesAll <- union(xColNamesAll, c("LogMaxPossibleDelay"))
         yColNamesAll <- union(yColNamesAll, c("VarX"))
       }
 
@@ -111,12 +113,12 @@ list(
 
         # Run model
         cat("Performing imputation.\n")
-        imp <- mice::mice(cbind(Y, X),
-                          m = nimp,
-                          maxit = nit)
-        artifacts[["Mids"]] <- imp
+        mids <- mice::mice(cbind(Y, X),
+                           m = nimp,
+                           maxit = nit)
+        artifacts[["Mids"]] <- mids
 
-        imp <- setDT(mice::complete(imp, action = "long", include = TRUE))
+        imp <- setDT(mice::complete(mids, action = "long", include = TRUE))
         setnames(imp, old = c(".imp", ".id"), new = c("Imputation", "id"))
 
       } else {
@@ -126,12 +128,13 @@ list(
 
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
-      dataSetColNames <- setdiff(colnames(dataSet), yColNames)
+      dataSetColNames <- setdiff(colnames(dataSet),
+                                 union(yColNames, "LogMaxPossibleDelay"))
 
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])
 
-      setcolorder(mi, union(indexColNames, names(dataSet)))
+      setcolorder(mi, union(indexColNames, dataSetColNames))
 
       ConvertDataTableColumns(mi, c(Imputation = function(x) as.integer(as.character(x))))
 

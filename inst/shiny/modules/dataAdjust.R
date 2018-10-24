@@ -65,9 +65,7 @@ dataAdjust <- function(input, output, session, appStatus)
   task <- NULL
 
   # Store reactive values
-  vals <- reactiveValues(runLog = "",
-                         intermReport = "",
-                         editedAdjustmentName = "None",
+  vals <- reactiveValues(editedAdjustmentName = "None",
                          editedAdjustmentParamsWidgets = list())
 
   invalidateAdjustments <- function() {
@@ -76,8 +74,8 @@ dataAdjust <- function(input, output, session, appStatus)
 
   observeEvent(appStatus$AdjustedData, {
     if (is.null(appStatus$AdjustedData)) {
-      vals$runLog <- ""
-      vals$intermReport <- ""
+      appStatus$RunLog <- ""
+      appStatus$IntermReport <- ""
       appStatus$Report <- NULL
     }
   }, ignoreNULL = FALSE)
@@ -225,8 +223,8 @@ dataAdjust <- function(input, output, session, appStatus)
 
     appStatus$AdjustedData <- NULL
 
-    vals$runLog <- ""
-    vals$intermReport <- ""
+    appStatus$RunLog <- ""
+    appStatus$IntermReport <- ""
 
     # Show progress message during task start
     prog <- Progress$new(session)
@@ -275,18 +273,18 @@ dataAdjust <- function(input, output, session, appStatus)
                                    "intermediate",
                                    adjustedData[[i]]))
         }
-        vals$intermReport <- HTML(intermReport)
-        vals$runLog <- "Done"
+        appStatus$IntermReport <- HTML(intermReport)
+        appStatus$RunLog <- "Done"
       } else {
         adjustedData(NULL)
-        vals$runLog <- "Adjustments cancelled"
+        appStatus$RunLog <- "Adjustments cancelled"
       }
-      vals$runLog <- paste(paste("Start time  :", FormatTime(startTime)),
-                           paste("End time    :", FormatTime(endTime)),
-                           paste("Elapsed time:", FormatDiffTime(endTime - startTime)),
-                           paste(""),
-                           vals$runLog,
-                           sep = "\n")
+      appStatus$RunLog <- paste(paste("Start time  :", FormatTime(startTime)),
+                                paste("End time    :", FormatTime(endTime)),
+                                paste("Elapsed time:", FormatDiffTime(endTime - startTime)),
+                                paste(""),
+                                appStatus$RunLog,
+                                sep = "\n")
 
       # This observer only runs once
       o$destroy()
@@ -319,7 +317,7 @@ dataAdjust <- function(input, output, session, appStatus)
 
   # Output intermediate report when it has changed
   output[["intermReport"]] <- renderUI({
-    if (vals$intermReport != "") {
+    if (appStatus$IntermReport != "") {
       intermReportHTML <- box(
         class = "intermReport",
         width = 12,
@@ -327,7 +325,7 @@ dataAdjust <- function(input, output, session, appStatus)
         solidHeader = FALSE,
         collapsible = TRUE,
         status = "warning",
-        vals$intermReport
+        appStatus$IntermReport
       )
     } else {
       intermReportHTML <- NULL
@@ -337,14 +335,14 @@ dataAdjust <- function(input, output, session, appStatus)
 
   # Populate adjustment parameter widgets in the editing dialog
   output[["runLog"]] <- renderUI({
-    if (vals$runLog != "") {
+    if (appStatus$RunLog != "") {
       runLogHTML <- box(
         width = 12,
         title = "Run log",
         solidHeader = FALSE,
         collapsible = TRUE,
         status = "warning",
-        tags$pre(vals$runLog)
+        tags$pre(appStatus$RunLog)
       )
     } else {
       runLogHTML <- NULL

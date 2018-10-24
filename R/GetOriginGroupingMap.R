@@ -30,7 +30,7 @@ GetOriginGroupingMap <- function(type, distr, groups)
   switch(
     type,
     "REPCOUNTRY + UNK + OTHER" = ,
-    "REPCOUNTRY + UNK + 4 most prevalent other regions" = {
+    "REPCOUNTRY + UNK + 3 most prevalent regions + OTHER" = {
       map[map %chin% c("ABROAD", "SUBAFR", "WESTEUR", "CENTEUR", "EASTEUR",
                        "EASTASIAPAC", "EUROPE", "AUSTNZ", "SOUTHASIA",
                        "NORTHAFRMIDEAST", "NORTHAM", "CAR", "LATAM")] <- "OTHER"
@@ -51,7 +51,7 @@ GetOriginGroupingMap <- function(type, distr, groups)
   map <- as.data.table(map, keep.rownames = TRUE)
   setnames(map, c("FullRegionOfOrigin", "GroupedRegionOfOrigin"))
 
-  if (type == "REPCOUNTRY + UNK + 4 most prevalent other regions") {
+  if (type == "REPCOUNTRY + UNK + 3 most prevalent regions + OTHER") {
     sepRegions <- head(distr[!FullRegionOfOrigin %chin% c("REPCOUNTRY", "UNK"),
                              FullRegionOfOrigin], 3)
     map[FullRegionOfOrigin %chin% sepRegions,

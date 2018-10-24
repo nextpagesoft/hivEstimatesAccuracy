@@ -43,14 +43,6 @@ GetDataSummaryArtifacts <- function(inputData)
       labels = c("Diagnosis year", "Diagnosis quarter", "Notification year",
                  "Notification quarter"))
 
-  # Observed delay distribution
-  inputData[, ":="(
-    NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
-    DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
-  )]
-  inputData[, VarX := 4 * (NotificationTime - DiagnosisTime)]
-  inputData[VarX < 0, VarX := NA]
-
   if (!all(is.na(inputData$VarX))) {
     quant95 <- quantile(inputData$VarX, probs = 0.95, na.rm = TRUE)
     quant99 <- quantile(inputData$VarX, probs = 0.99, na.rm = TRUE)

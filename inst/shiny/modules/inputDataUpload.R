@@ -134,6 +134,9 @@ inputDataUpload <- function(input, output, session, appStatus)
       rdAdjustmentName     <- uploadedData$RDAdjustmentName
       yearRange            <- uploadedData$YearRange
       yearRangeApply       <- uploadedData$YearRangeApply
+      runLog               <- uploadedData$RunLog
+      intermReport         <- uploadedData$IntermReport
+      report               <- uploadedData$Report
       appStatus$StateUploading  <- TRUE
     } else {
       originalData      <- req(uploadedData)
@@ -159,6 +162,9 @@ inputDataUpload <- function(input, output, session, appStatus)
       rdAdjustmentName     <- "None"
       yearRange            <- c(2000, currYear)
       yearRangeApply       <- FALSE
+      runLog               <- ""
+      intermReport         <- ""
+      report               <- ""
       appStatus$StateUploading  <- FALSE
     }
 
@@ -177,6 +183,9 @@ inputDataUpload <- function(input, output, session, appStatus)
     appStatus$RDAdjustmentName    <- rdAdjustmentName
     appStatus$YearRange           <- yearRange
     appStatus$YearRangeApply      <- yearRangeApply
+    appStatus$RunLog              <- runLog
+    appStatus$IntermReport        <- intermReport
+    appStatus$Report              <- report
     inputDataBeforeGrouping(NULL)
   }, ignoreNULL = TRUE)
 
