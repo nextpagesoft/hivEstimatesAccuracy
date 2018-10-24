@@ -276,7 +276,7 @@ dataAdjust <- function(input, output, session, appStatus)
         appStatus$IntermReport <- HTML(intermReport)
         appStatus$RunLog <- "Done"
       } else {
-        adjustedData(NULL)
+        appStatus$AdjustedData <- NULL
         appStatus$RunLog <- "Adjustments cancelled"
       }
       appStatus$RunLog <- paste(paste("Start time  :", FormatTime(startTime)),

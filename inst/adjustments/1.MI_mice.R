@@ -33,7 +33,7 @@ list(
     # Parameter 4
     imputeRD = list(
       label = "Impute reporting delays inputs",
-      value = TRUE,
+      value = FALSE,
       input = "checkbox")
     # Parameter 5
     # runInParallel = list(

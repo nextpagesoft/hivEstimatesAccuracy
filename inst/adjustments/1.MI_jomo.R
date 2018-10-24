@@ -38,7 +38,7 @@ list(
     # Parameter 5
     imputeRD = list(
       label = "Impute reporting delays inputs",
-      value = TRUE,
+      value = FALSE,
       input = "checkbox")
     # Parameter 6
     # runInParallel = list(
@@ -156,7 +156,7 @@ list(
       # Convert LogitVarX back to VarX
       if ("LogitVarX" %in% colnames(mi)) {
         mi[Imputation != 0 & is.na(VarX),
-           VarX := round(MaxPossibleDelay * exp(LogitVarX)/(1 + LogitVarX))]
+           VarX := MaxPossibleDelay * round(exp(LogitVarX)/(1 + LogitVarX))]
         mi[, LogitVarX := NULL]
       }
 
