@@ -13,7 +13,7 @@ params:
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10, warning = FALSE, message = FALSE)
 require(shiny)
 ```
 
@@ -70,16 +70,46 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 
 Maximum 5 first chains (imputations) are displayed.
 
-**Figure 1. Imputed values plot**<br />
+**Figure 1. Imputed values per sample**<br />
 ```{r}
 print(GetMiceDiagnosticPlot(params$InputData$Artifacts$F$Mids))
+```
+
+**Figure 2. Distributions of imputed values**<br />
+```{r, fig.height = 3}
+colNames <- params$InputData$Artifacts$F$Y_COLS$Kept
+dtF <- params$InputData$Table[Gender == "F"]
+for (colName in colNames) {
+  PlotMultipleCharts(
+    list(
+      GetImputedDistPlots(colName = colName, dt = dtF, missingOnly = TRUE),
+      GetImputedDistPlots(colName = colName, dt = dtF, missingOnly = FALSE)
+    ),
+    cols = 2
+  )
+}
 ```
 
 ## Diagnostic plots for Gender = \"Male\"
 
 Maximum 5 first chains (imputations) are displayed.
 
-**Figure 2. Imputed values plot**<br />
+**Figure 3. Imputed values plot per sample**<br />
 ```{r}
 print(GetMiceDiagnosticPlot(params$InputData$Artifacts$M$Mids))
+```
+
+**Figure 4. Distributions of imputed values**<br />
+```{r, fig.height = 3}
+colNames <- params$InputData$Artifacts$M$Y_COLS$Kept
+dtM <- params$InputData$Table[Gender == "M"]
+for (colName in colNames) {
+  PlotMultipleCharts(
+    list(
+      GetImputedDistPlots(colName = colName, dt = dtM, missingOnly = TRUE),
+      GetImputedDistPlots(colName = colName, dt = dtM, missingOnly = FALSE)
+    ),
+    cols = 2
+  )
+}
 ```

@@ -139,8 +139,8 @@ Hash: ab59ff4cad00d4621acb535dae2c6410
 
 Package: ggplot2
 Source: CRAN
-Version: 3.0.0
-Hash: 8332448b76ff31472a1bf6dd31fcddb1
+Version: 3.1.0
+Hash: ef541b05dda10b209d509b5bbaf46ea3
 Requires: digest, gtable, lazyeval, plyr, reshape2, rlang, scales,
     tibble, viridisLite, withr
 
@@ -369,8 +369,8 @@ Requires: Rcpp, plyr, stringr
 
 Package: rlang
 Source: CRAN
-Version: 0.3.0
-Hash: 14e2b2e471fd3f38e060517411a108ca
+Version: 0.3.0.1
+Hash: 35fb7a51d5d756c56f793ed9c381fb84
 
 Package: rmarkdown
 Source: CRAN
@@ -445,8 +445,8 @@ Requires: cli, crayon, pillar, rlang
 
 Package: tidyr
 Source: CRAN
-Version: 0.8.1
-Hash: 3b67391a922e482f233a29ad48e7ed0f
+Version: 0.8.2
+Hash: 6620dc3d1459df12881193f6b81b305b
 Requires: Rcpp, dplyr, glue, magrittr, purrr, rlang, stringi, tibble,
     tidyselect
 
@@ -458,8 +458,8 @@ Requires: Rcpp, glue, purrr, rlang
 
 Package: tinytex
 Source: CRAN
-Version: 0.8
-Hash: bf76759350cd2bfec401d8861a61ad66
+Version: 0.9
+Hash: a4ffe98c58eace5a95644d8fd6ca5a50
 Requires: xfun
 
 Package: ucminf
@@ -484,8 +484,8 @@ Hash: d534108bcd5f34ec73e9eb523751ba20
 
 Package: xfun
 Source: CRAN
-Version: 0.3
-Hash: 3b1cb5fdcfb96c88e3f9ab0239fbd048
+Version: 0.4
+Hash: 76004125b45195c0330ec71904849995
 
 Package: xtable
 Source: CRAN

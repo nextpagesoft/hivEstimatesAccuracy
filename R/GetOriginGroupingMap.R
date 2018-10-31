@@ -13,7 +13,7 @@
 #'   FullRegionOfOrigin = c("REPCOUNTRY", "SUBAFR"),
 #'   Count = c(1536, 2237))
 #' GetOriginGroupingMap(
-#'   type = "REPCOUNTRY + UNK + 4 most prevalent other regions",
+#'   type = "REPCOUNTRY + UNK + 3 most prevalent regions + OTHER",
 #'   distr = distr
 #' )
 #'
