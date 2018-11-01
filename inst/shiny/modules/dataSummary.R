@@ -62,6 +62,9 @@ dataSummary <- function(input, output, session, appStatus)
       appStatus$InputData$Table[,
         c(max(1980, min(DateOfDiagnosisYear, na.rm = TRUE)),
           min(2025, max(DateOfDiagnosisYear, na.rm = TRUE)))]
+    if (appStatus$YearRangeApply) {
+      invalidateAdjustments()
+    }
   })
 
   # Store filter settings
