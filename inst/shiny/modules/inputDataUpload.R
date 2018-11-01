@@ -160,7 +160,7 @@ inputDataUpload <- function(input, output, session, appStatus)
       adjustmentSpecs      <- adjustmentSpecs
       miAdjustmentName     <- "None"
       rdAdjustmentName     <- "None"
-      yearRange            <- c(2000, currYear)
+      yearRange            <- c(1980, 2025)
       yearRangeApply       <- FALSE
       runLog               <- ""
       intermReport         <- ""

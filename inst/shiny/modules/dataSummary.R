@@ -17,7 +17,7 @@ dataSummaryUI <- function(id)
           label = h3("Filter data on year of diagnosis"),
           min = 1980,
           max = 2025,
-          value = c(2000, 2018),
+          value = c(1980, 2025),
           step = 1,
           sep = "",
           width = "612px",
@@ -56,6 +56,13 @@ dataSummary <- function(input, output, session, appStatus)
   invalidateAdjustments <- function() {
     appStatus$AdjustedData <- NULL
   }
+
+  observeEvent(appStatus$InputData, {
+    appStatus$YearRange <-
+      appStatus$InputData$Table[,
+        c(max(1980, min(DateOfDiagnosisYear, na.rm = TRUE)),
+          min(2025, max(DateOfDiagnosisYear, na.rm = TRUE)))]
+  })
 
   # Store filter settings
   observeEvent(input[['filterChkBox']], {
