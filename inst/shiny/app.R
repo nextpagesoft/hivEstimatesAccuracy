@@ -42,7 +42,8 @@ ui <- tagList(
         class = "navbar navbar-static-top",
         div(class = "navbar-custom-menu",
             div(sprintf("v. %s", version)),
-            div(tags$a(href = "./", target = "_blank", list(icon("external-link"), "Open new window")))
+            div(tags$a(href = "./", target = "_blank", list(icon("external-link"), "Open new window"))),
+            actionLink("setSeed", "Set seed", icon = icon("random"))
         )
       )
     ),
@@ -82,6 +83,7 @@ server <- function(input, output, session)
   appStatus <- reactiveValues(
     CreateTime = Sys.time(),
     Version = version,
+    Seed = NULL,
     StateUploading = FALSE,
     InputDataUploaded = FALSE,
     OriginalData = NULL,
@@ -110,6 +112,32 @@ server <- function(input, output, session)
   callModule(createReports,   "reports",     appStatus)
   callModule(outputs,         "outputs",     appStatus)
   callModule(manual,          "manual")
+
+  observeEvent(input[["setSeed"]], {
+    showModal(
+      modalDialog(
+        title = "Set seed",
+        p("Not operational - UNDER DEVELOPMENT"),
+        textInput("seed", label = NULL),
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton("seedDlgOk", "OK")
+        ),
+        size = "s"
+      )
+    )
+  })
+
+  observeEvent(input[["seedDlgOk"]], {
+    seed <- input$seed
+    if (seed == "" || tolower(seed) == "default") {
+      appStatus$Seed <- seed
+    } else {
+      appStatus$Seed <- NULL
+    }
+    removeModal()
+  })
+
 
   if (!isServer) {
     session$onSessionEnded(stopApp)

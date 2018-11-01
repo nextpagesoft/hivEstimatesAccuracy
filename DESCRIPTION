@@ -1,7 +1,7 @@
 Package: hivEstimatesAccuracy
 Type: Package
 Title: Improves Accuracy of HIV Estimates in EU/EEA Countries
-Version: 0.10-10
+Version: 0.10-11
 Date: 2018-11-01
 Authors@R: c(person("Magdalena", "Rosinska", email = "mrosinska@pzh.gov.pl",
     role = c("aut", "cph")), person("Nikos", "Pantazis", email =
@@ -11,7 +11,7 @@ Authors@R: c(person("Magdalena", "Rosinska", email = "mrosinska@pzh.gov.pl",
     "ctb")))
 Maintainer: Daniel Lewandowski <daniel@nextpagesoft.net>
 Description: Improves the accuracy of HIV estimates in EU/EEA countries.
-License: EUPL-1.2 (file LICENSE)
+License: file LICENSE
 Depends: R (>= 3.1.0)
 Imports: callr (>= 2.0.4), data.table (>= 1.11.4), foreign (>= 0.8-70), grid
     (>= 3.0.0), ggplot2 (>= 3.0.0), graphics (>= 3.0.0), jomo (>= 2.6-2), knitr
