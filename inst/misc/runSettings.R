@@ -13,8 +13,8 @@ inputDataFilePath <- "~/share/dummy_miss1.zip"
 # c) "Reporting Delays"
 adjustmentNames <- c(
   # "Joint Modelling Multiple Imputation",
-  "Multiple Imputation using Chained Equations - MICE"
-  # "Reporting Delays"
+  # "Multiple Imputation using Chained Equations - MICE"
+  "Reporting Delays"
 )
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
 adjustmentSpecs <-

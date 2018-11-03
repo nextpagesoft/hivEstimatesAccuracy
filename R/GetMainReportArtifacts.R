@@ -831,12 +831,26 @@ GetMainReportArtifacts <- function(params)
 
   tblRd <- GetRDReportTable(data = rdData)
 
+  fileNames <- GetAdjustmentSpecFileNames()
+  adjustments <- lapply(params$AdjustedData, function(dt) {
+    fileName <- fileNames[dt$Name]
+    labels <- sapply(GetListObject(fileName, section = "Parameters"), "[[", "label")
+    list(
+      Name = dt$Name,
+      Parameters = lapply(names(dt$Parameters), function(paramName) {
+        list(Value = dt$Parameters[[paramName]],
+             Label = labels[[paramName]])
+      })
+    )
+  })
+
   return(
     list(
       ReportingDelay = optReportingDelay,
       Smoothing = optSmoothing,
       CD4ConfInt = optCD4ConfInt,
       Artifacts = list(
+        Adjustments = adjustments,
         MIPresent = miPresent,
         RDPresent = rdPresent,
         CD4Present = cd4Present,

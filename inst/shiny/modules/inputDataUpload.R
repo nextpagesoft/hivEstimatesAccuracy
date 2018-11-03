@@ -168,6 +168,7 @@ inputDataUpload <- function(input, output, session, appStatus)
       appStatus$StateUploading  <- FALSE
     }
 
+    appStatus$FileName            <- input$fileInput$name
     appStatus$OriginalData        <- originalData
     appStatus$OriginalDataAttrs   <- originalDataAttrs
     appStatus$DefaultValues       <- defaultValues

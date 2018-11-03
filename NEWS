@@ -22,6 +22,8 @@ Version 0.10.0 (2018/11/01)
 * Summary: Initialize filter to min and max of Diagnosis Year on data load
 * Summary: Clear adjusted data on filter change if applicable
 * Main page: Implement draft dialog for setting random seed
+* Main Report: Display detailed information on performed adjustments and input
+  data file name
 
 
 Version 0.9.11 (2018/09/05)

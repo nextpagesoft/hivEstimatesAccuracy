@@ -71,16 +71,9 @@ knitr::opts_chunk$set(echo = FALSE,
 # Introduction
 
 ```{r}
-cat("Adjustments:", "\n\n")
-cat(sprintf("* %s",
-            ifelse(params$Artifacts$MIPresent,
-                   "Multiple Imputations adjustment performed.",
-                   "Multiple Imputations adjustment not performed.")),
-    "\n")
-cat(sprintf("* %s",
-            ifelse(params$Artifacts$RDPresent,
-                   "Reporting Delays adjustment performed.",
-                   "Reporting Delays adjustment not performed.")),
+cat("Input data:", 
+    "\n\n")
+cat(sprintf("* File name: %s", params$Artifacts$FileName),
     "\n")
 cat(sprintf("* %s", 
             ifelse(params$Artifacts$YearRangeApply, 
@@ -89,7 +82,17 @@ cat(sprintf("* %s",
     "\n")
 
 
-cat("\n", "Selected report options:", "\n\n") 
+cat("\n", 
+    "Adjustments:", 
+    "\n\n")
+for (adjustment in params$Artifacts$Adjustments) {
+  cat(sprintf("* %s", adjustment$Name), "\n")
+  for (parameter in adjustment$Parameters) {
+    cat(sprintf("  * %s: %s", parameter$Label, as.character(parameter$Value)), "\n")
+  }
+}
+
+cat("\n", "Report options:", "\n\n") 
 cat(sprintf("* %s", 
             ifelse(params$ReportingDelay, 
                    "Correction of count of cases for reporting delay.",

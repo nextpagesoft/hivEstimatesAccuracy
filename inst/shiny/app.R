@@ -84,6 +84,7 @@ server <- function(input, output, session)
     CreateTime = Sys.time(),
     Version = version,
     Seed = NULL,
+    FileName = "",
     StateUploading = FALSE,
     InputDataUploaded = FALSE,
     OriginalData = NULL,

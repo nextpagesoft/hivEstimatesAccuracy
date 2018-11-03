@@ -69,6 +69,12 @@ if (!is.null(inputData)) {
     params <- GetMainReportArtifacts(params)
   }
 
+  params <- modifyList(params,
+                       list(Artifacts =
+                              list(FileName = inputDataFilePath,
+                                   YearRange = c(2000, 2010),
+                                   YearRangeApply = TRUE)))
+
   htmlReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,
     format = "html_document",
