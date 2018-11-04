@@ -25,14 +25,7 @@ cat(sprintf("# %d. Reporting Delays with trend", params$InputData$RunIdx))
 ```
 
 ```{r, fig.width = 10, fig.height = 4, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}}
-cat("**Figure 1. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year.**", "\n\n")
-params$InputData$Artifacts$OutputPlotTotal
-```
-
-```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat)}}
-cat("**Figure 2. Comparison of the reported count of HIV cases with the estimated total count by diagnosis year and stratum.**", "\n\n")
-```
-
+params$InputData$Artifacts$OutputPlotTotalRun
 ```{r, fig.width = 10, fig.height = calcFigHeight("Gender"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Gender)}}
 params$InputData$Artifacts$OutputPlotStrat$Gender
 ```
@@ -46,7 +39,6 @@ params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin
 ```
 
 ```{r, eval = {!is.null(params$InputData$Artifacts$UnivAnalysis)}}
-cat("**Table 1. Univariate analysis of predictors of reporting delay and proportionality assumption test**", "\n")
 dt <- params$InputData$Artifacts$UnivAnalysis
 knitr::kable(dt, align = rep("r", ncol(dt)))
 ```

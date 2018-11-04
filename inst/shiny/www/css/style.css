@@ -16,15 +16,33 @@ body p {
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
+  font-family: "Calibri Light", "MetaPro", Georgia, "Times New Roman", Times, serif;
 }
 
+.h1, h1 {
+  color: #2e74b5;
+  font-size: 21px;
+}
+
+.h2, h2 {
+  color: #2e74b5;
+  font-size: 17px;
+}
+
+
+.h3, h3 {
+  color: #2e74b5;
+  font-size: 15px;
+}
+
+/*
 h2 {
   font-size: 28px;
   font-weight: 700;
   margin-top: 0;
   padding-top: 10px;
 }
+*/
 
 pre {
   word-break: normal;
@@ -138,11 +156,14 @@ pre {
 .box-header>.ion {
   font-size: 22px;
   padding-left: 5px;
+  font-weight: bold;
 }
 
+/*
 .box-body h3, .box-body h4 {
   font-size: 14px;
 }
+*/
 
 /* Tab sets */
 .nav-tabs-custom {
@@ -155,9 +176,11 @@ pre {
   overflow: auto;
 }
 
+/*
 .tab-content h3 {
   font-size: 14px;
 }
+*/
 
 .nav a {
   font-weight: bold;
@@ -190,8 +213,8 @@ div.box-body .shiny-input-container h3 {
 }
 
 /* Main Report */
-#reportDiv h1, #adjustments-intermReport h1 {
-  font-size: 20px;
+#reportDiv .header-section-number::after {
+  content: ". ";
 }
 
 #reportDiv h2, #adjustments-intermReport h2 {

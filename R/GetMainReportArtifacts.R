@@ -134,7 +134,8 @@ GetMainReportArtifacts <- function(params)
     }
 
     dt <- knitr::kable(dt,
-                       align = rep("r", ncol(dt)))
+                       align = rep("r", ncol(dt)),
+                       table.attr = "style={width: auto}")
 
     return(dt)
   }

@@ -130,22 +130,22 @@ dataSummary <- function(input, output, session, appStatus)
       missPlotsTotal <- artifacts()$MissPlotsTotal
       missPlotsByGender <- artifacts()$MissPlotsByGender
       plotCounter <- 0
-      widgets[[length(widgets) + 1]] <- h3("1. Missing data summary: key variables")
+      widgets[[length(widgets) + 1]] <- h1("1. Missing data summary: key variables")
       widgets[[length(widgets) + 1]] <- p("Percentages of cases for which the information was not available (missing) for one or more of the key variables: CD4 count, transmission category, migrant status or age.")
 
       plotCounter <- plotCounter + 1
-      widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. All cases within selected time period", plotCounter))
+      widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. All cases within selected time period", plotCounter))
       if (!is.null(missPlotsTotal)) {
         widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
       } else {
         widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
       }
       plotCounter <- plotCounter + 1
-      widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. By gender", plotCounter))
+      widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. By gender", plotCounter))
       if (!is.null(missPlotsByGender)) {
-        widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d.1 Female cases within selected time period", plotCounter))
+        widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.1 Female cases within selected time period", plotCounter))
         widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderF"))
-        widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d.2 Male cases within selected time period", plotCounter))
+        widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.2 Male cases within selected time period", plotCounter))
         widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderM"))
       } else {
         widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
@@ -179,7 +179,7 @@ dataSummary <- function(input, output, session, appStatus)
     req(artifacts()$MissPlotsRD)
 
     tagList(
-      h3("2. Missing data summary: reporting delay variables"),
+      h1("2. Missing data summary: reporting delay variables"),
       p("Percentages of cases for which the information was not available (missing) for one or more of the variables used for reporting delay calculations: Diagnosis year, Diagnosis quarter, Notification year, Notification quarter."),
       plotOutput(ns("MissPlotsRD"))
     )
@@ -201,7 +201,7 @@ dataSummary <- function(input, output, session, appStatus)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h3("3. Trends in reporting delay by notification time"),
+        h1("3. Trends in reporting delay by notification time"),
         p("Average reporting delay for cases notified within a quarter and the upper bound for typical average delay values. Quarters when the average delay exceeds the upper bound may indicate cleaning events in surveillance."),
         elem
       )
@@ -223,7 +223,7 @@ dataSummary <- function(input, output, session, appStatus)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h3("4. Observed delay by notification time"),
+        h1("4. Observed delay by notification time"),
         elem
       )
 

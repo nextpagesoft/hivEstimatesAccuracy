@@ -126,20 +126,20 @@ adjustments.
 
 ### Before and after adjustments
 
-```{r}
+```{r, count-observed-by-gender}
 params$Artifacts$PlotOrigGenderCount
 params$Artifacts$TblOrigGenderCount
 ```
 
 ## Median CD4 cell count (cells/&micro;L)
 
-```{r, eval = params$Artifacts$CD4Present}
+```{r, cd4-observed-by-gender, eval = params$Artifacts$CD4Present}
 cat("### Before adjustments", "\n")
 params$Artifacts$PlotOrigGenderCD4
 params$Artifacts$TblOrigGenderCD4
 ```
 
-```{r, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
+```{r, cd4-imputed-by-gender, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
 cat("### After adjustments", " \n")
 params$Artifacts$PlotMIGenderCD4
 params$Artifacts$TblMIGenderCD4
@@ -164,12 +164,12 @@ cat("CD4 cell count results are not available due to full missingness of this at
 
 ### Before adjustments
 
-```{r}
+```{r, count-observed-by-trans}
 params$Artifacts$PlotOrigTransCount
 params$Artifacts$TblOrigTransCount
 ```
 
-```{r, eval = params$Artifacts$MIPresent}
+```{r, count-imputed-by-trans, eval = params$Artifacts$MIPresent}
 cat("### After adjustments", "\n")
 params$Artifacts$PlotMITransCount
 params$Artifacts$TblMITransCount
@@ -180,13 +180,13 @@ if (!IsEmptyString(params$Artifacts$dataMITransCountMessage)) {
 
 ## Median CD4 cell count (cells/&micro;L)
 
-```{r, eval = params$Artifacts$CD4Present}
+```{r, cd4-observed-by-trans, eval = params$Artifacts$CD4Present}
 cat("### Before adjustments", "\n")
 params$Artifacts$PlotOrigTransCD4
 params$Artifacts$TblOrigTransCD4
 ```
 
-```{r, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
+```{r, cd4-imputed-by-trans, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
 cat("### After adjustments", "\n")
 params$Artifacts$PlotMITransCD4
 params$Artifacts$TblMITransCD4
@@ -211,12 +211,12 @@ cat("CD4 cell count results are not available due to full missingness of this at
 
 ### Before adjustments
 
-```{r}
+```{r, count-observed-by-migr}
 params$Artifacts$PlotOrigMigrCount
 params$Artifacts$TblOrigMigrCount
 ```
 
-```{r, eval = params$Artifacts$MIPresent}
+```{r, count-imputed-by-migr, eval = params$Artifacts$MIPresent}
 cat("### After adjustments", "\n")
 params$Artifacts$PlotMIMigrCount
 params$Artifacts$TblMIMigrCount
@@ -227,13 +227,13 @@ if (!IsEmptyString(params$Artifacts$DataMIMigrCountMessage)) {
 
 ## Median CD4 cell count (cells/&micro;L)
 
-```{r, eval = params$Artifacts$CD4Present}
+```{r, cd4-observed-by-migr, eval = params$Artifacts$CD4Present}
 cat("### Before adjustments", "\n")
 params$Artifacts$PlotOrigMigrCD4
 params$Artifacts$TblOrigMigrCD4
 ```
 
-```{r, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
+```{r, cd4-imputed-by-migr, eval = params$Artifacts$CD4Present & params$Artifacts$MIPresent}
 cat("### After adjustments", "\n")
 params$Artifacts$PlotMIMigrCD4
 params$Artifacts$TblMIMigrCD4
