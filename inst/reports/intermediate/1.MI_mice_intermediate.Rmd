@@ -66,50 +66,113 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 }
 ```
 
-## Diagnostic plots for Gender = \"Female\"
-
-Maximum 5 first chains (imputations) are displayed.
-
-**Figure 1. Imputed values per sample**<br />
-```{r}
-print(GetMiceDiagnosticPlot(params$InputData$Artifacts$F$Mids))
-```
-
-**Figure 2. Distributions of imputed values**<br />
-```{r, fig.height = 3}
-colNames <- params$InputData$Artifacts$F$Y_COLS$Kept
-dtF <- params$InputData$Table[Gender == "F"]
-for (colName in colNames) {
-  PlotMultipleCharts(
-    list(
-      GetImputedDistPlots(colName = colName, dt = dtF, missingOnly = TRUE),
-      GetImputedDistPlots(colName = colName, dt = dtF, missingOnly = FALSE)
-    ),
-    cols = 2
+<!--html_preserve-->
+<div class="tabbable">
+<!--/html_preserve-->
+```{r, results='asis', echo = FALSE}
+genders <- names(params$InputData$Artifacts)
+genderNameMapping <- c("F" = "Female", "M" = "Male", "O" = "Other")
+tabsHeader <- c()
+for (genderIdx in seq_along(genders)) {
+  gender <- genders[genderIdx]
+  genderName <- genderNameMapping[gender]
+  class <- ifelse(genderIdx == 1, " class='active'", "")
+  tabsHeader[gender] <- sprintf(
+    "<li%s><a href='#miceTab%s' data-toggle='tab' data-value='miceVal%s'>%s</a></li>",
+    class, gender, gender, genderName
   )
 }
-```
+tabsHeader <- paste(tabsHeader, collapse = "")
+cat(knitr::knit_expand(text = "<ul class='nav nav-tabs'>{{tabsHeader}}</ul>"))
 
-## Diagnostic plots for Gender = \"Male\"
-
-Maximum 5 first chains (imputations) are displayed.
-
-**Figure 3. Imputed values plot per sample**<br />
-```{r}
-print(GetMiceDiagnosticPlot(params$InputData$Artifacts$M$Mids))
-```
-
-**Figure 4. Distributions of imputed values**<br />
-```{r, fig.height = 3}
-colNames <- params$InputData$Artifacts$M$Y_COLS$Kept
-dtM <- params$InputData$Table[Gender == "M"]
-for (colName in colNames) {
-  PlotMultipleCharts(
-    list(
-      GetImputedDistPlots(colName = colName, dt = dtM, missingOnly = TRUE),
-      GetImputedDistPlots(colName = colName, dt = dtM, missingOnly = FALSE)
-    ),
-    cols = 2
+cat(sprintf("<div class='tab-content'>"))
+for (genderIdx in seq_along(genders)) {
+  gender <- genders[genderIdx]
+  genderName <- genderNameMapping[gender]
+  class <- ifelse(genderIdx == 1, " active", "")
+  content <- GetMiceDiagnosticPlot(params$InputData$Artifacts[[gender]]$Mids)
+  cat(
+    sprintf("<div class='tab-pane%s' id='miceTab%s' data-value='miceVal%s'>", class, gender, gender)
   )
+  knitr::normal_print(content)
+  cat(sprintf("</div>"))
 }
+cat(sprintf("</div>"))
 ```
+<!--html_preserve-->
+<div>
+<!--/html_preserve-->
+
+
+<!-- <!--html_preserve--> -->
+<!-- <div class="tabbable"> -->
+<!--   <ul class="nav nav-tabs"> -->
+<!--     <li class="active"> -->
+<!--       <a href="#miceTabDiagFemale" data-toggle="tab" data-value="Female">Female</a> -->
+<!--     </li> -->
+<!--     <li> -->
+<!--       <a href="#miceTabDiagMale" data-toggle="tab" data-value="Male">Male</a> -->
+<!--     </li> -->
+<!--   </ul> -->
+<!--   <div class="tab-content"> -->
+<!--     <div class="tab-pane active" data-value="Female" id="miceTabDiagFemale"> -->
+<!-- <!--/html_preserve--> -->
+
+<!-- <!-- ## Diagnostic plots for Gender = \"Female\" --> -->
+
+<!-- Maximum 5 first chains (imputations) are displayed. -->
+
+<!-- **Figure 1. Imputed values per sample**<br /> -->
+<!-- ```{r} -->
+<!-- print(GetMiceDiagnosticPlot(params$InputData$Artifacts$F$Mids)) -->
+<!-- ``` -->
+
+<!-- **Figure 2. Distributions of imputed values**<br /> -->
+<!-- ```{r, fig.height = 3} -->
+<!-- colNames <- params$InputData$Artifacts$F$Y_COLS$Kept -->
+<!-- dtF <- params$InputData$Table[Gender == "F"] -->
+<!-- for (colName in colNames) { -->
+<!--   PlotMultipleCharts( -->
+<!--     list( -->
+<!--       GetImputedDistPlots(colName = colName, dt = dtF, missingOnly = TRUE), -->
+<!--       GetImputedDistPlots(colName = colName, dt = dtF, missingOnly = FALSE) -->
+<!--     ), -->
+<!--     cols = 2 -->
+<!--   ) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- <!--html_preserve--> -->
+<!--     </div> -->
+<!--     <div class="tab-pane" data-value="Male" id="miceTabDiagMale"> -->
+<!-- <!--/html_preserve--> -->
+
+<!-- <!-- ## Diagnostic plots for Gender = \"Male\" --> -->
+
+<!-- Maximum 5 first chains (imputations) are displayed. -->
+
+<!-- **Figure 3. Imputed values plot per sample**<br /> -->
+<!-- ```{r} -->
+<!-- print(GetMiceDiagnosticPlot(params$InputData$Artifacts$M$Mids)) -->
+<!-- ``` -->
+
+<!-- **Figure 4. Distributions of imputed values**<br /> -->
+<!-- ```{r, fig.height = 3} -->
+<!-- colNames <- params$InputData$Artifacts$M$Y_COLS$Kept -->
+<!-- dtM <- params$InputData$Table[Gender == "M"] -->
+<!-- for (colName in colNames) { -->
+<!--   PlotMultipleCharts( -->
+<!--     list( -->
+<!--       GetImputedDistPlots(colName = colName, dt = dtM, missingOnly = TRUE), -->
+<!--       GetImputedDistPlots(colName = colName, dt = dtM, missingOnly = FALSE) -->
+<!--     ), -->
+<!--     cols = 2 -->
+<!--   ) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- <!--html_preserve--> -->
+<!--     </div> -->
+<!--   </div> -->
+<!-- </div> -->
+<!-- <!--/html_preserve--> -->
