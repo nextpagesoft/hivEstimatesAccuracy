@@ -21,7 +21,7 @@ formatNumbers <- function(x) sprintf("%.2f", x)
 ```
 
 ```{r}
-cat(sprintf("# %d. Reporting Delays", params$InputData$RunIdx))
+cat(sprintf("# %d. Reporting Delays with trend", params$InputData$RunIdx))
 ```
 
 ```{r, fig.width = 10, fig.height = 4, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}}

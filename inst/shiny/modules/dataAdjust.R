@@ -46,7 +46,7 @@ dataAdjustUI <- function(id)
         column(2, actionLink(ns("rdSelectParam"), "Edit parameters"), style = "padding-top: 7px")
       ),
       uiOutput(ns("rerunInfo")),
-      actionButton(ns("runAdjustBtn"), "Run"),
+      actionButton(ns("runAdjustBtn"), "Run", style = "background-color: #69b023; color: white"),
       shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
     ),
     uiOutput(ns("intermReport")),
@@ -153,8 +153,8 @@ dataAdjust <- function(input, output, session, appStatus)
         uiOutput(ns("adjustmentParams")),
         easyClose = FALSE,
         footer = tagList(
-          actionButton(ns("paramsDlgCancel"), "Cancel"),
-          actionButton(ns("paramsDlgOk"), "OK")
+          actionButton(ns("paramsDlgOk"), "OK", style = "background-color: #69b023; color: white"),
+          actionButton(ns("paramsDlgCancel"), "Cancel")
         )
       ))
     } else {

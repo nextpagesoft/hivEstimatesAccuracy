@@ -121,8 +121,9 @@ server <- function(input, output, session)
         p("Not operational - UNDER DEVELOPMENT"),
         textInput("seed", label = NULL),
         footer = tagList(
-          modalButton("Cancel"),
-          actionButton("seedDlgOk", "OK")
+          actionButton("seedDlgOk", "OK",
+                       style = "background-color: #69b023; color: white"),
+          modalButton("Cancel")
         ),
         size = "s"
       )

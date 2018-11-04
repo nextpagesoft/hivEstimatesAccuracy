@@ -28,7 +28,8 @@ createReportsUI <- function(id)
                style = "padding-top: 7px"),
         column(12,
                uiOutput(ns("rerunInfo")),
-               actionButton(ns("createReportBtn"), "Create")
+               actionButton(ns("createReportBtn"), "Create",
+                            style = "background-color: #69b023; color: white")
         )
       )),
     uiOutput(ns("report"))
@@ -98,8 +99,8 @@ createReports <- function(input, output, session, appStatus)
       uiOutput(ns("reportParams")),
       easyClose = FALSE,
       footer = tagList(
-        modalButton("Cancel"),
-        actionButton(ns("paramsDlgOk"), "OK")
+        actionButton(ns("paramsDlgOk"), "OK", style = "background-color: #69b023; color: white"),
+        modalButton("Cancel")
       )
     ))
   })

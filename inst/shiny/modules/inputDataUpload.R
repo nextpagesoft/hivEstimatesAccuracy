@@ -74,7 +74,7 @@ inputDataUploadUI <- function(id)
           ),
           actionButton(ns("applyMappingBtn"),
                        label = "Apply mapping",
-                       style = "margin-bottom: 15px; background-color: #7cbdc1; color: white"),
+                       style = "margin-bottom: 15px; background-color: #69b023; color: white"),
           fluidRow(
             column(8,
                    uiOutput(ns("attrMappingTableDiv"))),

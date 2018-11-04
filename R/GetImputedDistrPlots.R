@@ -62,7 +62,7 @@ GetImputedDistPlots <- function(
           group = Imputation
         ),
         position = 'identity',
-        size = 2) +
+        size = 1.5) +
       geom_line(
         mapping = aes(
           x = get(colName),
@@ -101,14 +101,28 @@ GetImputedDistPlots <- function(
   }
 
   p <- p +
+    xlab(colName) +
     scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +
-    theme(plot.title = element_text(size = 12, face = "plain"),
-          text = element_text(size = 12, face = "plain"),
+    theme(plot.title = element_text(size = 10, face = "plain"),
+          text = element_text(size = 10, face = "plain"),
           panel.grid = element_blank(),
           axis.line = element_line(colour = "#888888"),
-          axis.ticks = element_line(colour = "#888888")) +
-    xlab(colName)
+          axis.ticks = element_line(colour = "#888888"))
+#
+#   theme(strip.background = element_rect(fill = "#e9e9e9",
+#                                         linetype = "blank"),
+#         strip.placement = "outside",
+#         strip.text = element_text(size = 8),
+#         plot.title = element_text(size = 13),
+#         axis.title.x =  element_text(size = 10),
+#         axis.title.y =  element_text(size = 10),
+#         axis.text = element_text(size = 8),
+#         text = element_text(size = 11),
+#         strip.switch.pad.wrap = unit(0, "points"),
+#         panel.border = element_rect(colour = "#888888"),
+#         axis.line = element_line(colour = "#888888"),
+#         axis.ticks = element_line(colour = "#888888"))
 
   return(p)
 }
