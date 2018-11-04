@@ -13,6 +13,27 @@ dataSummaryUI <- function(id)
       collapsible = TRUE,
       div(
         sliderInput(
+          ns("notifEndQ"),
+          label = h3("Filter data on end quarter of notification"),
+          min = 1980,
+          max = 2025,
+          value = 2018,
+          step = 0.25,
+          sep = "",
+          width = "612px",
+          round = FALSE
+        ),
+        div(
+          checkboxInput(ns("notifEndQFilter"),
+                        "Apply filter in adjustments",
+                        FALSE),
+          p("Not operational - UNDER DEVELOPMENT"),
+          style = "position: absolute; top: 62px; left: 700px"
+        ),
+        style = "margin-left: 22px; position: relative"
+      ),
+      div(
+        sliderInput(
           ns("yearRange"),
           label = h3("Filter data on year of diagnosis"),
           min = 1980,
