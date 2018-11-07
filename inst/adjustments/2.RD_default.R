@@ -106,7 +106,8 @@ list(
 
     # Filter
     compData <- compData[!is.na(DiagnosisTime) & !is.na(NotificationTime)]
-    compData <- compData[DiagnosisTime >= max(startYear + 0.25,
+    compData <- compData[VarX >= 0 &
+                           DiagnosisTime >= max(startYear + 0.25,
                                               min(NotificationTime, na.rm = TRUE)) &
                            NotificationTime <= endQrt]
     compData[, ":="(
@@ -123,7 +124,6 @@ list(
 
     totalPlot <- NULL
     totalPlotData <- NULL
-    rdData <- NULL
     stratPlotList <- NULL
     stratPlotListData <- NULL
     rdDistribution <- NULL

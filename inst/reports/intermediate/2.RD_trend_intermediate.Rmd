@@ -25,7 +25,9 @@ cat(sprintf("# %d. Reporting Delays with trend", params$InputData$RunIdx))
 ```
 
 ```{r, fig.width = 10, fig.height = 4, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}}
-params$InputData$Artifacts$OutputPlotTotalRun
+params$InputData$Artifacts$OutputPlotTotal
+```
+
 ```{r, fig.width = 10, fig.height = calcFigHeight("Gender"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Gender)}}
 params$InputData$Artifacts$OutputPlotStrat$Gender
 ```

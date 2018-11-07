@@ -16,7 +16,7 @@ endQrt <- 2017.25
 stratVarNames <- c("Gender", "Transmission")
 
 # Run mice adjustment before RD
-runMice <- TRUE
+runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
@@ -81,7 +81,8 @@ outputData[, VarT := 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime)
 
 # Filter
 compData <- compData[!is.na(DiagnosisTime) & !is.na(NotificationTime)]
-compData <- compData[DiagnosisTime >= max(startYear + 0.25,
+compData <- compData[VarX >= 0 &
+                       DiagnosisTime >= max(startYear + 0.25,
                                           min(NotificationTime, na.rm = TRUE)) &
                        NotificationTime <= endQrt]
 compData[, ":="(

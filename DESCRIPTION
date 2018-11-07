@@ -1,8 +1,8 @@
 Package: hivEstimatesAccuracy
 Type: Package
 Title: Improves Accuracy of HIV Estimates in EU/EEA Countries
-Version: 0.10-16
-Date: 2018-11-04
+Version: 0.10-18
+Date: 2018-11-07
 Authors@R: c(person("Magdalena", "Rosinska", email = "mrosinska@pzh.gov.pl",
     role = c("aut", "cph")), person("Nikos", "Pantazis", email =
     "npantaz@med.uoa.gr", role = c("aut")), person("Daniel", "Lewandowski",
