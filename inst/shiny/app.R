@@ -2,7 +2,8 @@
 options(shiny.maxRequestSize = 70 * 1024^2)
 
 # Determine if the app is run on the server or locally
-isServer <- tolower(Sys.info()[["nodename"]]) == "shinyserver"
+isServer <- tolower(Sys.info()[["nodename"]]) == "shinyapps"
+print(Sys.info()[["nodename"]])
 
 # Load standard libraries
 suppressPackageStartupMessages(library(shiny))
