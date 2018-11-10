@@ -15,6 +15,14 @@ if (GetIsState(uploadedData)) {
 
 # 4. PRE-PROCESS DATA ------------------------------------------------------------------------------
 attrMapping <- GetPreliminaryAttributesMapping(originalData)
+
+if (is.null(attrMapping[["RecordId"]])) {
+  attrMapping[["RecordId"]] <- "Identyfikator"
+}
+if (is.null(attrMapping[["Age"]])) {
+  attrMapping[["Age"]] <- "WiekHIVdor"
+}
+
 # Map "FirstCD4Count" to "cd4_num" if not mapped yet
 if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"

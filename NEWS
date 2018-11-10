@@ -29,6 +29,7 @@ Version 0.10.0 (2018/11/07)
 * Main Report: Latex figures naming adjusted to be more intuitive
 * RD adjustments: Remove records with NotificationTime < DiagnosisTime
 * Summary page: Remove records with NotificationTime < DiagnosisTime
+* RD: Ensure weight is 1 if after fit it is NA or infinite
 
 
 Version 0.9.11 (2018/09/05)

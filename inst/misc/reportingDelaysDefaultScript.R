@@ -21,7 +21,7 @@ runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "~/share/PLtest.csv"
+inputDataFilePath <- "~/share/baza30czer2018_mod_QRT.xlsx"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -32,6 +32,12 @@ originalData <- ReadDataFile(inputDataFilePath)
 attrMapping <- GetPreliminaryAttributesMapping(originalData)
 if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"
+}
+if (is.null(attrMapping[["RecordId"]])) {
+  attrMapping[["RecordId"]] <- "Identyfikator"
+}
+if (is.null(attrMapping[["Age"]])) {
+  attrMapping[["Age"]] <- "WiekHIVdor"
 }
 inputData <- ApplyAttributesMapping(originalData,
                                     attrMapping,
@@ -223,10 +229,12 @@ if (nrow(compData) > 0) {
              ), on = .(VarT, Stratum)]
   outputData[, ":="(
     Source = ifelse(Imputation == 0, "Reported", "Imputed"),
-    MissingData = is.na(Weight)
+    MissingData = is.na(Weight) | is.infinite(Weight)
   )]
-  outputData[is.na(Weight), Weight := 1]
-  outputData[is.na(P), P := 1]
+  outputData[MissingData == TRUE, ":="(
+    Weight = 1,
+    P = 1
+  )]
   outputData[is.na(Var), Var := 0]
 
   # ------------------------------------------------------------------------

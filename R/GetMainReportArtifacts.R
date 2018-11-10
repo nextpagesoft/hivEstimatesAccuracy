@@ -262,6 +262,9 @@ GetMainReportArtifacts <- function(params)
     colvar,
     nsdf
   ) {
+    dt <- copy(dt)
+    dt[is.infinite(ModelWeight), ModelWeight := 1]
+
     dt <- dt[,
              .(Count_Val = sum(ModelWeight, na.rm = TRUE)),
              by = c("Imputation", "DateOfDiagnosisYear", colvar)]
@@ -573,6 +576,7 @@ GetMainReportArtifacts <- function(params)
         GetModelledDataAdaptive(
           data = dataMI,
           modelFunc = GetModelledQuantileData,
+          colNamesMapping = colNamesMapping,
           colvar = "Gender",
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
@@ -582,6 +586,7 @@ GetMainReportArtifacts <- function(params)
         GetModelledDataAdaptive(
           data = dataMI,
           modelFunc = GetModelledQuantileData,
+          colNamesMapping = colNamesMapping,
           colvar = "Transmission",
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
@@ -591,6 +596,7 @@ GetMainReportArtifacts <- function(params)
         GetModelledDataAdaptive(
           data = dataMI,
           modelFunc = GetModelledQuantileData,
+          colNamesMapping = colNamesMapping,
           colvar = "Migration",
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
@@ -614,6 +620,7 @@ GetMainReportArtifacts <- function(params)
       GetModelledDataAdaptive(
         data = dataMI,
         modelFunc = GetModelledCountData,
+        colNamesMapping = colNamesMapping,
         colvar = "Transmission",
         distr = dataMITransCountDistr[!Transmission %in% transBadCategories],
         nsdf = nsdf)
@@ -627,6 +634,7 @@ GetMainReportArtifacts <- function(params)
       GetModelledDataAdaptive(
         data = dataMI,
         modelFunc = GetModelledCountData,
+        colNamesMapping = colNamesMapping,
         colvar = "Migration",
         distr = dataMIMigrCountDistr[!Migration %in% migrBadCategories],
         nsdf = nsdf)

@@ -252,9 +252,11 @@ list(
                           fitStratum[, c(..mergeVars, "P", "Weight", "Var")],
                           by = mergeVars,
                           all.x = TRUE)
-      outputData[, MissingData := is.na(Weight)]
-      outputData[is.na(Weight), Weight := 1]
-      outputData[is.na(P), P := 1]
+      outputData[, MissingData := is.na(Weight) | is.infinite(Weight)]
+      outputData[MissingData == TRUE, ":="(
+        Weight = 1,
+        P = 1
+      )]
       outputData[is.na(Var), Var := 0]
       outputData[, ":="(
         DateOfDiagnosisYear = DateOfDiagnosisYearOrig,
