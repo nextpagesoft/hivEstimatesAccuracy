@@ -22,14 +22,19 @@ list(
       input = "numeric"),
     # Parameter 3
     nsdf = list(
-      label = "Number of degrees of freedom for spline",
-      value = 5L,
+      label = "Number of degrees of freedom for spline of diagnosis calendar year",
+      value = 4L,
       min = 3L,
       max = 5L,
       step = 1L,
       ticks = TRUE,
       round = TRUE,
-      input = "slider")
+      input = "slider"),
+    # Parameter 4
+    imputeRD = list(
+      label = "Impute reporting delays inputs",
+      value = FALSE,
+      input = "checkbox")
     # Parameter 5
     # runInParallel = list(
     #   label = "Run in parallel",
@@ -47,7 +52,7 @@ list(
 
     # Perform imputations per data set.
     # This is the actual worker function.
-    workerFunction <- function(i, nit, nimp, nsdf) {
+    workerFunction <- function(i, nit, nimp, nsdf, imputeRD) {
 
       cat("\n")
       cat(sprintf("Processing gender: %s\n", names(dataSets)[i]))
@@ -60,6 +65,13 @@ list(
       xColNamesAll <- c("AIDS")
       # Define outcomes
       yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
+
+      if (imputeRD) {
+        dataSet[, LogMaxPossibleDelay := log(MaxPossibleDelay)]
+
+        xColNamesAll <- union(xColNamesAll, c("LogMaxPossibleDelay"))
+        yColNamesAll <- union(yColNamesAll, c("VarX"))
+      }
 
       # Determine which columns to pass to the mice package
 
@@ -101,12 +113,12 @@ list(
 
         # Run model
         cat("Performing imputation.\n")
-        imp <- mice::mice(cbind(Y, X),
-                          m = nimp,
-                          maxit = nit)
-        artifacts[["Mids"]] <- imp
+        mids <- mice::mice(cbind(Y, X),
+                           m = nimp,
+                           maxit = nit)
+        artifacts[["Mids"]] <- mids
 
-        imp <- setDT(mice::complete(imp, action = "long", include = TRUE))
+        imp <- setDT(mice::complete(mids, action = "long", include = TRUE))
         setnames(imp, old = c(".imp", ".id"), new = c("Imputation", "id"))
 
       } else {
@@ -116,12 +128,13 @@ list(
 
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
-      dataSetColNames <- setdiff(colnames(dataSet), yColNames)
+      dataSetColNames <- setdiff(colnames(dataSet),
+                                 union(yColNames, "LogMaxPossibleDelay"))
 
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])
 
-      setcolorder(mi, union(indexColNames, names(dataSet)))
+      setcolorder(mi, union(indexColNames, dataSetColNames))
 
       ConvertDataTableColumns(mi, c(Imputation = function(x) as.integer(as.character(x))))
 
@@ -162,7 +175,8 @@ list(
                            workerFunction,
                            nit = parameters$nit,
                            nimp = parameters$nimp,
-                           nsdf = parameters$nsdf)
+                           nsdf = parameters$nsdf,
+                           imputeRD = parameters$imputeRD)
     # }
 
     # 5. Combine all data sets

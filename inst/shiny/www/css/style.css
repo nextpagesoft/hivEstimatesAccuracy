@@ -7,24 +7,42 @@
 /* Tags */
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
   color: #333;
 }
 
 body p {
-  font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
+  font-family: "Calibri Light", "MetaPro", Georgia, "Times New Roman", Times, serif;
 }
 
+.h1, h1 {
+  color: #2e74b5;
+  font-size: 21px;
+}
+
+.h2, h2 {
+  color: #2e74b5;
+  font-size: 17px;
+}
+
+
+.h3, h3 {
+  color: #2e74b5;
+  font-size: 15px;
+}
+
+/*
 h2 {
   font-size: 28px;
   font-weight: 700;
   margin-top: 0;
   padding-top: 10px;
 }
+*/
 
 pre {
   word-break: normal;
@@ -37,69 +55,43 @@ pre {
   background-image: url("../images/ECDC_logo.svg");
   background-repeat: no-repeat;
   background-size: 110px;
+  background-color: white;
   background-position: left 15px center;
   max-height: 120px;
   height: 120px;
+  font-weight: bold;
+  color: #333;
+  font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
 }
 
-.main-header .sidebar-toggle {
-  display: none;
-}
-
-.left-side, .main-sidebar {
-  padding-top: 120px;
-}
-
-.skin-blue .main-header .logo,
-.skin-blue .main-header .logo:hover,
-.skin-blue .main-header .navbar
+.skin-blue .main-header .logo
 {
   background-color: transparent !important;
   line-height: 120px;
   height: 120px;
+  width: 600px;
   padding-left: 125px;
   font-size: 32pt;
   font-weight: bold;
-  color: rgb(51, 51, 51);
+  color: #333;
   font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
 }
 
-.skin-blue .main-header .logo:hover
-{
-  background-color: #c9e2b0;
+.skin-blue .main-header .navbar {
+  background-color: transparent;
+  margin-left: 725px;
 }
 
-.skin-blue .main-header .navbar .sidebar-toggle,
-.skin-blue .main-header .navbar .nav>li>a
-{
-  color: rgb(51, 51, 51);
-}
-
-.skin-blue .main-header .navbar .sidebar-toggle:hover,
-.skin-blue .main-header .navbar .nav>li>a:hover
-{
-  background-color: #c9e2b0;
-  color: rgb(51, 51, 51);
-}
-
-.skin-blue .main-header .navbar .navbar-custom-menu,
-.skin-blue .main-header .navbar .navbar-custom-menu:hover,
-.skin-blue .main-header .navbar .nav>li>a,
-.skin-blue .main-header .navbar .nav>li>a:active,
-.skin-blue .main-header .navbar .nav>li>a:hover
-{
-  font-size: 14px;
-  color: rgb(51, 51, 51);
-  background: white;
-  cursor: default;
+.navbar-custom-menu {
+  text-align: right;
+  margin-right: 10px;
+  line-height: 25px;
 }
 
 /* Sidebar */
-.skin-blue .left-side,
-.skin-blue .main-sidebar,
-.skin-blue .wrapper
-{
-  background-color: #fff;
+.left-side, .main-sidebar {
+  padding-top: 120px;
+  background-color: #fff !important;
 }
 
 .skin-blue .sidebar-menu > li > a
@@ -164,11 +156,14 @@ pre {
 .box-header>.ion {
   font-size: 22px;
   padding-left: 5px;
+  font-weight: bold;
 }
 
+/*
 .box-body h3, .box-body h4 {
   font-size: 14px;
 }
+*/
 
 /* Tab sets */
 .nav-tabs-custom {
@@ -181,9 +176,11 @@ pre {
   overflow: auto;
 }
 
+/*
 .tab-content h3 {
   font-size: 14px;
 }
+*/
 
 .nav a {
   font-weight: bold;
@@ -198,6 +195,10 @@ div.box-body .shiny-input-container h3 {
   font-size: 16px;
 }
 
+.form-control {
+  font-size: 13px;
+}
+
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: #bbbbbb;
   font-weight: normal;
@@ -207,13 +208,13 @@ div.box-body .shiny-input-container h3 {
 
 /* Progress bar */
 .progress-bar {
-  background-color: #7cbdc1 !important;
+  background-color: #69b023 !important;
   background-image: none !important;
 }
 
 /* Main Report */
-#reportDiv h1, #adjustments-intermReport h1 {
-  font-size: 20px;
+#reportDiv .header-section-number::after {
+  content: ". ";
 }
 
 #reportDiv h2, #adjustments-intermReport h2 {
@@ -223,7 +224,7 @@ div.box-body .shiny-input-container h3 {
 #reportDiv table, #adjustments-intermReport table {
     border-spacing: 0;
     border-collapse: separate;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 #reportDiv table td,
@@ -309,19 +310,19 @@ div.box-body .shiny-input-container h3 {
 
 /* Data table */
 
-#summary-inputDataTable, #outputs-adjustedDataTableBox {
+#upload-inputDataTable, #outputs-adjustedDataTableBox {
   font-size: 12px;
 }
 
-#summary-inputDataTable table, #outputs-adjustedDataTableBox table {
+#upload-inputDataTable table, #outputs-adjustedDataTableBox table {
   white-space: nowrap;
 }
 
-#summary-inputDataTable tr, #outputs-adjustedDataTableBox tr {
+#upload-inputDataTable tr, #outputs-adjustedDataTableBox tr {
   height: 30px;
 }
 
-#summary-inputDataTable td, #outputs-adjustedDataTableBox td {
+#upload-inputDataTable td, #outputs-adjustedDataTableBox td {
   text-align: right;
   padding: 5px;
   font-size: 11px;

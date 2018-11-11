@@ -27,15 +27,20 @@ list(
       input = "numeric"),
     # Parameter 4
     nsdf = list(
-      label = "Number of degrees of freedom for spline",
-      value = 5L,
+      label = "Number of degrees of freedom for spline of diagnosis calendar year",
+      value = 4L,
       min = 3L,
       max = 5L,
       step = 1L,
       ticks = TRUE,
       round = TRUE,
-      input = "slider")
+      input = "slider"),
     # Parameter 5
+    imputeRD = list(
+      label = "Impute reporting delays inputs",
+      value = FALSE,
+      input = "checkbox")
+    # Parameter 6
     # runInParallel = list(
     #   label = "Run in parallel",
     #   value = FALSE,
@@ -52,7 +57,7 @@ list(
 
     # Perform imputations per data set.
     # This is the actual worker function.
-    workerFunction <- function(i, nburn, nbetween, nimp, nsdf) {
+    workerFunction <- function(i, nburn, nbetween, nimp, nsdf, imputeRD) {
 
       cat("\n")
       cat(sprintf("Processing gender: %s\n", names(dataSets)[i]))
@@ -65,6 +70,19 @@ list(
       xColNamesAll <- c("AIDS")
       # Define outcomes
       yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
+
+      if (imputeRD) {
+        # Create logit transform of VarX
+        dataSet[, c("LogitVarX", "LogMaxPossibleDelay") := {
+          p <- TweakedVarX / TweakedMaxPossibleDelay
+          logitVarX <- log(p / (1 - p))
+          logMaxPossibleDelay <- log(MaxPossibleDelay)
+          list(logitVarX, logMaxPossibleDelay)
+        }]
+
+        xColNamesAll <- union(xColNamesAll, c("LogMaxPossibleDelay"))
+        yColNamesAll <- union(yColNamesAll, c("LogitVarX"))
+      }
 
       # Determine which columns to pass to the jomo package
 
@@ -129,12 +147,20 @@ list(
 
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
-      dataSetColNames <- setdiff(colnames(dataSet), yColNames)
+      dataSetColNames <- setdiff(colnames(dataSet),
+                                 union(yColNames, "LogMaxPossibleDelay"))
 
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])
 
-      setcolorder(mi, union(indexColNames, names(dataSet)))
+      # Convert LogitVarX back to VarX
+      if ("LogitVarX" %in% colnames(mi)) {
+        mi[Imputation != 0 & is.na(VarX),
+           VarX := MaxPossibleDelay * round(exp(LogitVarX)/(1 + LogitVarX))]
+        mi[, LogitVarX := NULL]
+      }
+
+      setcolorder(mi, union(indexColNames, dataSetColNames))
 
       ConvertDataTableColumns(mi, c(Imputation = "integer"))
 
@@ -177,7 +203,8 @@ list(
                            nburn = parameters$nburn,
                            nbetween = parameters$nbetween,
                            nimp = parameters$nimp,
-                           nsdf = parameters$nsdf)
+                           nsdf = parameters$nsdf,
+                           imputeRD = parameters$imputeRD)
     # }
 
     # 5. Combine all data sets

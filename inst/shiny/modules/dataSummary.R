@@ -1,6 +1,3 @@
-# Module globals
-currYear <- year(Sys.time())
-
 # User interface
 dataSummaryUI <- function(id)
 {
@@ -14,18 +11,51 @@ dataSummaryUI <- function(id)
       solidHeader = FALSE,
       status = "primary",
       collapsible = TRUE,
-      sliderInput(
-        ns("yearRange"),
-        label = h3("Filter data on year of diagnosis"),
-        min = 1980,
-        max = 2025,
-        value = c(2000, currYear),
-        step = 1,
-        sep = "",
-        width = "600px",
-        round = TRUE
+      div(
+        sliderInput(
+          ns("notifEndQ"),
+          label = h3("Filter data on end quarter of notification"),
+          min = 1980,
+          max = 2025,
+          value = 2018,
+          step = 0.25,
+          sep = "",
+          width = "612px",
+          round = FALSE
+        ),
+        div(
+          checkboxInput(ns("notifEndQFilter"),
+                        "Apply filter in adjustments",
+                        FALSE),
+          p("Not operational - UNDER DEVELOPMENT"),
+          style = "position: absolute; top: 62px; left: 700px"
+        ),
+        style = "margin-left: 22px; position: relative"
       ),
-      tags$small(textOutput(ns("filterInfo"))),
+      div(
+        sliderInput(
+          ns("yearRange"),
+          label = h3("Filter data on year of diagnosis"),
+          min = 1980,
+          max = 2025,
+          value = c(1980, 2025),
+          step = 1,
+          sep = "",
+          width = "612px",
+          round = TRUE
+        ),
+        div(
+          checkboxInput(ns("filterChkBox"),
+                        "Apply filter in adjustments",
+                        FALSE),
+          textOutput(ns("filterInfo")),
+          style = "position: absolute; top: 62px; left: 700px"
+        ),
+        style = "margin-left: 22px; position: relative"
+      ),
+      uiOutput(ns("diagYearDensityOutput")),
+      # div(textOutput(ns("filterInfo"))
+      #     style = "margin-left: 22px"),
       tagList(
         uiOutput(ns("missPlotDiv")),
         uiOutput(ns("missPlotRDOutput")),
@@ -34,24 +64,67 @@ dataSummaryUI <- function(id)
       ),
       type = 7,
       proxy.height = "60px"
-    ),
-    uiOutput(ns("inputDataTableBox"))
+    )
   )
 }
 
 # Server logic
-dataSummary <- function(input, output, session, appStatus, inputData)
+dataSummary <- function(input, output, session, appStatus)
 {
   # Get namespace
   ns <- session$ns
 
+  invalidateAdjustments <- function() {
+    appStatus$AdjustedData <- NULL
+  }
+
+  observeEvent(appStatus$InputData, {
+    appStatus$YearRange <-
+      appStatus$InputData$Table[,
+        c(max(1980, min(DateOfDiagnosisYear, na.rm = TRUE)),
+          min(2025, max(DateOfDiagnosisYear, na.rm = TRUE)))]
+    if (appStatus$YearRangeApply) {
+      invalidateAdjustments()
+    }
+  })
+
+  # Store filter settings
+  observeEvent(input[['filterChkBox']], {
+    freezeReactiveValue(appStatus, 'YearRangeApply')
+    appStatus$YearRangeApply <- input[['filterChkBox']]
+    invalidateAdjustments()
+  })
+
+  observeEvent(input[['yearRange']], {
+    freezeReactiveValue(appStatus, 'YearRange')
+    appStatus$YearRange <- input[['yearRange']]
+    if (appStatus$YearRangeApply) {
+      invalidateAdjustments()
+    }
+  })
+
+  # Restore filter settings
+  observeEvent(appStatus$YearRange, {
+    freezeReactiveValue(input, 'yearRange')
+    updateSliderInput(session, 'yearRange', value = appStatus$YearRange)
+    if (appStatus$YearRangeApply) {
+      invalidateAdjustments()
+    }
+  })
+
+  observeEvent(appStatus$YearRangeApply, {
+    freezeReactiveValue(input, 'filterChkBox')
+    updateCheckboxInput(session, 'filterChkBox', value = appStatus$YearRangeApply)
+    invalidateAdjustments()
+  })
+
   dataSelection <- reactive({
-    yearRange <- input$yearRange
-    req(inputData()$Table)[, between(DateOfDiagnosisYear, yearRange[1], yearRange[2])]
+    yearRange <- req(input[['yearRange']])
+    req(appStatus$InputData$Table)[, DateOfDiagnosisYear %between% yearRange]
   })
 
   artifacts <- reactive({
-    GetDataSummaryArtifacts(inputData()$Table[dataSelection()])
+    GetDataSummaryArtifacts(appStatus$InputData$Table[dataSelection()])
   })
 
   output[["filterInfo"]] <- renderText({
@@ -59,27 +132,41 @@ dataSummary <- function(input, output, session, appStatus, inputData)
     sprintf("Selected observations: %d out of %d", sum(dataSelection), length(dataSelection))
   })
 
+  output[["diagYearDensityOutput"]] <- renderUI({
+    req(appStatus$InputData$Table)
+    req(input[['yearRange']])
+    plotOutput(ns("diagYearDensityPlot"),
+               width = "700px",
+               height = "150px")
+  })
+
+  output[["diagYearDensityPlot"]] <- renderPlot({
+    GetDiagnosisYearDensityPlot(plotData = appStatus$InputData$Table,
+                                markerLocations = input$yearRange)
+  })
+
   output[["missPlotDiv"]] <- renderUI({
     widgets <- tagList()
-    if (appStatus[["AttributeMappingValid"]]) {
+    if (appStatus[["AttrMappingValid"]]) {
       missPlotsTotal <- artifacts()$MissPlotsTotal
       missPlotsByGender <- artifacts()$MissPlotsByGender
       plotCounter <- 0
-      widgets[[length(widgets) + 1]] <- h3("1. Overall missing data summary")
+      widgets[[length(widgets) + 1]] <- h1("1. Missing data summary: key variables")
+      widgets[[length(widgets) + 1]] <- p("Percentages of cases for which the information was not available (missing) for one or more of the key variables: CD4 count, transmission category, migrant status or age.")
 
       plotCounter <- plotCounter + 1
-      widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. Total plot", plotCounter))
+      widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. All cases within selected time period", plotCounter))
       if (!is.null(missPlotsTotal)) {
         widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
       } else {
         widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
       }
       plotCounter <- plotCounter + 1
-      widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d. By Gender", plotCounter))
+      widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. By gender", plotCounter))
       if (!is.null(missPlotsByGender)) {
-        widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d.1 Gender = \"Female\"", plotCounter))
+        widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.1 Female cases within selected time period", plotCounter))
         widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderF"))
-        widgets[[length(widgets) + 1]] <- h4(sprintf("1.%d.2 Gender = \"Male\"", plotCounter))
+        widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.2 Male cases within selected time period", plotCounter))
         widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderM"))
       } else {
         widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
@@ -93,27 +180,28 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   output[["missPlotsTotal"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsTotal,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["missPlotsGenderF"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$F,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["missPlotsGenderM"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$M,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["missPlotRDOutput"]] <- renderUI({
-    req(appStatus[["AttributeMappingValid"]])
+    req(appStatus[["AttrMappingValid"]])
     req(artifacts()$MissPlotsRD)
 
     tagList(
-      h3("2. Reporting dates missing data summary"),
+      h1("2. Missing data summary: reporting delay variables"),
+      p("Percentages of cases for which the information was not available (missing) for one or more of the variables used for reporting delay calculations: Diagnosis year, Diagnosis quarter, Notification year, Notification quarter."),
       plotOutput(ns("MissPlotsRD"))
     )
   })
@@ -121,11 +209,11 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   output[["MissPlotsRD"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsRD,
                        cols = 3,
-                       widths = c(3, 3, 2))
+                       widths = c(3, 1, 4))
   })
 
   output[["delayDensityOutput"]] <- renderUI({
-    if (appStatus$AttributeMappingValid) {
+    if (appStatus$AttrMappingValid) {
       delayDensFullPlot <- artifacts()$DelayDensFullPlot
       delayDensShortPlot <- artifacts()$DelayDensFullPlot
       if (!is.null(delayDensShortPlot) & !is.null(delayDensShortPlot)) {
@@ -134,7 +222,8 @@ dataSummary <- function(input, output, session, appStatus, inputData)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h3("3. Observed delay density"),
+        h1("3. Trends in reporting delay by notification time"),
+        p("Average reporting delay for cases notified within a quarter and the upper bound for typical average delay values. Quarters when the average delay exceeds the upper bound may indicate cleaning events in surveillance."),
         elem
       )
     } else {
@@ -143,15 +232,11 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   })
 
   output[["delayDensityPlot"]] <- renderPlot({
-    delayDensFullPlot <- artifacts()$DelayDensFullPlot
-    delayDensShortPlot <- artifacts()$DelayDensShortPlot
-    PlotMultipleCharts(list(delayDensFullPlot,
-                            delayDensShortPlot),
-                       cols = 2)
+    artifacts()$DelayDensFullPlot
   })
 
   output[["meanDelayOutput"]] <- renderUI({
-    if (appStatus$AttributeMappingValid) {
+    if (appStatus$AttrMappingValid) {
       meanDelayPlot <- artifacts()$MeanDelayPlot
       if (!is.null(meanDelayPlot)) {
         elem <- plotOutput(ns("meanDelayPlot"))
@@ -159,7 +244,7 @@ dataSummary <- function(input, output, session, appStatus, inputData)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h3("4. Observed delay by notification time"),
+        h1("4. Observed delay by notification time"),
         elem
       )
 
@@ -171,27 +256,4 @@ dataSummary <- function(input, output, session, appStatus, inputData)
   output[["meanDelayPlot"]] <- renderPlot({
     artifacts()$MeanDelayPlot
   })
-
-  output[["inputDataTableBox"]] <- renderUI({
-    if (appStatus$AttributeMappingValid) {
-      box(
-        width = 12,
-        title = "Input data records pre-processed",
-        solidHeader = FALSE,
-        status = "warning",
-        collapsible = TRUE,
-        dataTableOutput(ns("inputDataTable"))
-      )
-    }
-  })
-
-  output[["inputDataTable"]] <- renderDataTable(inputData()$Table,
-                                                options = list(
-                                                  dom = '<"top">lirt<"bottom">p',
-                                                  autoWidth = FALSE,
-                                                  pageLength = 15,
-                                                  scrollX = TRUE,
-                                                  deferRender = TRUE,
-                                                  serverSide = TRUE,
-                                                  scroller = FALSE))
 }

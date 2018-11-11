@@ -19,6 +19,9 @@ Checks if the passed text is NULL or empty ("") or NA (in that order).
 IsEmptyString(NULL)
 IsEmptyString("")
 IsEmptyString(NA)
+IsEmptyString(character())
+IsEmptyString(5)
+IsEmptyString("5")
 IsEmptyString("text")
 
 }

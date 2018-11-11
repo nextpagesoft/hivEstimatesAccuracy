@@ -17,7 +17,7 @@ GetRDPlotData <- function(data, by) {
   # Number of imputations in the data (at least one - dummy)
   nimp <- data[, length(unique(Imputation)) - 1]
 
-  # Aggregatea
+  # Aggregate
   data <- data[, .(Count = sum(Count),
                    EstCount = sum(EstCount),
                    EstCountVar = sum(EstCountVar)),

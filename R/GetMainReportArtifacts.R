@@ -134,7 +134,8 @@ GetMainReportArtifacts <- function(params)
     }
 
     dt <- knitr::kable(dt,
-                       align = rep("r", ncol(dt)))
+                       align = rep("r", ncol(dt)),
+                       table.attr = "style={width: auto}")
 
     return(dt)
   }
@@ -176,8 +177,10 @@ GetMainReportArtifacts <- function(params)
                         labels = mapping,
                         values = colors) +
       theme_classic() +
-      theme(axis.text.x = element_text(size = 8),
-            axis.text.y = element_text(size = 8)) +
+      theme(plot.title = element_text(size = 9, face = "plain"),
+            text = element_text(size = 9, face = "plain"),
+            axis.text.x = element_text(size = 7),
+            axis.text.y = element_text(size = 7)) +
       labs(x = "Year",
            y = yLabel)
 
@@ -259,6 +262,9 @@ GetMainReportArtifacts <- function(params)
     colvar,
     nsdf
   ) {
+    dt <- copy(dt)
+    dt[is.infinite(ModelWeight), ModelWeight := 1]
+
     dt <- dt[,
              .(Count_Val = sum(ModelWeight, na.rm = TRUE)),
              by = c("Imputation", "DateOfDiagnosisYear", colvar)]
@@ -381,13 +387,14 @@ GetMainReportArtifacts <- function(params)
     }
 
     dt <- copy(data)
+
     numericCols <- setdiff(colnames(dt), c("DateOfDiagnosisYear"))
     dtTotals <- dt[, lapply(.SD, sum, na.rm = TRUE), .SDcols = numericCols]
     dtTotals[, DateOfDiagnosisYear := "Total"]
     ConvertDataTableColumns(dt, c(DateOfDiagnosisYear = "character"))
     dt <- rbind(dt,
                 dtTotals)
-    singleValCols <- c("MissingData", "Reported")
+    singleValCols <- c("Reported", "RDWeightEstimated", "RDWeightNotEstimated")
     dt[, (singleValCols) := lapply(.SD, FormatNumbers), .SDcols = singleValCols]
     dt[, EstUnreported := FormatRangeCols(.SD), .SDcols = c("LowerEstUnreported", "EstUnreported", "UpperEstUnreported")]
     dt[, EstCount := FormatRangeCols(.SD), .SDcols = c("LowerEstCount", "EstCount", "UpperEstCount")]
@@ -399,10 +406,11 @@ GetMainReportArtifacts <- function(params)
     )]
     setorderv(dt, c("DateOfDiagnosisYear"))
     tableColNames <- c("Diagnosis<br /> year",
-                       "Missing<br /> details",
                        "Reported<br /> &nbsp;",
-                       "Estimated<br /> unreported [N (L, U)]",
-                       "Estimated<br /> total [N (L, U)]")
+                       "Weight<br /> estimated",
+                       "Weight<br /> not estimated",
+                       "Estimated<br /> unreported<br /> [N (95% CI)]",
+                       "Estimated<br /> total<br /> [N (95% CI)]")
     dt <- knitr::kable(dt,
                        align = rep("r", ncol(dt)),
                        col.names = tableColNames)
@@ -478,7 +486,7 @@ GetMainReportArtifacts <- function(params)
   colNamesMappingCD4 <-
     setNames(
       c(colNamesMapping[1],
-        paste(colNamesMapping[-1], "[N (L, U)]")),
+        paste(colNamesMapping[-1], "[Median (IQR)]")),
       names(colNamesMapping))
 
   # Original data
@@ -568,6 +576,7 @@ GetMainReportArtifacts <- function(params)
         GetModelledDataAdaptive(
           data = dataMI,
           modelFunc = GetModelledQuantileData,
+          colNamesMapping = colNamesMapping,
           colvar = "Gender",
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
@@ -577,6 +586,7 @@ GetMainReportArtifacts <- function(params)
         GetModelledDataAdaptive(
           data = dataMI,
           modelFunc = GetModelledQuantileData,
+          colNamesMapping = colNamesMapping,
           colvar = "Transmission",
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
@@ -586,6 +596,7 @@ GetMainReportArtifacts <- function(params)
         GetModelledDataAdaptive(
           data = dataMI,
           modelFunc = GetModelledQuantileData,
+          colNamesMapping = colNamesMapping,
           colvar = "Migration",
           rowvar = "DateOfDiagnosisYear",
           vvar = "SqCD4",
@@ -609,6 +620,7 @@ GetMainReportArtifacts <- function(params)
       GetModelledDataAdaptive(
         data = dataMI,
         modelFunc = GetModelledCountData,
+        colNamesMapping = colNamesMapping,
         colvar = "Transmission",
         distr = dataMITransCountDistr[!Transmission %in% transBadCategories],
         nsdf = nsdf)
@@ -622,6 +634,7 @@ GetMainReportArtifacts <- function(params)
       GetModelledDataAdaptive(
         data = dataMI,
         modelFunc = GetModelledCountData,
+        colNamesMapping = colNamesMapping,
         colvar = "Migration",
         distr = dataMIMigrCountDistr[!Migration %in% migrBadCategories],
         nsdf = nsdf)
@@ -716,7 +729,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotOrigTransCount <-
     GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
@@ -729,7 +743,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotMITransCount <-
     GetReportPlot(data = dataMITransCount,
                   rowvar = "DateOfDiagnosisYear",
@@ -742,7 +757,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingCD4)
   plotOrigTransCD4 <-
     GetReportPlot(data = dataOrigTrans,
                   rowvar = "DateOfDiagnosisYear",
@@ -754,7 +770,8 @@ GetMainReportArtifacts <- function(params)
     GetReportTable(data = dataMITransCD4,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Transmission",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   mapping = colNamesMappingCD4)
   plotMITransCD4 <-
     GetReportPlot(data = dataMITransCD4,
                   rowvar = "DateOfDiagnosisYear",
@@ -769,7 +786,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotOrigMigrCount <-
     GetReportPlot(data = dataOrigMigr,
                   rowvar = "DateOfDiagnosisYear",
@@ -782,7 +800,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
                    vvars = c("Count_Val", "Count_Perc"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingN)
   plotMIMigrCount <-
     GetReportPlot(data = dataMIMigrCount,
                   rowvar = "DateOfDiagnosisYear",
@@ -795,7 +814,8 @@ GetMainReportArtifacts <- function(params)
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
                    vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
-                   totalRowName = "Overall")
+                   totalRowName = "Overall",
+                   mapping = colNamesMappingCD4)
   plotOrigMigrCD4 <-
     GetReportPlot(data = dataOrigMigr,
                   rowvar = "DateOfDiagnosisYear",
@@ -807,7 +827,8 @@ GetMainReportArtifacts <- function(params)
     GetReportTable(data = dataMIMigrCD4,
                    rowvar = "DateOfDiagnosisYear",
                    colvar = "Migration",
-                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"))
+                   vvars = c("CD4_Low", "CD4_Median", "CD4_High"),
+                   mapping = colNamesMappingCD4)
   plotMIMigrCD4 <-
     GetReportPlot(data = dataMIMigrCD4,
                   rowvar = "DateOfDiagnosisYear",
@@ -819,12 +840,26 @@ GetMainReportArtifacts <- function(params)
 
   tblRd <- GetRDReportTable(data = rdData)
 
+  fileNames <- GetAdjustmentSpecFileNames()
+  adjustments <- lapply(params$AdjustedData, function(dt) {
+    fileName <- fileNames[dt$Name]
+    labels <- sapply(GetListObject(fileName, section = "Parameters"), "[[", "label")
+    list(
+      Name = dt$Name,
+      Parameters = lapply(names(dt$Parameters), function(paramName) {
+        list(Value = dt$Parameters[[paramName]],
+             Label = labels[[paramName]])
+      })
+    )
+  })
+
   return(
     list(
       ReportingDelay = optReportingDelay,
       Smoothing = optSmoothing,
       CD4ConfInt = optCD4ConfInt,
       Artifacts = list(
+        Adjustments = adjustments,
         MIPresent = miPresent,
         RDPresent = rdPresent,
         CD4Present = cd4Present,

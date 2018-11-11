@@ -6,10 +6,23 @@ library(hivEstimatesAccuracy)
 source("/home/daniel/_REPOSITORIES/hivEstimatesAccuracy/inst/misc/runSettings.R")
 
 # 3. READ INPUT DATA -------------------------------------------------------------------------------
-originalData <- ReadDataFile(inputDataFilePath)
+uploadedData <- ReadDataFile(inputDataFilePath)
+if (GetIsState(uploadedData)) {
+  originalData <- uploadedData$OriginalData
+} else {
+  originalData <- uploadedData
+}
 
 # 4. PRE-PROCESS DATA ------------------------------------------------------------------------------
 attrMapping <- GetPreliminaryAttributesMapping(originalData)
+
+if (is.null(attrMapping[["RecordId"]])) {
+  attrMapping[["RecordId"]] <- "Identyfikator"
+}
+if (is.null(attrMapping[["Age"]])) {
+  attrMapping[["Age"]] <- "WiekHIVdor"
+}
+
 # Map "FirstCD4Count" to "cd4_num" if not mapped yet
 if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"
@@ -41,7 +54,8 @@ if (!is.null(inputData)) {
 
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
   adjustedData <- RunAdjustments(data = inputData$Table,
-                                 adjustmentSpecs = adjustmentSpecs)
+                                 adjustmentSpecs = adjustmentSpecs,
+                                 yearRange = NULL)
 
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Take the last adjustment output as final data
@@ -59,9 +73,15 @@ if (!is.null(inputData)) {
                  Smoothing = FALSE,
                  CD4ConfInt = TRUE)
 
-  if (is.element(reportName, c("Main Report-new"))) {
+  if (is.element(reportName, c("Main Report"))) {
     params <- GetMainReportArtifacts(params)
   }
+
+  params <- modifyList(params,
+                       list(Artifacts =
+                              list(FileName = inputDataFilePath,
+                                   YearRange = c(2000, 2010),
+                                   YearRangeApply = TRUE)))
 
   htmlReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,

@@ -28,11 +28,21 @@ GetRDPlots <- function(
                    "Imputed" = "#9d8b56")
 )
 {
+  keyCols <- c("Source", "DateOfDiagnosisYear")
+
   if (!is.null(stratum)) {
     localPlotData <- plotData[Stratum == stratum]
+    localPlotData[, StratumValue := factor(StratumValue)]
+    keyCols <- union(keyCols, "StratumValue")
   } else {
     localPlotData <- plotData
   }
+
+  localPlotData <-
+    localPlotData[, lapply(.SD, sum),
+                  by = keyCols,
+                  .SDcols = c("Count", "EstCount", "EstCountVar", "LowerEstCount",
+                              "UpperEstCount")]
 
   localConfBoundsPlotData <- localPlotData[Source == ifelse(isOriginalData,
                                                             "Reported",
@@ -73,7 +83,7 @@ GetRDPlots <- function(
   if (!is.null(stratum)) {
     plot <-
       plot +
-      ggtitle(paste("Reported and estimated total count of cases, by", stratum)) +
+      ggtitle(paste("Reported and estimated total count of cases by", stratum)) +
       facet_wrap(~StratumValue, ncol = 2, drop = FALSE, shrink = FALSE)
   } else {
     plot <- plot +

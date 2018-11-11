@@ -1,10 +1,12 @@
 # Store libPaths of the master process.
 # They are set on the spawned R processes created by parallel.
 # Otherwise, libraries installed in packrat folder cannot be found by those processes.
-libPaths <- .libPaths()
+# libPaths <- .libPaths()
 
 # Module globals
-adjustmentSpecFileNames <- GetAdjustmentSpecFileNames()
+adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
+                          GetListObject)
+adjustmentSpecsType <- lapply(adjustmentSpecs, "[[", "Type")
 
 isLinux <- tolower(Sys.info()[["sysname"]]) == "linux"
 
@@ -21,10 +23,30 @@ dataAdjustUI <- function(id)
       solidHeader = FALSE,
       status = "primary",
       collapsible = TRUE,
-      actionButton(ns("addAdjustBtn"), "Add"),
-      p(""),
-      div(id = ns("adjustmentList")),
-      actionButton(ns("runAdjustBtn"), "Run"),
+      fluidRow(
+        column(3, "1. Multiple Imputations adjustment", style = "padding-top: 7px"),
+        column(4, selectInput(
+          ns("miSelect"),
+          label = NULL,
+          choices = c(names(adjustmentSpecs[adjustmentSpecsType == "MULTIPLE_IMPUTATIONS"]),
+                      "None"),
+          selected = "None")
+        ),
+        column(2, actionLink(ns("miSelectParam"), "Edit parameters"), style = "padding-top: 7px")
+      ),
+      fluidRow(
+        column(3, "2. Reporting Delays adjustment", style = "padding-top: 7px"),
+        column(4, selectInput(
+          ns("rdSelect"),
+          label = NULL,
+          choices = c(names(adjustmentSpecs[adjustmentSpecsType == "REPORTING_DELAYS"]),
+                      "None"),
+          selected = "None")
+        ),
+        column(2, actionLink(ns("rdSelectParam"), "Edit parameters"), style = "padding-top: 7px")
+      ),
+      uiOutput(ns("rerunInfo")),
+      actionButton(ns("runAdjustBtn"), "Run", style = "background-color: #69b023; color: white"),
       shinyjs::disabled(actionButton(ns("cancelAdjustBtn"), "Cancel"))
     ),
     uiOutput(ns("intermReport")),
@@ -33,7 +55,7 @@ dataAdjustUI <- function(id)
 }
 
 # Server logic
-dataAdjust <- function(input, output, session, inputData)
+dataAdjust <- function(input, output, session, appStatus)
 {
   # Get namespace
   ns <- session$ns
@@ -43,82 +65,66 @@ dataAdjust <- function(input, output, session, inputData)
   task <- NULL
 
   # Store reactive values
-  adjustedData <- reactiveVal(NULL)
-  vals <- reactiveValues(runLog = "",
-                         intermReport = "",
-                         adjustmentSpecs = list(),
-                         lastAdjustmentWidgetIndex = 0L,
-                         editedAdjustmentKey = "",
+  vals <- reactiveValues(editedAdjustmentName = "None",
                          editedAdjustmentParamsWidgets = list())
 
-  # Get widget for selecting an adjustment
-  GetAdjustmentSelectionWidget <- function() {
-    # Get unique index for the elements
-    index <- vals$lastAdjustmentWidgetIndex + 1
-    key <- as.character(index)
-
-    rowId          <- paste0("row", key)
-    deleteBtnId    <- paste0("deleteBtn", key)
-    adjustSelectId <- paste0("adjustSelect", key)
-    editParamBtnId <- paste0("adjustParamBtn", key)
-
-    # Get widget html
-    widget <- fluidRow(
-      id = ns(rowId),
-      column(1, actionLink(ns(deleteBtnId), "Remove"), style = "padding-top: 7px"),
-      # Selection input
-      column(5, selectInput(ns(adjustSelectId),
-                            label = NULL,
-                            choices = adjustmentSpecFileNames)),
-      # Edit parameters button
-      column(2, actionLink(ns(editParamBtnId), "Edit parameters"), style = "padding-top: 7px")
-    )
-
-    # EVENT: Adjustment selection changed
-    observeEvent(input[[adjustSelectId]], {
-      # Add selected adjustment to the list of adjustments to run
-      selectedAdjustmentFileName <- input[[adjustSelectId]]
-      if (file.exists(selectedAdjustmentFileName)) {
-        # Get adjustment specification and enrich with key for later reference
-        adjustmentSpec <- GetListObject(selectedAdjustmentFileName)
-        adjustmentSpec$Key <- key
-        vals$adjustmentSpecs[[key]] <- adjustmentSpec
-      }
-    })
-
-    # EVENT: Button "Delete" clicked
-    observeEvent(input[[deleteBtnId]], {
-      vals$adjustmentSpecs[[key]] <- NULL
-      removeUI(selector = paste0("#", ns(rowId)))
-    })
-
-    # EVENT: Button "Edit parameters" clicked
-    observeEvent(input[[editParamBtnId]], {
-      vals$editedAdjustmentKey <- key
-    })
-
-    # Store for next adjustment selection widget addition
-    vals$lastAdjustmentWidgetIndex <- index
-
-    return(widget)
+  invalidateAdjustments <- function() {
+    appStatus$AdjustedData <- NULL
   }
 
-  # Reactive values observers
-  observeEvent(vals$adjustmentSpecs, {
-    adjustedData(NULL)
+  observeEvent(appStatus$AdjustedData, {
+    if (is.null(appStatus$AdjustedData)) {
+      appStatus$RunLog <- ""
+      appStatus$IntermReport <- ""
+      appStatus$Report <- NULL
+    }
+  }, ignoreNULL = FALSE)
+
+  observeEvent(appStatus$InputUploading, {
+    updateSelectInput(session,
+                      "rdSelect",
+                      selected = appStatus$RDAdjustmentName)
+    updateSelectInput(session,
+                      "miSelect",
+                      selected = appStatus$MIAdjustmentName)
   })
 
-  # Add adjustment selection widget
-  observeEvent(input[["addAdjustBtn"]], {
-    widget <- GetAdjustmentSelectionWidget()
-    insertUI(selector = paste0("#", ns("adjustmentList")),
-             where = "beforeEnd",
-             ui = widget)
+  # EVENT: MI adjustment selection changed
+  observeEvent(input[["miSelect"]], {
+    adjustmentName <- input[["miSelect"]]
+    appStatus$MIAdjustmentName <- adjustmentName
+    if (adjustmentName != "None") {
+      shinyjs::show("miSelectParam")
+    } else {
+      shinyjs::hide("miSelectParam")
+    }
+    if (!appStatus$StateUploading) {
+      invalidateAdjustments()
+    }
   })
 
-  # Populate adjustment parameter widgets in the editing dialog
-  output[["adjustmentList"]] <- renderUI({
-    vals$adjustmentSelectionWidgets
+  # EVENT: RD adjustment selection changed
+  observeEvent(input[["rdSelect"]], {
+    adjustmentName <- input[["rdSelect"]]
+    appStatus$RDAdjustmentName <- adjustmentName
+    if (adjustmentName != "None") {
+      shinyjs::show("rdSelectParam")
+    } else {
+      shinyjs::hide("rdSelectParam")
+    }
+    if (!appStatus$StateUploading) {
+      invalidateAdjustments()
+    }
+  })
+
+  # EVENT: Button "Edit parameters" clicked
+  observeEvent(input[["miSelectParam"]], {
+    vals$editedAdjustmentName <- appStatus$MIAdjustmentName
+  })
+
+  # EVENT: Button "Edit parameters" clicked
+  observeEvent(input[["rdSelectParam"]], {
+    vals$editedAdjustmentName <- appStatus$RDAdjustmentName
   })
 
   # Get widgets for editing parameters in a dialog
@@ -137,9 +143,9 @@ dataAdjust <- function(input, output, session, inputData)
   }
 
   # Show adjustment parameters editing dialog
-  observeEvent(vals$editedAdjustmentKey, {
-    if (vals$editedAdjustmentKey != "") {
-      editedAdjustmentSpec <- vals$adjustmentSpecs[[vals$editedAdjustmentKey]]
+  observeEvent(vals$editedAdjustmentName, {
+    if (vals$editedAdjustmentName != "None") {
+      editedAdjustmentSpec <- appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]
       vals$editedAdjustmentParamsWidgets <- GetAdjustParamsWidgets(editedAdjustmentSpec)
 
       showModal(modalDialog(
@@ -147,8 +153,8 @@ dataAdjust <- function(input, output, session, inputData)
         uiOutput(ns("adjustmentParams")),
         easyClose = FALSE,
         footer = tagList(
-          actionButton(ns("paramsDlgCancel"), "Cancel"),
-          actionButton(ns("paramsDlgOk"), "OK")
+          actionButton(ns("paramsDlgOk"), "OK", style = "background-color: #69b023; color: white"),
+          actionButton(ns("paramsDlgCancel"), "Cancel")
         )
       ))
     } else {
@@ -164,39 +170,61 @@ dataAdjust <- function(input, output, session, inputData)
   # Adjustment parameters editing dialog CLOSE through OK event
   observeEvent(input[["paramsDlgOk"]], {
     # Copy parameters from dialog
-    adjustmentParams <- vals$adjustmentSpecs[[vals$editedAdjustmentKey]]$Parameters
+    adjustmentParams <- appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]$Parameters
     for (paramName in names(vals$editedAdjustmentParamsWidgets)) {
       adjustmentParams[[paramName]]$value <- input[[paramName]]
     }
-    # Save parameters
-    vals$adjustmentSpecs[[vals$editedAdjustmentKey]]$Parameters <- adjustmentParams
+    # Save parameters in the selected adjustment object
+    appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]$Parameters <- adjustmentParams
 
     # Clean up
-    vals$editedAdjustmentKey <- ""
+    vals$editedAdjustmentName <- "None"
     vals$editedAdjustmentParamsWidgets <- list()
+    invalidateAdjustments()
     removeModal()
   })
 
   # Adjustment parameters editing dialog CLOSE through Cancel event
   observeEvent(input[["paramsDlgCancel"]], {
     # Clean up
-    vals$editedAdjustmentKey <- ""
+    vals$editedAdjustmentName <- "None"
     vals$editedAdjustmentParamsWidgets <- list()
     removeModal()
   })
 
+  observe({
+    if ((appStatus$MIAdjustmentName != "None" || appStatus$RDAdjustmentName != "None") &&
+        appStatus$AttrMappingValid) {
+      shinyjs::enable("runAdjustBtn")
+    } else {
+      shinyjs::disable("runAdjustBtn")
+    }
+  })
+
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
-    inputData <- req(inputData())
-    adjustmentSpecs <- req(vals$adjustmentSpecs)
+    inputData <- req(appStatus$InputData)
+    if (appStatus$YearRangeApply) {
+      yearRange <- appStatus$YearRange
+    } else {
+      yearRange <-  NULL
+    }
+
+    adjustmentSpecs <- list()
+    if (appStatus$MIAdjustmentName != "None") {
+      adjustmentSpecs[[appStatus$MIAdjustmentName]] <- appStatus$AdjustmentSpecs[[appStatus$MIAdjustmentName]]
+    }
+    if (appStatus$RDAdjustmentName != "None") {
+      adjustmentSpecs[[appStatus$RDAdjustmentName]] <- appStatus$AdjustmentSpecs[[appStatus$RDAdjustmentName]]
+    }
 
     shinyjs::disable("runAdjustBtn")
     shinyjs::enable("cancelAdjustBtn")
 
-    adjustedData(NULL)
+    appStatus$AdjustedData <- NULL
 
-    vals$runLog <- ""
-    vals$intermReport <- ""
+    appStatus$RunLog <- ""
+    appStatus$IntermReport <- ""
 
     # Show progress message during task start
     prog <- Progress$new(session)
@@ -208,15 +236,19 @@ dataAdjust <- function(input, output, session, inputData)
       task <<- CreateTask({
         RunAdjustments(
           inputData$Table,
-          adjustmentSpecs = adjustmentSpecs)
+          adjustmentSpecs = adjustmentSpecs,
+          yearRange = yearRange)
       })
     } else {
-      task <<- CreateTask(function(x, y) {
+      task <<- CreateTask(function(x, y, yearRange) {
         hivEstimatesAccuracy::RunAdjustments(
           data = x,
-          adjustmentSpecs = y)
+          adjustmentSpecs = y,
+          yearRange = yearRange)
       },
-      args = list(inputData$Table, adjustmentSpecs))
+      args = list(inputData$Table,
+                  adjustmentSpecs,
+                  yearRange))
     }
 
     o <- observe({
@@ -228,7 +260,7 @@ dataAdjust <- function(input, output, session, inputData)
       adjustedData <- task$result()
       task <<- NULL
       if (is.list(adjustedData)) {
-        adjustedData(adjustedData)
+        appStatus$AdjustedData <- adjustedData
 
         intermReport <- RenderReportToHTML(
           reportFilePath = system.file("reports/intermediate/0.PreProcess.Rmd",
@@ -241,18 +273,18 @@ dataAdjust <- function(input, output, session, inputData)
                                    "intermediate",
                                    adjustedData[[i]]))
         }
-        vals$intermReport <- HTML(intermReport)
-        vals$runLog <- "Done"
+        appStatus$IntermReport <- HTML(intermReport)
+        appStatus$RunLog <- "Done"
       } else {
-        adjustedData(NULL)
-        vals$runLog <- "Adjustments cancelled"
+        appStatus$AdjustedData <- NULL
+        appStatus$RunLog <- "Adjustments cancelled"
       }
-      vals$runLog <- paste(paste("Start time  :", FormatTime(startTime)),
-                           paste("End time    :", FormatTime(endTime)),
-                           paste("Elapsed time:", FormatDiffTime(endTime - startTime)),
-                           paste(""),
-                           vals$runLog,
-                           sep = "\n")
+      appStatus$RunLog <- paste(paste("Start time  :", FormatTime(startTime)),
+                                paste("End time    :", FormatTime(endTime)),
+                                paste("Elapsed time:", FormatDiffTime(endTime - startTime)),
+                                paste(""),
+                                appStatus$RunLog,
+                                sep = "\n")
 
       # This observer only runs once
       o$destroy()
@@ -270,9 +302,22 @@ dataAdjust <- function(input, output, session, inputData)
     req(task)$cancel()
   })
 
+  output[["rerunInfo"]] <- renderUI({
+    inputDataAvailable <- appStatus$AttrMappingValid
+    adjustedDataAvailable <- !is.null(appStatus$AdjustedData)
+
+    if (!inputDataAvailable) {
+      return(p("Please, apply attribute mapping before proceeding with adjustments."))
+    } else if (!adjustedDataAvailable) {
+      return(p("Input data or adjustment parameters changed. Please, re-run adjustments."))
+    } else {
+      return(NULL)
+    }
+  })
+
   # Output intermediate report when it has changed
   output[["intermReport"]] <- renderUI({
-    if (vals$intermReport != "") {
+    if (appStatus$IntermReport != "") {
       intermReportHTML <- box(
         class = "intermReport",
         width = 12,
@@ -280,7 +325,7 @@ dataAdjust <- function(input, output, session, inputData)
         solidHeader = FALSE,
         collapsible = TRUE,
         status = "warning",
-        vals$intermReport
+        appStatus$IntermReport
       )
     } else {
       intermReportHTML <- NULL
@@ -290,14 +335,14 @@ dataAdjust <- function(input, output, session, inputData)
 
   # Populate adjustment parameter widgets in the editing dialog
   output[["runLog"]] <- renderUI({
-    if (vals$runLog != "") {
+    if (appStatus$RunLog != "") {
       runLogHTML <- box(
         width = 12,
         title = "Run log",
         solidHeader = FALSE,
         collapsible = TRUE,
         status = "warning",
-        tags$pre(vals$runLog)
+        tags$pre(appStatus$RunLog)
       )
     } else {
       runLogHTML <- NULL
@@ -305,5 +350,5 @@ dataAdjust <- function(input, output, session, inputData)
     return(runLogHTML)
   })
 
-  return(adjustedData)
+  return(NULL)
 }

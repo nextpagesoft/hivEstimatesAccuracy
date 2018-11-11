@@ -13,12 +13,12 @@ params:
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10)
+knitr::opts_chunk$set(echo = FALSE, results = "markup", include = TRUE, fig.height = 10, fig.width = 10, warning = FALSE, message = FALSE)
 require(shiny)
 ```
 
 ```{r, results='asis'}
-cat(sprintf("# %d. Multiple Imputations (mice)\n", params$InputData$RunIdx))
+cat(sprintf("# %d. Multiple Imputation using Chained Equations - MICE\n", params$InputData$RunIdx))
 ```
 
 ```{r, results='asis'}
@@ -66,20 +66,63 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 }
 ```
 
-## Diagnostic plots for Gender = \"Female\"
-
 Maximum 5 first chains (imputations) are displayed.
 
-**Figure 1. Imputed values plot**<br />
-```{r}
-print(GetMiceDiagnosticPlot(params$InputData$Artifacts$F$Mids))
+<!--html_preserve-->
+<div class="tabbable">
+<!--/html_preserve-->
+```{r, results='asis', echo = FALSE}
+genders <- names(params$InputData$Artifacts)
+genderNameMapping <- c("F" = "Female", "M" = "Male", "O" = "Other")
+tabIdx <- 0
+plotTypes <- c("Sample", "Distribution")
+tabsHeader <- c()
+for (gender in genders) {
+  genderName <- genderNameMapping[gender]
+  for (plotType in plotTypes) {
+    tabIdx <- tabIdx + 1
+    class <- ifelse(tabIdx == 1, " class='active'", "")
+    tabTitle <- sprintf("%s - %s", genderName, plotType)
+    tabsHeader[tabIdx] <- 
+      knitr::knit_expand(
+        text = "<li{{class}}><a href='#miceTab{{tabIdx}}' data-toggle='tab' data-value='miceVal{{tabIdx}}'>{{tabTitle}}</a></li>")
+  }
+}
+tabsHeader <- paste(tabsHeader, collapse = "")
+cat(knitr::knit_expand(text = "<ul class='nav nav-tabs'>{{tabsHeader}}</ul>"))
+
+cat("<div class='tab-content'>")
+tabIdx <- 0
+for (gender in genders) {
+  genderName <- genderNameMapping[gender]
+
+  # Sample plot
+  tabIdx <- tabIdx + 1
+  class <- ifelse(tabIdx == 1, " active", "")
+  cat(knitr::knit_expand(text = "<div class='tab-pane{{class}}' id='miceTab{{tabIdx}}' data-value='miceVal{{tabIdx}}'>"))
+  knitr::normal_print(GetMiceDiagnosticPlot(params$InputData$Artifacts[[gender]]$Mids))
+  cat("</div>")
+  
+  # Distribution plot
+  tabIdx <- tabIdx + 1
+  cat(knitr::knit_expand(text = "<div class='tab-pane' id='miceTab{{tabIdx}}' data-value='miceVal{{tabIdx}}'>"))
+  colNames <- params$InputData$Artifacts[[gender]]$Y_COLS$Kept
+  dt <- params$InputData$Table[Gender == gender]
+  charts <- list()
+  chartIdx <- 0
+  for (colName in colNames) {
+    chartIdx <- chartIdx + 1
+    charts[[chartIdx]] <- GetImputedDistPlots(colName = colName, dt = dt, missingOnly = TRUE)
+    
+    chartIdx <- chartIdx + 1
+    charts[[chartIdx]] <- GetImputedDistPlots(colName = colName, dt = dt, missingOnly = FALSE)
+  }
+  PlotMultipleCharts(charts, cols = 2)
+
+  cat("</div>")
+}
+cat(sprintf("</div>"))
 ```
-
-## Diagnostic plots for Gender = \"Male\"
-
-Maximum 5 first chains (imputations) are displayed.
-
-**Figure 2. Imputed values plot**<br />
-```{r}
-print(GetMiceDiagnosticPlot(params$InputData$Artifacts$M$Mids))
-```
+<!--html_preserve-->
+<div>
+<!--/html_preserve-->

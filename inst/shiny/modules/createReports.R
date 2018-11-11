@@ -16,28 +16,7 @@ createReportsUI <- function(id)
       solidHeader = FALSE,
       collapsible = TRUE,
       status = "primary",
-      uiOutput(ns("reportSelection"))),
-    uiOutput(ns("report"))
-  )
-}
-
-# Server logic
-createReports <- function(input, output, session, adjustedData)
-{
-  ns <- session$ns
-
-  # Store reactive values
-  vals <- reactiveValues(selectedReportName = NULL,
-                         reportParamsWidgets = list(),
-                         reportParams = list(),
-                         reportParamsFull = list())
-
-  # Output reports selection
-  output[["reportSelection"]] <- renderUI({
-    isolate({
-
-      # Get adjustment list
-      reportSelection <- fluidRow(
+      fluidRow(
         column(6,
                selectInput(ns("select"),
                            label = NULL,
@@ -48,12 +27,40 @@ createReports <- function(input, output, session, adjustedData)
                actionLink(ns("openParamsDlg"), "Edit parameters"),
                style = "padding-top: 7px"),
         column(12,
-          actionButton(ns("createReportBtn"), "Create")
+               uiOutput(ns("rerunInfo")),
+               actionButton(ns("createReportBtn"), "Create",
+                            style = "background-color: #69b023; color: white")
         )
-      )
+      )),
+    uiOutput(ns("report"))
+  )
+}
 
-      return(reportSelection)
-    })
+# Server logic
+createReports <- function(input, output, session, appStatus)
+{
+  ns <- session$ns
+
+  # Store reactive values
+  vals <- reactiveValues(selectedReportName = NULL,
+                         reportParamsWidgets = list(),
+                         reportParams = list(),
+                         reportParamsFull = list())
+
+  invalidateReport <- function() {
+    appStatus$Report <- NULL
+  }
+
+  adjustedDataAvailable <- reactive({
+    !is.null(appStatus$AdjustedData)
+  })
+
+  observe({
+    if (adjustedDataAvailable()) {
+      shinyjs::enable("createReportBtn")
+    } else {
+      shinyjs::disable("createReportBtn")
+    }
   })
 
   # Get selected report name on change
@@ -92,8 +99,8 @@ createReports <- function(input, output, session, adjustedData)
       uiOutput(ns("reportParams")),
       easyClose = FALSE,
       footer = tagList(
-        modalButton("Cancel"),
-        actionButton(ns("paramsDlgOk"), "OK")
+        actionButton(ns("paramsDlgOk"), "OK", style = "background-color: #69b023; color: white"),
+        modalButton("Cancel")
       )
     ))
   })
@@ -118,49 +125,68 @@ createReports <- function(input, output, session, adjustedData)
                         ns = session$ns)
     }
 
+    invalidateReport()
     removeModal()
   })
 
-  # EVENT: Button "Create report" clicked
-  report <- eventReactive(input[["createReportBtn"]], {
+  output[["rerunInfo"]] <- renderUI({
+    adjustedDataAvailable <- adjustedDataAvailable()
 
-    adjustedData <- adjustedData()
-    if (!is.null(adjustedData)) {
-      withProgress(message = "Creating report",
-                   detail = "The report will be displayed shortly.",
-                   value = 0, {
-                     # Define parameters
-                     params <- append(list(AdjustedData = adjustedData()),
-                                      vals$reportParams[[vals$selectedReportName]])
-
-                     setProgress(0.1)
-
-                     if (is.element(vals$selectedReportName, c("Main Report-new"))) {
-                       params <- GetMainReportArtifacts(params)
-                     }
-
-                     setProgress(0.5)
-
-                     # Store parameters for reuse when downloading
-                     vals$reportParamsFull <- params
-
-                     setProgress(0.7)
-
-                     report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
-                                                  params = params)
-
-                     setProgress(1)
-                   })
-
-      # Create report
-      return(report)
+    if (!adjustedDataAvailable) {
+      return(p("Adjusted data is not available for report. Please, re-run adjustments first."))
+    } else if (IsEmptyString(appStatus$Report)) {
+      return(p("Adjusted data or report parameters have changed. Please, re-create the report."))
+    } else {
+      return(NULL)
     }
+  })
+
+  # EVENT: Button "Create report" clicked
+  observeEvent(input[["createReportBtn"]], {
+    adjustedData <- req(appStatus$AdjustedData)
+    fileName <- appStatus$FileName
+    yearRangeApply <- appStatus$YearRangeApply
+    yearRange <- appStatus$YearRange
+    withProgress(message = "Creating report",
+                 detail = "The report will be displayed shortly.",
+                 value = 0, {
+                   # Define parameters
+                   params <- append(list(AdjustedData = adjustedData),
+                                    vals$reportParams[[vals$selectedReportName]])
+
+                   setProgress(0.1)
+
+                   if (is.element(vals$selectedReportName, c("Main Report"))) {
+                     params <- GetMainReportArtifacts(params)
+                   }
+
+                   params <- modifyList(params,
+                                        list(Artifacts =
+                                               list(FileName = fileName,
+                                                    YearRange = yearRange,
+                                                    YearRangeApply = yearRangeApply)))
+
+                   setProgress(0.5)
+
+                   # Store parameters for reuse when downloading
+                   vals$reportParamsFull <- params
+
+                   setProgress(0.7)
+
+                   report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
+                                                params = params)
+
+                   setProgress(1)
+                 })
+
+    # Create report
+    appStatus$Report <- report
   })
 
   # Output report when it has changed
   output[["report"]] <- renderUI({
     # Respond to report change
-    report <- report()
+    report <- req(appStatus$Report)
     if (!is.null(report)) {
       isolate({
         ns <- session$ns
@@ -235,5 +261,5 @@ createReports <- function(input, output, session, adjustedData)
   output[["downloadLatexReport"]] <- reportDownloadHandler("latex_document")
   output[["downloadWordReport"]] <- reportDownloadHandler("word_document")
 
-  return(report)
+  return(NULL)
 }

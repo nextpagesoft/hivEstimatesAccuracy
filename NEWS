@@ -1,3 +1,39 @@
+Version 0.10.0 (2018/11/11)
+--------------------------------------------------------------------------------
+
+* Input data: custom mapping module for GroupedRegionOfOrigin implemented
+* Input data: additional country codes incorporated
+* Adjustments: Remodel adjustment specification control to have fixed order
+* Main Report: Rename "confidence interval" to "inter-quartile range"
+* Main Report: Change and fix column names of report tables to include proper
+  unit indicator
+* Input data: Fix typo in "Assignment of input..."
+* Reporting Delays: Initial implementation of univariate analysis
+* Reporting Delays: Initial implementation of modelling time trend
+* Intermediate report for RD: fixes in plotting stratified data
+* Misc: Add "reportingDelaysRegressionScript.R" in inst folder
+* Input data summary: titles of plots adjusted, comments added. PLot for trends
+  in reporting delay for last 5 years removed. Histogram of data below filter
+  added.
+* Misc: Initial implementation of application state saving
+* Adjustments: Allow filtering adjusted data
+* Misc: Implement opening a new window
+* Intermediate reports for MI: Distributions of imputed data added
+* Summary: Initialize filter to min and max of Diagnosis Year on data load
+* Summary: Clear adjusted data on filter change if applicable
+* Main page: Implement draft dialog for setting random seed
+* Main Report: Display detailed information on performed adjustments and input
+  data file name
+* Diagnostic reports: Display tabbed plots
+* Misc: Header styling adjusted according to ECDC request
+* Main Report: Latex figures naming adjusted to be more intuitive
+* RD adjustments: Remove records with NotificationTime < DiagnosisTime
+* Summary page: Remove records with NotificationTime < DiagnosisTime
+* RD: Ensure weight is 1 if after fit it is NA or infinite
+* MICE: Default degree of freedom set to 4
+* Input data upload: Filter redundant columns from the input data.
+
+
 Version 0.9.11 (2018/09/05)
 --------------------------------------------------------------------------------
 

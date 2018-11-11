@@ -29,7 +29,9 @@ PlotMultipleCharts <- function(plots, cols = 1, layout = NULL, widths = NULL)
     # ncol: Number of columns of plots
     # nrow: Number of rows needed, calculated from # of cols
     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                     ncol = cols, nrow = ceiling(numPlots/cols))
+                     ncol = cols,
+                     nrow = ceiling(numPlots/cols),
+                     byrow = TRUE)
   }
 
   if (is.null(widths)) {

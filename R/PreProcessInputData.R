@@ -106,9 +106,52 @@ PreProcessInputData <- function(inputData)
   inputDataGender <- inputData[, .(Gender = as.factor(Gender),
                                    DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
                                    Transmission)]
-  miceImputation <- mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE)
+  miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE))
   inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
   inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
+
+  # Support imputing reporting delay -----------------------------------------------
+  # Create intermediate variables
+  inputData[, ":="(
+    NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
+    DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
+  )]
+
+  # Create Min and Max notification time
+  inputData[, ":="(
+    MinNotificationTime = min(NotificationTime, na.rm = TRUE),
+    MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
+  ), by = .(ReportingCountry)]
+
+  # Create VarX, MaxPossibleDelay
+  inputData[, c("VarX", "TweakedVarX", "MaxPossibleDelay", "TweakedMaxPossibleDelay") := {
+    # Compute MaxPossibleDelay
+    maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
+                               4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
+                               4 * (MaxNotificationTime - DiagnosisTime))
+    maxPossibleDelay <- ifelse(is.na(DateOfDiagnosisYear),
+                               4 * (NotificationTime - MinNotificationTime),
+                               maxPossibleDelay)
+    maxPossibleDelay <- ifelse(is.na(maxPossibleDelay),
+                               4 * (MaxNotificationTime - MinNotificationTime),
+                               maxPossibleDelay)
+
+    # Compute VarX
+    varX <- 4 * (NotificationTime - DiagnosisTime)
+    tweakedVarX <- ifelse(varX == 0, 0.01, varX)
+    tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
+                          maxPossibleDelay - 0.01,
+                          varX)
+
+    # Tweak MaxPossibleDelay
+    tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
+                                      0.02,
+                                      maxPossibleDelay)
+
+    list(varX, tweakedVarX, maxPossibleDelay, tweakedMaxPossibleDelay)
+  }]
+
+
 
   # Transform columns to factor
   inputData[, Gender := factor(Gender)]

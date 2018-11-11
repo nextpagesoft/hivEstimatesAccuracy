@@ -55,13 +55,15 @@ GetMissingnessPlots <- function(
     scale_x_discrete(limits = relFreqData$Attribute, labels = relFreqData$Label) +
     scale_y_continuous(expand = c(0, 0), labels = percent_format) +
     theme_classic() +
-    theme(text = element_text(size = 14),
+    theme(plot.title = element_text(size = 12, face = "plain"),
+          text = element_text(size = 12, face = "plain"),
           axis.title.x = element_blank(),
           axis.text.x = element_text(angle = 90),
           axis.line = element_line(colour = "#888888"),
           axis.ticks = element_line(colour = "#888888"),
           panel.grid.minor = element_blank(),
           panel.grid.major.x = element_blank()) +
+    ggtitle("Percent of cases with missing data for each of variables") +
     ylab("Relative frequency of missing data")
 
   patternData <- missData[, .(Percentage = .N / nrow(missData)), by = columnNames]
@@ -93,11 +95,13 @@ GetMissingnessPlots <- function(
                      limits = relFreqData$Attribute,
                      labels = relFreqData$Label) +
     scale_y_discrete(expand = c(0, 0)) +
-    theme(text = element_text(size = 14),
+    theme(plot.title = element_text(size = 12, face = "plain"),
+          text = element_text(size = 12, face = "plain"),
           axis.title.x = element_blank(),
           axis.text.x = element_text(angle = 90),
           axis.text.y = element_blank(),
           legend.position = "none") +
+    ggtitle("Patterns of missing data present in the dataset and their frequency (rightmost chart).") +
     ylab("Missing data patterns")
 
   missHistData <- patternData[, .(Combination, Percentage, CombinationId = .I)]
@@ -117,12 +121,14 @@ GetMissingnessPlots <- function(
     scale_y_continuous(expand = c(0, 0),
                        breaks = rep(0, length(labels)),
                        labels = relFreqData$Label) +
-    theme(text = element_text(size = 14),
+    theme(plot.title = element_text(size = 12, face = "plain"),
+          text = element_text(size = 12, face = "plain"),
           axis.title.x = element_blank(),
           axis.text.x = element_text(angle = 90, colour = "white"),
           axis.title.y = element_blank(),
           panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
+          panel.grid.minor = element_blank()) +
+    ggtitle("")
 
   invisible(list(relFreqPlot, missPatternPlot, missHistPlot))
 }

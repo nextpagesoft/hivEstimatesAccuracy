@@ -4,12 +4,14 @@
 \alias{GetOriginGroupingMap}
 \title{GetOriginGroupingMap}
 \usage{
-GetOriginGroupingMap(type, distr)
+GetOriginGroupingMap(type, distr, groups)
 }
 \arguments{
 \item{type}{Grouping type}
 
 \item{distr}{Distribution of RegionOfOrigin}
+
+\item{groups}{Groups}
 }
 \description{
 Get mapping from RegionOfOrigin to GroupOfOrigin
@@ -19,7 +21,7 @@ distr <- data.table::data.table(
   FullRegionOfOrigin = c("REPCOUNTRY", "SUBAFR"),
   Count = c(1536, 2237))
 GetOriginGroupingMap(
-  type = "REPCOUNTRY + UNK + 4 most prevalent other regions",
+  type = "REPCOUNTRY + UNK + 3 most prevalent regions + OTHER",
   distr = distr
 )
 

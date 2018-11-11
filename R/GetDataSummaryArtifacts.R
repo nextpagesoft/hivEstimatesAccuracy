@@ -43,18 +43,12 @@ GetDataSummaryArtifacts <- function(inputData)
       labels = c("Diagnosis year", "Diagnosis quarter", "Notification year",
                  "Notification quarter"))
 
-  # Observed delay distribution
-  inputData[, ":="(
-    NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
-    DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
-  )]
-  inputData[, VarX := 4 * (NotificationTime - DiagnosisTime)]
-  inputData[VarX < 0, VarX := NA]
-
-  if (!all(is.na(inputData$VarX))) {
-    quant95 <- quantile(inputData$VarX, probs = 0.95, na.rm = TRUE)
-    quant99 <- quantile(inputData$VarX, probs = 0.99, na.rm = TRUE)
-    delayDensFullPlot <- ggplot(data = inputData, mapping = aes(x = VarX)) +
+  # Reporting delay density plot
+  densDelay <- inputData[!is.na(VarX)][VarX >= 0]
+  if (densDelay[, .N > 0]) {
+    quant95 <- quantile(densDelay$VarX, probs = 0.95, na.rm = TRUE)
+    quant99 <- quantile(densDelay$VarX, probs = 0.99, na.rm = TRUE)
+    delayDensFullPlot <- ggplot(data = densDelay, mapping = aes(x = VarX)) +
       geom_density(fill = colors[2], alpha = 0.6, adjust = 4, size = 1, colour = colors[1]) +
       geom_vline(xintercept = quant95, linetype = "dashed") +
       annotate("text",
@@ -64,48 +58,20 @@ GetDataSummaryArtifacts <- function(inputData)
                y = -Inf,
                hjust = 0,
                vjust = -1) +
-      expand_limits(x = c(0, max(30, ceiling(quant99)))) +
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_continuous(expand = c(0, 0)) +
+      coord_cartesian(xlim = c(0, max(20, ceiling(quant99)))) +
       theme_classic() +
-      theme(text = element_text(size = 14),
+      theme(plot.title = element_text(size = 12, face = "plain"),
+            text = element_text(size = 12, face = "plain"),
             panel.grid = element_blank(),
             axis.line = element_line(colour = "#888888"),
             axis.ticks = element_line(colour = "#888888")) +
       ggtitle("Density of Reporting Delay\n") +
       xlab("Delay in quarters of the year") +
       ylab("Proportion reported with the delay")
-
-    shortData <- inputData[DateOfDiagnosisYear < max(DateOfDiagnosisYear) - 5]
-    quant95 <- quantile(shortData$VarX, probs = 0.95, na.rm = TRUE)
-    quant99 <- quantile(shortData$VarX, probs = 0.99, na.rm = TRUE)
-    delayDensShortPlot <- ggplot(data = shortData, mapping = aes(x = VarX)) +
-      geom_density(fill = colors[2], alpha = 0.6, adjust = 4, size = 1, colour = colors[1]) +
-      geom_vline(xintercept = quant95, linetype = "dashed") +
-      annotate("text",
-               label = paste("95% of cases reported \nby", prettyNum(quant95), "quarters"),
-               fontface = "italic",
-               x = quant95 + 0.5,
-               y = -Inf,
-               hjust = 0,
-               vjust = -1) +
-      expand_limits(x = c(0, max(30, ceiling(quant99)))) +
-      scale_x_continuous(expand = c(0, 0)) +
-      theme_classic() +
-      theme(text = element_text(size = 14),
-            panel.grid = element_blank(),
-            axis.line = element_line(colour = "#888888"),
-            axis.ticks = element_line(colour = "#888888")) +
-      ggtitle("Density of Reporting Delay with last 5 years deleted") +
-      xlab("Delay in quarters of the year") +
-      ylab("Proportion reported with the delay")
-    if (nrow(shortData) > 0) {
-      delayDensShortPlot <- delayDensShortPlot +
-        scale_y_continuous(expand = c(0, 0))
-    }
   } else {
     delayDensFullPlot <- NULL
-    delayDensShortPlot <- NULL
   }
 
   # Mean delay plot
@@ -113,7 +79,7 @@ GetDataSummaryArtifacts <- function(inputData)
                          .(MeanDelay = mean(VarX, na.rm = TRUE)),
                          by = .(NotificationTime)]
 
-  if (nrow(meanDelay) > 0) {
+  if (meanDelay[, .N > 0]) {
     meanDelay[, rsd := RollingApply(MeanDelay, 10, sd)]
     meanDelayCurve <- meanDelay[, as.data.table(lowess(NotificationTime, MeanDelay))]
     meanDelayUpper <- meanDelay[, as.data.table(lowess(NotificationTime, MeanDelay + 1.96 * rsd))]
@@ -130,10 +96,11 @@ GetDataSummaryArtifacts <- function(inputData)
       scale_linetype_manual("Datasets",
                             values = c("Smoothed mean reporting delay" = "solid",
                                        "Expected upper bound" = "dotted")) +
-      scale_x_continuous(expand = c(0, 0), breaks = meanDelay[, sort(unique(round(NotificationTime)))]) +
+      scale_x_continuous(expand = c(0, 0)) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
-      theme(text = element_text(size = 14),
+      theme(plot.title = element_text(size = 12, face = "plain"),
+            text = element_text(size = 12, face = "plain"),
             panel.grid = element_blank(),
             axis.line = element_line(colour = "#888888"),
             axis.ticks = element_line(colour = "#888888"),
@@ -151,6 +118,5 @@ GetDataSummaryArtifacts <- function(inputData)
               MissPlotsByGender = missPlotsByGender,
               MissPlotsRD = missPlotsRD,
               DelayDensFullPlot = delayDensFullPlot,
-              DelayDensShortPlot = delayDensShortPlot,
               MeanDelayPlot = meanDelayPlot))
 }

@@ -1,8 +1,10 @@
 # 1. INPUT DATA ----------------------------------------------------------------
 # Set path to the input data file
 # inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL.csv"
-# inputDataFilePath <- "/media/sf_VirtualBox_SharedDrive/EL2.csv"
-inputDataFilePath <- "/media/sf_VirtualBox_Share/dummy_miss1.zip"
+inputDataFilePath <- "~/share/baza30czer2018_mod_QRT.xlsx"
+# inputDataFilePath <- "~/share/dummy_miss1.zip"
+# inputDataFilePath <- "~/share/StateTestings/StateData_20181014212132.rds"
+# inputDataFilePath <- "/media/sf_VirtualBox_Share/hiv_2017.zip"
 
 # 2. ADJUSTMENTS SELECTION -----------------------------------------------------
 # Select adjustments to perform. Order is important. Available adjustment names:
@@ -10,6 +12,7 @@ inputDataFilePath <- "/media/sf_VirtualBox_Share/dummy_miss1.zip"
 # b) " Multiple Imputation using Chained Equations - MICE"
 # c) "Reporting Delays"
 adjustmentNames <- c(
+  # "Joint Modelling Multiple Imputation",
   "Multiple Imputation using Chained Equations - MICE",
   "Reporting Delays"
 )
@@ -20,11 +23,12 @@ adjustmentSpecs <-
            adjustmentNames)
 
 # Optionally adjust parameters of the adjustments
-# For instance stratify "Reporting Delays" adjustment by Transmission category:
-# adjustmentSpecs[["Reporting Delays"]]$Parameters$stratTrans$value <- TRUE
+# For instance stratify "Reporting Delays" adjustment by Migration category:
+# adjustmentSpecs[["Joint Modelling Multiple Imputation"]]$Parameters$imputeRD$value <- TRUE
+# adjustmentSpecs[["Reporting Delays"]]$Parameters$stratMigr$value <- TRUE
 
 # 3. FULLMIGR MAPPING ----------------------------------------------------------
-migrMappingType <- "REPCOUNTRY + UNK + 4 most prevalent other regions"
+migrMappingType <- "REPCOUNTRY + UNK + OTHER"
 
 # 4. FINAL REPORT NAME ---------------------------------------------------------
-reportName <- "Main Report-new"
+reportName <- "Main Report"
