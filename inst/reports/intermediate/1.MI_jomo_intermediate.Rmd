@@ -72,7 +72,7 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 genders <- names(params$InputData$Artifacts)
 genderNameMapping <- c("F" = "Female", "M" = "Male", "O" = "Other")
 tabIdx <- 0
-plotTypes <- c("Trace", "Autocorrelation", "Distribution")
+plotTypes <- c("Convergence", "Autocorrelation", "Observed vs. Imputed")
 tabsHeader <- c()
 for (gender in genders) {
   genderName <- genderNameMapping[gender]

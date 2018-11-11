@@ -75,7 +75,7 @@ Maximum 5 first chains (imputations) are displayed.
 genders <- names(params$InputData$Artifacts)
 genderNameMapping <- c("F" = "Female", "M" = "Male", "O" = "Other")
 tabIdx <- 0
-plotTypes <- c("Sample", "Distribution")
+plotTypes <- c("Convergence", "Observed vs. Imputed")
 tabsHeader <- c()
 for (gender in genders) {
   genderName <- genderNameMapping[gender]
