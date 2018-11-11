@@ -478,15 +478,18 @@ inputDataUpload <- function(input, output, session, appStatus)
     }
   })
 
-  output[["inputDataTable"]] <- renderDataTable(appStatus$InputData$Table,
-                                                options = list(
-                                                  dom = '<"top">lirt<"bottom">p',
-                                                  autoWidth = FALSE,
-                                                  pageLength = 15,
-                                                  scrollX = TRUE,
-                                                  deferRender = TRUE,
-                                                  serverSide = TRUE,
-                                                  scroller = FALSE))
+  output[["inputDataTable"]] <- renderDataTable(
+    appStatus$InputData$Table[, -c("GroupOfOrigin", "SqCD4", "MinNotificationTime",
+                                   "MaxNotificationTime", "VarX", "TweakedVarX",
+                                   "MaxPossibleDelay", "TweakedMaxPossibleDelay")],
+    options = list(
+      dom = '<"top">lirt<"bottom">p',
+      autoWidth = FALSE,
+      pageLength = 15,
+      scrollX = TRUE,
+      deferRender = TRUE,
+      serverSide = TRUE,
+      scroller = FALSE))
 
   callModule(inputDataUploadMigrant, "migrant", appStatus, inputDataBeforeGrouping)
 

@@ -1,4 +1,4 @@
-Version 0.10.0 (2018/11/07)
+Version 0.10.0 (2018/11/11)
 --------------------------------------------------------------------------------
 
 * Input data: custom mapping module for GroupedRegionOfOrigin implemented
@@ -30,6 +30,8 @@ Version 0.10.0 (2018/11/07)
 * RD adjustments: Remove records with NotificationTime < DiagnosisTime
 * Summary page: Remove records with NotificationTime < DiagnosisTime
 * RD: Ensure weight is 1 if after fit it is NA or infinite
+* MICE: Default degree of freedom set to 4
+* Input data upload: Filter redundant columns from the input data.
 
 
 Version 0.9.11 (2018/09/05)

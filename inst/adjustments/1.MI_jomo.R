@@ -27,8 +27,8 @@ list(
       input = "numeric"),
     # Parameter 4
     nsdf = list(
-      label = "Number of degrees of freedom for spline",
-      value = 5L,
+      label = "Number of degrees of freedom for spline of diagnosis calendar year",
+      value = 4L,
       min = 3L,
       max = 5L,
       step = 1L,
