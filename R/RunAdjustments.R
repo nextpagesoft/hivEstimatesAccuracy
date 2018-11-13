@@ -6,6 +6,7 @@
 #' @param adjustmentSpecs List of adjustment specifications to execute. Optional. Default = \code{list()}.
 #' @param yearRange Numeric cector of length two with lower and upper bound for diagnosis year.
 #'   Optional. Default = \code{NULL}.
+#' @param seed Random seed. Optional. Default = NULL
 #'
 #' @return data table object after adjustments applied.
 #'
@@ -15,7 +16,7 @@
 #' }
 #'
 #' @export
-RunAdjustments <- function(data, adjustmentSpecs = list(), yearRange = NULL)
+RunAdjustments <- function(data, adjustmentSpecs = list(), yearRange = NULL, seed = NULL)
 {
   stopifnot(!missing(data))
 
@@ -27,8 +28,9 @@ RunAdjustments <- function(data, adjustmentSpecs = list(), yearRange = NULL)
     data$Table <- data$Table[DateOfDiagnosisYear %between% yearRange]
   }
 
-  results <- list()
   # Process adjustments
+  set.seed(seed)
+  results <- list()
   i <- 0L
   for (adjustmentSpec in adjustmentSpecs) {
     i <- i + 1L

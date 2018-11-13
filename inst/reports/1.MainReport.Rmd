@@ -1,10 +1,16 @@
 ---
 name: "Main Report"
 author: "HIV Estimates Accuracy tool"
-title: "Multiple imputations"
+title: "Adjustments report"
 date: "`r format(Sys.time(), '%d %B %Y, %H:%M:%S')`"
 editor_options: 
   chunk_output_type: console
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \usepackage{titling}
+- \pretitle{\begin{center}\LARGE\includegraphics[width=12cm]{resources/ECDC_logo.png}\\[\bigskipamount]}
+- \posttitle{\end{center}}  
 output:
   html_fragment:
     smart: yes

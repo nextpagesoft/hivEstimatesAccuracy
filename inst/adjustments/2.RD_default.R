@@ -55,9 +55,6 @@ list(
     # Work on a copy
     compData <- copy(inputData)
 
-    # Initialize output data
-    outputData <- copy(inputData)
-
     # Separator used for creating a composite of stratum columns. Should not occur in the stratum
     # values.
     stratSep <- "_"

@@ -122,6 +122,7 @@ inputDataUpload <- function(input, output, session, appStatus)
       originalData         <- req(uploadedData$OriginalData)
       originalDataAttrs    <- uploadedData$OriginalDataAttrs
       defaultValues        <- uploadedData$DefaultValues
+      seed                 <- uploadedData$Seed
       attrMapping          <- uploadedData$AttrMapping
       attrMappingStatus    <- uploadedData$AttrMappingStatus
       attrMappingValid     <- uploadedData$AttrMappingValid
@@ -151,6 +152,7 @@ inputDataUpload <- function(input, output, session, appStatus)
           originalDataAttrs[tolower(originalDataAttrs) == "cd4_num"][1]
       }
 
+      seed                 <- NULL
       attrMappingStatus    <- NULL
       attrMappingValid     <- FALSE
       inputDataTest        <- NULL
@@ -168,6 +170,7 @@ inputDataUpload <- function(input, output, session, appStatus)
       appStatus$StateUploading  <- FALSE
     }
 
+    appStatus$Seed                <- seed
     appStatus$FileName            <- input$fileInput$name
     appStatus$OriginalData        <- originalData
     appStatus$OriginalDataAttrs   <- originalDataAttrs
@@ -351,7 +354,7 @@ inputDataUpload <- function(input, output, session, appStatus)
                                                            appStatus$DefaultValues)
                    setProgress(0.4, detail = "Pre-processing data with a single imputation of Gender")
 
-                   inputDataTest <- PreProcessInputData(inputDataTest)
+                   inputDataTest <- PreProcessInputData(inputDataTest, appStatus$Seed)
                    setProgress(0.9, detail = "Checking data validity")
 
                    appStatus$AttrMappingStatus <- GetAttrMappingStatus(appStatus$AttrMapping)

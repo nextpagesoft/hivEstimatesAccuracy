@@ -55,7 +55,8 @@ if (!is.null(inputData)) {
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
   adjustedData <- RunAdjustments(data = inputData$Table,
                                  adjustmentSpecs = adjustmentSpecs,
-                                 yearRange = NULL)
+                                 yearRange = NULL,
+                                 seed = NULL)
 
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Take the last adjustment output as final data

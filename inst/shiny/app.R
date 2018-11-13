@@ -118,8 +118,8 @@ server <- function(input, output, session)
     showModal(
       modalDialog(
         title = "Set seed",
-        p("Not operational - UNDER DEVELOPMENT"),
-        textInput("seed", label = NULL),
+        textInput("seed", label = "Seed value", value = appStatus$Seed),
+        p("Give empty value or type 'default' to remove fixed seed"),
         footer = tagList(
           actionButton("seedDlgOk", "OK",
                        style = "background-color: #69b023; color: white"),
@@ -133,9 +133,9 @@ server <- function(input, output, session)
   observeEvent(input[["seedDlgOk"]], {
     seed <- input$seed
     if (seed == "" || tolower(seed) == "default") {
-      appStatus$Seed <- seed
-    } else {
       appStatus$Seed <- NULL
+    } else {
+      appStatus$Seed <- seed
     }
     removeModal()
   })

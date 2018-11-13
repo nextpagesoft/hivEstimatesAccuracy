@@ -4,10 +4,12 @@
 \alias{PreProcessInputData}
 \title{PreProcessInputData}
 \usage{
-PreProcessInputData(inputData)
+PreProcessInputData(inputData, seed = NULL)
 }
 \arguments{
 \item{inputData}{Input data. Required.}
+
+\item{seed}{Random seed. Optional. Default = NULL}
 }
 \value{
 data.table object

@@ -3,6 +3,7 @@
 #' Pre-processes input data before passing it to adjustment scripts.
 #'
 #' @param inputData Input data. Required.
+#' @param seed Random seed. Optional. Default = NULL
 #'
 #' @return data.table object
 #'
@@ -12,7 +13,7 @@
 #' }
 #'
 #' @export
-PreProcessInputData <- function(inputData)
+PreProcessInputData <- function(inputData, seed = NULL)
 {
   stopifnot(!missing(inputData))
 
@@ -106,6 +107,7 @@ PreProcessInputData <- function(inputData)
   inputDataGender <- inputData[, .(Gender = as.factor(Gender),
                                    DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
                                    Transmission)]
+  set.seed(seed)
   miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE))
   inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
   inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
@@ -150,8 +152,6 @@ PreProcessInputData <- function(inputData)
 
     list(varX, tweakedVarX, maxPossibleDelay, tweakedMaxPossibleDelay)
   }]
-
-
 
   # Transform columns to factor
   inputData[, Gender := factor(Gender)]

@@ -4,7 +4,8 @@
 \alias{RunAdjustments}
 \title{RunAdjustments}
 \usage{
-RunAdjustments(data, adjustmentSpecs = list(), yearRange = NULL)
+RunAdjustments(data, adjustmentSpecs = list(), yearRange = NULL,
+  seed = NULL)
 }
 \arguments{
 \item{data}{data table object on which adjustments should be applied. Required.}
@@ -13,6 +14,8 @@ RunAdjustments(data, adjustmentSpecs = list(), yearRange = NULL)
 
 \item{yearRange}{Numeric cector of length two with lower and upper bound for diagnosis year.
 Optional. Default = \code{NULL}.}
+
+\item{seed}{Random seed. Optional. Default = NULL}
 }
 \value{
 data table object after adjustments applied.

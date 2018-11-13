@@ -45,10 +45,14 @@ RenderReportToFile <- function(
     unlink(reportDirName, recursive = TRUE)
   })
 
-  if (format == "all" || "word_document" %in% format) {
-    dir.create(file.path(reportDirName, "resources"),
-               showWarnings = FALSE, recursive = TRUE)
+  dir.create(file.path(reportDirName, "resources"),
+             showWarnings = FALSE, recursive = TRUE)
 
+  file.copy(system.file("reports/resources/ECDC_logo.png",
+                        package = "hivEstimatesAccuracy"),
+            file.path(reportDirName, "resources/ECDC_logo.png"))
+
+  if (format == "all" || "word_document" %in% format) {
     file.copy(system.file("reports/resources/template_ECDC.docx",
                           package = "hivEstimatesAccuracy"),
               file.path(reportDirName, "resources/template_ECDC.docx"))
