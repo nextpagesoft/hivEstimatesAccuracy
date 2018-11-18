@@ -32,7 +32,7 @@ if (attrMappingStatus[["Valid"]]) {
   inputDataTest <- ApplyAttributesMapping(originalData,
                                           attrMapping,
                                           GetPreliminaryDefaultValues())
-  inputDataTest <- PreProcessInputData(inputData = inputDataTest)
+  inputDataTest <- PreProcessInputDataBeforeSummary(inputData = inputDataTest)
   inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
   if (inputDataTestStatus[["Valid"]]) {
     inputData <- inputDataTest
@@ -50,12 +50,17 @@ if (!is.null(inputData)) {
   inputData <- ApplyOriginGroupingMap(inputData, map)
 
   # Get "Summary" page plots (optionally)
+  GetDiagnosisYearDensityPlot(plotData = inputData$Table)
+  GetNotificationQuarterDensityPlot(plotData = inputData$Table)
+  summaryInputData <- inputData$Table
+  PreProcessInputDataBeforeAdjustments(summaryInputData)
   summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
 
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
   adjustedData <- RunAdjustments(data = inputData$Table,
                                  adjustmentSpecs = adjustmentSpecs,
-                                 yearRange = NULL,
+                                 diagYearRange = NULL,
+                                 notifQuarterRange = NULL,
                                  seed = NULL)
 
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
@@ -81,8 +86,8 @@ if (!is.null(inputData)) {
   params <- modifyList(params,
                        list(Artifacts =
                               list(FileName = inputDataFilePath,
-                                   YearRange = c(2000, 2010),
-                                   YearRangeApply = TRUE)))
+                                   DiagYearRange = c(2000, 2010),
+                                   DiagYearRangeApply = TRUE)))
 
   htmlReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,

@@ -1,6 +1,6 @@
-#' PreProcessInputData
+#' PreProcessInputDataBeforeSummary
 #'
-#' Pre-processes input data before passing it to adjustment scripts.
+#' Pre-processes input data before making data summary and passing it to adjustment scripts.
 #'
 #' @param inputData Input data. Required.
 #' @param seed Random seed. Optional. Default = NULL
@@ -9,11 +9,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' PreProcessInputData(inputData)
+#' PreProcessInputDataBeforeSummary(inputData)
 #' }
 #'
 #' @export
-PreProcessInputData <- function(inputData, seed = NULL)
+PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
 {
   stopifnot(!missing(inputData))
 
@@ -112,46 +112,11 @@ PreProcessInputData <- function(inputData, seed = NULL)
   inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
   inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
 
-  # Support imputing reporting delay -----------------------------------------------
-  # Create intermediate variables
+  # Create helper columns for filtering data on diagnosis and notification time
   inputData[, ":="(
     NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
     DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
   )]
-
-  # Create Min and Max notification time
-  inputData[, ":="(
-    MinNotificationTime = min(NotificationTime, na.rm = TRUE),
-    MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
-  ), by = .(ReportingCountry)]
-
-  # Create VarX, MaxPossibleDelay
-  inputData[, c("VarX", "TweakedVarX", "MaxPossibleDelay", "TweakedMaxPossibleDelay") := {
-    # Compute MaxPossibleDelay
-    maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
-                               4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
-                               4 * (MaxNotificationTime - DiagnosisTime))
-    maxPossibleDelay <- ifelse(is.na(DateOfDiagnosisYear),
-                               4 * (NotificationTime - MinNotificationTime),
-                               maxPossibleDelay)
-    maxPossibleDelay <- ifelse(is.na(maxPossibleDelay),
-                               4 * (MaxNotificationTime - MinNotificationTime),
-                               maxPossibleDelay)
-
-    # Compute VarX
-    varX <- 4 * (NotificationTime - DiagnosisTime)
-    tweakedVarX <- ifelse(varX == 0, 0.01, varX)
-    tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
-                          maxPossibleDelay - 0.01,
-                          varX)
-
-    # Tweak MaxPossibleDelay
-    tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
-                                      0.02,
-                                      maxPossibleDelay)
-
-    list(varX, tweakedVarX, maxPossibleDelay, tweakedMaxPossibleDelay)
-  }]
 
   # Transform columns to factor
   inputData[, Gender := factor(Gender)]

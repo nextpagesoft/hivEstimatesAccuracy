@@ -145,8 +145,8 @@ createReports <- function(input, output, session, appStatus)
   observeEvent(input[["createReportBtn"]], {
     adjustedData <- req(appStatus$AdjustedData)
     fileName <- appStatus$FileName
-    yearRangeApply <- appStatus$YearRangeApply
-    yearRange <- appStatus$YearRange
+    diagYearRangeApply <- appStatus$DiagYearRangeApply
+    diagYearRange <- appStatus$DiagYearRange
     withProgress(message = "Creating report",
                  detail = "The report will be displayed shortly.",
                  value = 0, {
@@ -163,8 +163,8 @@ createReports <- function(input, output, session, appStatus)
                    params <- modifyList(params,
                                         list(Artifacts =
                                                list(FileName = fileName,
-                                                    YearRange = yearRange,
-                                                    YearRangeApply = yearRangeApply)))
+                                                    DiagYearRange = diagYearRange,
+                                                    DiagYearRangeApply = diagYearRangeApply)))
 
                    setProgress(0.5)
 

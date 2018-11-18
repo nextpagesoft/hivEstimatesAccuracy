@@ -95,8 +95,10 @@ server <- function(input, output, session)
     AttrMappingValid = FALSE,
     InputDataTest = NULL,
     InputDataTestStatus = NULL,
-    YearRange = NULL,
-    YearRangeApply = FALSE,
+    DiagYearRange = NULL,
+    DiagYearRangeApply = FALSE,
+    NotifQuarterRange = NULL,
+    NotifQuarterRangeApply = NULL,
     InputData = NULL,
     AdjustedData = NULL,
     AdjustmentSpecs = adjustmentSpecs,
@@ -141,9 +143,9 @@ server <- function(input, output, session)
   })
 
 
-  if (!isServer) {
-    session$onSessionEnded(stopApp)
-  }
+  # if (!isServer) {
+  #   session$onSessionEnded(stopApp)
+  # }
 }
 
 # Run application

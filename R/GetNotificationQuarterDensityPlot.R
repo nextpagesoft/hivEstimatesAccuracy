@@ -1,6 +1,6 @@
-#' GetDiagnosisYearDensityPlot
+#' GetNotificationQuarterDensityPlot
 #'
-#' Get density plot of diagnosis year
+#' Get density plot of notification quarter
 #'
 #' @param plotData Data table object. Required.
 #' @param colorPalette Character vector of colors for plotted
@@ -15,11 +15,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' GetDiagnosisYearDensityPlot(plotData)
+#' GetNotificationQuarterDensityPlot(plotData)
 #' }
 #'
 #' @export
-GetDiagnosisYearDensityPlot <- function(
+GetNotificationQuarterDensityPlot <- function(
   plotData,
   colorPalette = c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"),
   xLimits = c(1980, 2025),
@@ -34,16 +34,16 @@ GetDiagnosisYearDensityPlot <- function(
   labels <- as.character(breaks)
   labels[breaks %% 5 != 0] <- ""
 
-  plotDt <- plotData[, .(Count = .N), by = .(DateOfDiagnosisYear, Gender)]
+  plotDt <- plotData[, .(Count = .N), by = .(NotificationTime, Gender)]
   if (!is.null(markerLocations)) {
-    plotDt[, Selected := DateOfDiagnosisYear %between% markerLocations]
+    plotDt[, Selected := NotificationTime %between% markerLocations]
   } else {
     plotDt[, Selected := TRUE]
   }
 
   plot <-
-    ggplot(plotDt, aes(x = DateOfDiagnosisYear, y = Count, fill = Gender, color = Gender)) +
-    geom_col(aes(alpha = Selected), position = "stack", width = 1, size = 0.1) +
+    ggplot(plotDt, aes(x = NotificationTime, y = Count, fill = Gender, color = Gender)) +
+    geom_col(aes(alpha = Selected), position = "stack", width = 0.25, size = 0.1) +
     scale_colour_manual("Gender",
                         values = colorPalette,
                         labels = c("M" = "Male",
@@ -71,7 +71,7 @@ GetDiagnosisYearDensityPlot <- function(
           strip.text = element_text(size = 8),
           axis.text.x = element_text(size = 9),
           axis.text.y = element_text(size = 9, angle = 90, hjust = 0.5)) +
-    xlab("Diagnosis year") +
+    xlab("Notification quarter") +
     ylab("Count of cases")
 
   return(plot)

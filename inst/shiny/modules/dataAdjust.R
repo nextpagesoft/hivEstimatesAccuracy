@@ -205,10 +205,15 @@ dataAdjust <- function(input, output, session, appStatus)
   observeEvent(input[["runAdjustBtn"]], {
     inputData <- req(appStatus$InputData)
     seed <- appStatus$Seed
-    if (appStatus$YearRangeApply) {
-      yearRange <- appStatus$YearRange
+    if (appStatus$DiagYearRangeApply) {
+      diagYearRange <- appStatus$DiagYearRange
     } else {
-      yearRange <-  NULL
+      diagYearRange <-  NULL
+    }
+    if (appStatus$NotifQuarterRangeApply) {
+      notifQuarterRange <- appStatus$NotifQuarterRange
+    } else {
+      notifQuarterRange <-  NULL
     }
 
     adjustmentSpecs <- list()
@@ -238,20 +243,23 @@ dataAdjust <- function(input, output, session, appStatus)
         RunAdjustments(
           inputData$Table,
           adjustmentSpecs = adjustmentSpecs,
-          yearRange = yearRange,
+          diagYearRange = diagYearRange,
+          notifQuarterRange = notifQuarterRange,
           seed = seed)
       })
     } else {
-      task <<- CreateTask(function(x, y, yearRange, seed) {
+      task <<- CreateTask(function(x, y, diagYearRange, notifQuarterRange, seed) {
         hivEstimatesAccuracy::RunAdjustments(
           data = x,
           adjustmentSpecs = y,
-          yearRange = yearRange,
+          diagYearRange = diagYearRange,
+          notifQuarterRange = notifQuarterRange,
           seed = seed)
       },
       args = list(inputData$Table,
                   adjustmentSpecs,
-                  yearRange,
+                  diagYearRange,
+                  notifQuarterRange,
                   seed))
     }
 
