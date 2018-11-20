@@ -15,7 +15,7 @@ manualUI <- function(id)
       collapsible = TRUE,
       status = "primary",
       tags$iframe(style = "height:900px; width:100%; border: none",
-                  src = "pdf/HIV_Estimates_Accuracy_manual.pdf#zoom=100")
+                  src = "./www/pdf/HIV_Estimates_Accuracy_manual.pdf#zoom=100")
     )
   )
 
