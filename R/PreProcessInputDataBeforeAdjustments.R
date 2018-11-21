@@ -32,6 +32,10 @@ PreProcessInputDataBeforeAdjustments <- function(inputData)
 
   # Create VarX, MaxPossibleDelay
   inputData[, c("VarX", "TweakedVarX", "MaxPossibleDelay", "TweakedMaxPossibleDelay") := {
+    # Compute VarX
+    varX <- 4 * (NotificationTime - DiagnosisTime)
+    varX[varX < 0] <- NA
+
     # Compute MaxPossibleDelay
     maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
                                4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
@@ -43,12 +47,10 @@ PreProcessInputDataBeforeAdjustments <- function(inputData)
                                4 * (MaxNotificationTime - MinNotificationTime),
                                maxPossibleDelay)
 
-    # Compute VarX
-    varX <- 4 * (NotificationTime - DiagnosisTime)
     tweakedVarX <- ifelse(varX == 0, 0.01, varX)
     tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
                           maxPossibleDelay - 0.01,
-                          varX)
+                          tweakedVarX)
 
     # Tweak MaxPossibleDelay
     tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
