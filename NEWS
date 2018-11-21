@@ -7,6 +7,7 @@ Version 0.11.0 (2018/11/--)
 * Misc: make filtering on notification quarter effective
 * Manual: Draft manual added as pdf file
 * Adjustments: Fix infinity in LogitVarX for jomo adjustment
+* Summary: set min/max for filters based on input data
 
 Version 0.10.0 (2018/11/11)
 --------------------------------------------------------------------------------

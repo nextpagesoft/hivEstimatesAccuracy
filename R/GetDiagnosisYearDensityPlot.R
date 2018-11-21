@@ -7,7 +7,7 @@
 #'  series. Optional. Default = \code{c("#c7c7c7", "#69b023", "#7bbcc0",
 #'  "#9d8b56", "#ce80ce")}.
 #' @param xLimits Vector of two numbers (years), lower and upper limit for the
-#'   x axis. Optional. Default = \code{c(1980, 2025)}.
+#'   x axis. Optional. Default = \code{NULL}.
 #' @param markerLocations Vector of numbers (years) for positions of vertical
 #'   dashed lines. Optional. Default = \code{NULL}.
 #'
@@ -22,7 +22,7 @@
 GetDiagnosisYearDensityPlot <- function(
   plotData,
   colorPalette = c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"),
-  xLimits = c(1980, 2025),
+  xLimits = NULL,
   markerLocations = NULL
 )
 {
@@ -30,16 +30,23 @@ GetDiagnosisYearDensityPlot <- function(
     return(NULL)
   }
 
-  breaks <- xLimits[1]:xLimits[2]
-  labels <- as.character(breaks)
-  labels[breaks %% 5 != 0] <- ""
-
   plotDt <- plotData[, .(Count = .N), by = .(DateOfDiagnosisYear, Gender)]
   if (!is.null(markerLocations)) {
     plotDt[, Selected := DateOfDiagnosisYear %between% markerLocations]
   } else {
     plotDt[, Selected := TRUE]
   }
+
+  if (is.null(xLimits)) {
+    xLimits <- plotDt[, c(floor(min(DateOfDiagnosisYear, na.rm = TRUE)),
+                          ceiling(max(DateOfDiagnosisYear, na.rm = TRUE)))]
+  }
+
+  breaks <- seq(from = xLimits[1],
+                to = xLimits[2],
+                by = 1)
+  labels <- as.character(breaks)
+  labels[breaks %% 2 != 0] <- ""
 
   plot <-
     ggplot(plotDt, aes(x = DateOfDiagnosisYear, y = Count, fill = Gender, color = Gender)) +

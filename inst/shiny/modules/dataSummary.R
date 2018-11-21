@@ -42,7 +42,7 @@ dataSummaryUI <- function(id)
           step = 0.25,
           sep = "",
           width = "612px",
-          round = FALSE
+          round = -2
         ),
         div(
           checkboxInput(ns("notifQuarterFilterChkBox"),
@@ -78,14 +78,35 @@ dataSummary <- function(input, output, session, appStatus)
   }
 
   observeEvent(appStatus$InputData, {
-    appStatus$DiagYearRange <-
-      appStatus$InputData$Table[,
-        c(max(1980, min(DateOfDiagnosisYear, na.rm = TRUE)),
-          min(2025, max(DateOfDiagnosisYear, na.rm = TRUE)))]
-    appStatus$NotifQuarterRange <-
-      appStatus$InputData$Table[,
-        c(max(1980, min(NotificationTime, na.rm = TRUE)),
-          min(2025, max(NotificationTime, na.rm = TRUE)))]
+
+    diagYearDataRange <- appStatus$InputData$Table[,
+      c(min(DateOfDiagnosisYear, na.rm = TRUE),
+        max(DateOfDiagnosisYear, na.rm = TRUE))]
+    notifQuarterDataRange <- appStatus$InputData$Table[,
+      c(floor(min(NotificationTime, na.rm = TRUE)),
+        ceiling(max(NotificationTime, na.rm = TRUE)))]
+
+    if (identical(diagYearDataRange, c(NA, NA))) {
+      diagYearDataRange <- c(1980, 2025)
+    }
+    if (identical(notifQuarterDataRange, c(NA, NA))) {
+      notifQuarterDataRange <- c(1980, 2025)
+    }
+
+    freezeReactiveValue(input, 'diagYearRange')
+    updateSliderInput(session, 'diagYearRange',
+                      min = diagYearDataRange[1],
+                      max = diagYearDataRange[2])
+
+    freezeReactiveValue(input, 'notifQuarterRange')
+    updateSliderInput(session, 'notifQuarterRange',
+                      min = notifQuarterDataRange[1],
+                      max = notifQuarterDataRange[2])
+
+    appStatus$DiagYearRange <- diagYearDataRange
+
+    appStatus$NotifQuarterRange <- notifQuarterDataRange
+
     if (appStatus$DiagYearRangeApply || appStatus$NotifQuarterRangeApply) {
       invalidateAdjustments()
     }
