@@ -38,9 +38,11 @@ RenderReportToFile <- function(
   reportDirName <- dirname(tempReportFilePath)
 
   dir.create(reportDirName, showWarnings = FALSE, recursive = TRUE)
+
   file.copy(reportFilePath,
             tempReportFilePath,
             overwrite = TRUE)
+
   on.exit({
     unlink(reportDirName, recursive = TRUE)
   })
@@ -48,9 +50,9 @@ RenderReportToFile <- function(
   dir.create(file.path(reportDirName, "resources"),
              showWarnings = FALSE, recursive = TRUE)
 
-  file.copy(system.file("reports/resources/ECDC_logo.png",
+  file.copy(system.file("reports/resources/ECDC_logo.pdf",
                         package = "hivEstimatesAccuracy"),
-            file.path(reportDirName, "resources/ECDC_logo.png"))
+            file.path(reportDirName, "resources/ECDC_logo.pdf"))
 
   if (format == "all" || "word_document" %in% format) {
     file.copy(system.file("reports/resources/template_ECDC.docx",

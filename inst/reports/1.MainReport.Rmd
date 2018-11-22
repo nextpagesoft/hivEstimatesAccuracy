@@ -9,7 +9,7 @@ header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
 - \usepackage{titling}
-- \pretitle{\begin{center}\LARGE\includegraphics[width=12cm]{resources/ECDC_logo.png}\\[\bigskipamount]}
+- \pretitle{\begin{center}\LARGE\includegraphics[width=3cm]{resources/ECDC_logo.pdf}\\[\bigskipamount]}
 - \posttitle{\end{center}}  
 output:
   html_fragment:
