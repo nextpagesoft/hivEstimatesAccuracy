@@ -5,7 +5,7 @@
 \title{GetNotificationQuarterDensityPlot}
 \usage{
 GetNotificationQuarterDensityPlot(plotData, colorPalette = c("#69b023",
-  "#7bbcc0", "#9d8b56", "#ce80ce"), xLimits = c(1980, 2025),
+  "#7bbcc0", "#9d8b56", "#ce80ce"), xLimits = NULL,
   markerLocations = NULL)
 }
 \arguments{
@@ -16,7 +16,7 @@ series. Optional. Default = \code{c("#c7c7c7", "#69b023", "#7bbcc0",
 "#9d8b56", "#ce80ce")}.}
 
 \item{xLimits}{Vector of two numbers (years), lower and upper limit for the
-x axis. Optional. Default = \code{c(1980, 2025)}.}
+x axis. Optional. Default = \code{NULL}.}
 
 \item{markerLocations}{Vector of numbers (years) for positions of vertical
 dashed lines. Optional. Default = \code{NULL}.}
