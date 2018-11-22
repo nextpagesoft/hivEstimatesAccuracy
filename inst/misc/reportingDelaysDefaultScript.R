@@ -21,7 +21,7 @@ runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "~/share/baza30czer2018_mod_QRT.xlsx"
+inputDataFilePath <- "/media/sf_VirtualBox_Shared/Nikos_test/EL2.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -44,7 +44,7 @@ inputData <- ApplyAttributesMapping(originalData,
                                     GetPreliminaryDefaultValues())
 
 # Pre-process data
-inputData <- PreProcessInputData(inputData = inputData)
+inputData <- PreProcessInputDataBeforeSummary(inputData = inputData)
 
 # Apply Origin mapping
 distr <- GetOriginDistribution(inputData$Table)
@@ -104,14 +104,17 @@ outputData <- copy(compData)
 outputData[, VarT := 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1]
 
 # Filter
-compData <- compData[!is.na(DiagnosisTime) & !is.na(NotificationTime)]
+compData <- compData[!is.na(VarX)]
+compData[is.na(DiagnosisTime), DiagnosisTime := DateOfDiagnosisYear + 0.25]
+compData[is.na(NotificationTime), NotificationTime := DiagnosisTime + VarX / 4]
+
 compData <- compData[VarX >= 0 &
-                       DiagnosisTime >= max(startYear + 0.25,
-                                            min(NotificationTime, na.rm = TRUE)) &
+                       DiagnosisTime >= (startYear + 0.25) &
                        NotificationTime <= endQrt]
+
 compData[, ":="(
-  VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1,
-  Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(MinNotificationTime, startYear + 0.25)),
+  VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
+  Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)),
   ReportingDelay = 1L
 )]
 compData[, ":="(

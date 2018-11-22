@@ -1,13 +1,14 @@
 Version 0.11.0 (2018/11/--)
 --------------------------------------------------------------------------------
 
-* MI: rename tabs of intermediate results
+* MI: Rename tabs of intermediate results
 * Main Report: add ECDC logo to pdf output
-* Misc: seed for random number generator for imputations can be set
-* Misc: make filtering on notification quarter effective
+* Misc: Seed for random number generator for imputations can be set
+* Misc: Make filtering on notification quarter effective
 * Manual: Draft manual added as pdf file
 * Adjustments: Fix infinity in LogitVarX for jomo adjustment
-* Summary: set min/max for filters based on input data
+* Summary: Set min/max for filters based on input data
+* Main Report: Allow cancelling creating the report
 
 Version 0.10.0 (2018/11/11)
 --------------------------------------------------------------------------------
