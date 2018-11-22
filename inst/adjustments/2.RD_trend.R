@@ -90,14 +90,17 @@ list(
     outputData[, VarT := 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1]
 
     # Filter
-    compData <- compData[!is.na(DiagnosisTime) & !is.na(NotificationTime)]
+    compData <- compData[!is.na(VarX)]
+    compData[is.na(DiagnosisTime), DiagnosisTime := DateOfDiagnosisYear + 0.25]
+    compData[is.na(NotificationTime), NotificationTime := DiagnosisTime + VarX / 4]
+
     compData <- compData[VarX >= 0 &
-                           DiagnosisTime >= max(startYear + 0.25,
-                                              min(NotificationTime, na.rm = TRUE)) &
+                           DiagnosisTime >= (startYear + 0.25) &
                            NotificationTime <= endQrt]
+
     compData[, ":="(
       VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
-      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(MinNotificationTime, startYear + 0.25)),
+      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)),
       ReportingDelay = 1L
     )]
     compData[, ":="(
@@ -222,17 +225,31 @@ list(
           ReportingDelay = 0
         )]
 
-        fit <- survfit(fitCox,
-                       newdata = estFrame,
-                       id = Id)
+        fit <- try({
+          survfit(fitCox,
+                  newdata = estFrame,
+                  id = Id)
+        }, silent = TRUE)
 
-        fitStratumImp <- data.table(
-          Imputation = imputation,
-          Delay = fit$time,
-          P = fit$surv,
-          Weight = 1/fit$surv,
-          Var = fit$std.err^2,
-          unique(estFrame[, ..stratVarNamesTrend])[rep(seq_len(.N), fit$strata)])
+        if (is(fit, "try-error")) {
+          fitStratumImp <- data.table(
+            Imputation = imputation,
+            Delay = 0,
+            P = 1,
+            Weight = 1,
+            Var = 0,
+            unique(estFrame[, ..stratVarNamesTrend])
+          )
+        } else {
+          fitStratumImp <- data.table(
+            Imputation = imputation,
+            Delay = fit$time,
+            P = fit$surv,
+            Weight = 1/fit$surv,
+            Var = fit$std.err^2,
+            unique(estFrame[, ..stratVarNamesTrend])[rep(seq_len(.N), fit$strata)])
+        }
+
         fitStratumImp[, VarT := max(Delay) - Delay]
 
         # Store this imputation results
@@ -302,9 +319,17 @@ list(
                                  LowerEstCount + UpperEstCount ~ MissingData,
                                value.var = "Count",
                                fun.aggregate = sum)
-      setnames(reportTableData,
-               old = c("FALSE", "TRUE"),
-               new = c("RDWeightEstimated", "RDWeightNotEstimated"))
+      if ("TRUE" %in% colnames(reportTableData)) {
+        setnames(reportTableData, old = "TRUE", new = "RDWeightNotEstimated")
+      } else {
+        reportTableData[, RDWeightNotEstimated := 0]
+      }
+      if ("FALSE" %in% colnames(reportTableData)) {
+        setnames(reportTableData, old = "FALSE", new = "RDWeightEstimated")
+      } else {
+        reportTableData[, RDWeightEstimated := 0]
+      }
+
       reportTableData <- reportTableData[, lapply(.SD, sum),
                                          by = DateOfDiagnosisYear,
                                          .SDcols = setdiff(colnames(reportTableData),

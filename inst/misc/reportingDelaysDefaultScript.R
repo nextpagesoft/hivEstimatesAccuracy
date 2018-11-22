@@ -51,6 +51,8 @@ distr <- GetOriginDistribution(inputData$Table)
 map <- GetOriginGroupingMap(type = "REPCOUNTRY + UNK + OTHER", distr)
 inputData <- ApplyOriginGroupingMap(inputData, map)
 
+PreProcessInputDataBeforeAdjustments(inputData = inputData$Table)
+
 # Apply mice adjustment (optional)
 if (runMice) {
   adjustmentNames <- c("Multiple Imputation using Chained Equations - MICE")
@@ -232,9 +234,9 @@ if (nrow(compData) > 0) {
              ), on = .(VarT, Stratum)]
   outputData[, ":="(
     Source = ifelse(Imputation == 0, "Reported", "Imputed"),
-    MissingData = is.na(Weight) | is.infinite(Weight)
+    MissingData = VarX != 0 & (is.na(Weight) | is.infinite(Weight))
   )]
-  outputData[MissingData == TRUE, ":="(
+  outputData[MissingData == TRUE | VarX == 0, ":="(
     Weight = 1,
     P = 1
   )]
@@ -280,9 +282,17 @@ if (nrow(compData) > 0) {
                              LowerEstCount + UpperEstCount ~ MissingData,
                            value.var = "Count",
                            fun.aggregate = sum)
-  setnames(reportTableData,
-           old = c("FALSE", "TRUE"),
-           new = c("RDWeightEstimated", "RDWeightNotEstimated"))
+  if ("TRUE" %in% colnames(reportTableData)) {
+    setnames(reportTableData, old = "TRUE", new = "RDWeightNotEstimated")
+  } else {
+    reportTableData[, RDWeightNotEstimated := 0]
+  }
+  if ("FALSE" %in% colnames(reportTableData)) {
+    setnames(reportTableData, old = "FALSE", new = "RDWeightEstimated")
+  } else {
+    reportTableData[, RDWeightEstimated := 0]
+  }
+
   reportTableData <- reportTableData[, lapply(.SD, sum),
                                      by = DateOfDiagnosisYear,
                                      .SDcols = setdiff(colnames(reportTableData),

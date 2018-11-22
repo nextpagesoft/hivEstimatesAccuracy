@@ -160,7 +160,7 @@ createReports <- function(input, output, session, appStatus)
 
     # Show progress message during task start
     prog <- Progress$new(session)
-    prog$set(message = "Creating report...", value = 0.1)
+    prog$set(message = "Creating report...", value = 0.5)
 
     # Define parameters
     params <- append(list(AdjustedData = adjustedData),
