@@ -48,6 +48,7 @@ dataSummaryUI <- function(id)
           checkboxInput(ns("notifQuarterFilterChkBox"),
                         "Apply filter in adjustments",
                         FALSE),
+          textOutput(ns("notifQuarterFilterInfo")),
           style = "position: absolute; top: 62px; left: 700px"
         ),
         style = "margin-left: 22px; position: relative"
@@ -104,7 +105,6 @@ dataSummary <- function(input, output, session, appStatus)
                       max = notifQuarterDataRange[2])
 
     appStatus$DiagYearRange <- diagYearDataRange
-
     appStatus$NotifQuarterRange <- notifQuarterDataRange
 
     if (appStatus$DiagYearRangeApply || appStatus$NotifQuarterRangeApply) {
@@ -122,6 +122,7 @@ dataSummary <- function(input, output, session, appStatus)
   observeEvent(input[['diagYearRange']], {
     freezeReactiveValue(appStatus, 'DiagYearRange')
     appStatus$DiagYearRange <- input[['diagYearRange']]
+
     if (appStatus$DiagYearRangeApply) {
       invalidateAdjustments()
     }
@@ -172,6 +173,17 @@ dataSummary <- function(input, output, session, appStatus)
     invalidateAdjustments()
   })
 
+  output[["notifQuarterFilterInfo"]] <- renderText({
+    diagYearRange <- input[['diagYearRange']]
+    notifQuarterRange <- input[['notifQuarterRange']]
+
+    if (diagYearRange[1] > notifQuarterRange[1]) {
+      sprintf("Start notification quarter should not be before diagnosis year (%d)", diagYearRange[1])
+    } else {
+      ""
+    }
+  })
+
   # Output density plots
   output[["diagYearDensityOutput"]] <- renderUI({
     req(appStatus$InputData$Table)
@@ -202,17 +214,19 @@ dataSummary <- function(input, output, session, appStatus)
   dataSelection <- reactive({
     diagYearRange <- req(input[['diagYearRange']])
     notifQuarterRange <- req(input[['notifQuarterRange']])
+
     req(appStatus$InputData$Table)[, DateOfDiagnosisYear %between% diagYearRange &
                                      NotificationTime %between% notifQuarterRange]
   })
 
   output[["filterInfo"]] <- renderText({
     dataSelection <- dataSelection()
-    sprintf("Selected observations: %d out of %d", sum(dataSelection), length(dataSelection))
+    sprintf("Number of selected observations: %d out of %d", sum(dataSelection), length(dataSelection))
   })
 
   artifacts <- reactive({
-    inputData <- appStatus$InputData$Table[dataSelection()]
+    dataSelection <- dataSelection()
+    inputData <- appStatus$InputData$Table[dataSelection]
     PreProcessInputDataBeforeAdjustments(inputData)
     GetDataSummaryArtifacts(inputData)
   })
