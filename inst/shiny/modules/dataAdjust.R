@@ -148,8 +148,12 @@ dataAdjust <- function(input, output, session, appStatus)
       editedAdjustmentSpec <- appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]
       vals$editedAdjustmentParamsWidgets <- GetAdjustParamsWidgets(editedAdjustmentSpec)
 
+      dialogTitle <- ifelse(editedAdjustmentSpec$Type == "REPORTING_DELAYS",
+                            "Edit adjustment parameters for calculating weights",
+                            "Edit adjustment parameters")
+
       showModal(modalDialog(
-        title = "Edit adjustment parameters",
+        title = dialogTitle,
         uiOutput(ns("adjustmentParams")),
         easyClose = FALSE,
         footer = tagList(
