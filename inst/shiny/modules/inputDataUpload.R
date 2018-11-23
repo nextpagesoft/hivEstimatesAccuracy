@@ -446,7 +446,7 @@ inputDataUpload <- function(input, output, session, appStatus)
             wrongValuesCol <- wrongValuesCols[[colName]]
             tags$li(sprintf("Attribute %s contains invalid value(s) %s.",
                             AddQuoteMarks(colName),
-                            paste(AddQuoteMarks(wrongValuesCol$WrongValues), collapse = ", ")))
+                            paste(AddQuoteMarks(as.character(wrongValuesCol$WrongValues)), collapse = ", ")))
           })
         )
       }
@@ -492,7 +492,7 @@ inputDataUpload <- function(input, output, session, appStatus)
     options = list(
       dom = '<"top">lirt<"bottom">p',
       autoWidth = FALSE,
-      pageLength = 15,
+      pageLength = 10,
       scrollX = TRUE,
       deferRender = TRUE,
       serverSide = TRUE,

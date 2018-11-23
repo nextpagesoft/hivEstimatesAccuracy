@@ -27,13 +27,15 @@ if (is.null(attrMapping[["Age"]])) {
 if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"
 }
+
 attrMappingStatus <- GetAttrMappingStatus(attrMapping)
 if (attrMappingStatus[["Valid"]]) {
+  defaultValues <- GetPreliminaryDefaultValues()
   inputDataTest <- ApplyAttributesMapping(originalData,
                                           attrMapping,
-                                          GetPreliminaryDefaultValues())
+                                          defaultValues)
   inputDataTest <- PreProcessInputDataBeforeSummary(inputData = inputDataTest)
-  inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
+  inputDataTestStatus <- GetInputDataValidityStatus(inputData = inputDataTest$Table)
   if (inputDataTestStatus[["Valid"]]) {
     inputData <- inputDataTest
   } else {

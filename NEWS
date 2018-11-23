@@ -12,6 +12,7 @@ Version 0.11.0 (2018/11/--)
 * RD adjustments: Update reporting delays adjustments to support missing
   DiagnosisTime or NotificationTime
 * RD adjustments: Title of the parameters dialog updated
+* Misc: Enforce no missings in DateOfDiagnosisYear
 
 Version 0.10.0 (2018/11/11)
 --------------------------------------------------------------------------------
