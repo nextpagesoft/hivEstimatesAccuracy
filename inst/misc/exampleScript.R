@@ -56,7 +56,7 @@ if (!is.null(inputData)) {
   GetNotificationQuarterDensityPlot(plotData = inputData$Table)
   summaryInputData <- inputData$Table
   PreProcessInputDataBeforeAdjustments(summaryInputData)
-  summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
+  summaryArtifacts <- GetDataSummaryArtifacts(inputData = summaryInputData)
 
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
   adjustedData <- RunAdjustments(data = inputData$Table,

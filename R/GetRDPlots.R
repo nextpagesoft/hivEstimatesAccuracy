@@ -47,6 +47,13 @@ GetRDPlots <- function(
   localConfBoundsPlotData <- localPlotData[Source == ifelse(isOriginalData,
                                                             "Reported",
                                                             "Imputed")]
+
+  breaks <- localPlotData[, sort(unique(DateOfDiagnosisYear))]
+  labels <- as.character(breaks)
+  if (!is.null(stratum)) {
+    labels[breaks %% 2 != 0] <- ""
+  }
+
   plot <-
     ggplot(data = localPlotData, aes(x = DateOfDiagnosisYear)) +
     geom_ribbon(data = localConfBoundsPlotData,
@@ -59,7 +66,7 @@ GetRDPlots <- function(
               aes(x = DateOfDiagnosisYear, y = EstCount, color = "Estimated total"), size = 1) +
     geom_line(aes(y = Count, group = Source, color = Source), size = 1) +
     scale_colour_manual("Counts", values = colorPalette) +
-    scale_x_continuous(expand = c(0, 0), breaks = localPlotData[, sort(unique(DateOfDiagnosisYear))]) +
+    scale_x_continuous(expand = c(0, 0), breaks = breaks, labels = labels) +
     scale_y_continuous(expand = c(0, 0)) +
     expand_limits(y = 0) +
     theme_classic() +

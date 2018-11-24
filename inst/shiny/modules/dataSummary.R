@@ -1,3 +1,6 @@
+# Module globals
+genderLabels <- c("M" = "Male", "F" = "Female", "O" = "Other")
+
 # User interface
 dataSummaryUI <- function(id)
 {
@@ -56,14 +59,15 @@ dataSummaryUI <- function(id)
       uiOutput(ns("notifQuarterDensityOutput")),
       div(textOutput(ns("filterInfo")),
           style = "margin-left: 22px; font-weight: bold"),
-      tagList(
-        uiOutput(ns("missPlotDiv")),
-        uiOutput(ns("missPlotRDOutput")),
-        uiOutput(ns("delayDensityOutput")),
-        uiOutput(ns("meanDelayOutput"))
-      ),
-      type = 7,
-      proxy.height = "60px"
+      withSpinner(
+        tagList(
+          uiOutput(ns("missPlotDiv")),
+          uiOutput(ns("missPlotRDOutput")),
+          uiOutput(ns("delayDensityOutput")),
+          uiOutput(ns("meanDelayOutput"))),
+        type = 7,
+        proxy.height = "50px"
+      )
     )
   )
 }
@@ -232,39 +236,61 @@ dataSummary <- function(input, output, session, appStatus)
   })
 
   output[["missPlotDiv"]] <- renderUI({
-    widgets <- tagList()
-    if (appStatus[["AttrMappingValid"]]) {
-      missPlotsTotal <- artifacts()$MissPlotsTotal
-      missPlotsByGender <- artifacts()$MissPlotsByGender
-      plotCounter <- 0
-      widgets[[length(widgets) + 1]] <- h1("1. Missing data summary: key variables")
-      widgets[[length(widgets) + 1]] <- p("Percentages of cases for which the information was not available (missing) for one or more of the key variables: CD4 count, transmission category, migrant status or age.")
+    artifacts <- artifacts()
 
-      plotCounter <- plotCounter + 1
-      widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. All cases within selected time period", plotCounter))
-      if (!is.null(missPlotsTotal)) {
-        widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
+    isolate({
+
+      widgets <- tagList()
+      if (appStatus[["AttrMappingValid"]]) {
+        missPlotsTotal <- artifacts$MissPlotsTotal
+        missPlotsByGender <- artifacts$MissPlotsByGender
+        plotCounter <- 0
+        widgets[[length(widgets) + 1]] <- h1("1. Missing data summary: key variables")
+        widgets[[length(widgets) + 1]] <- p("Percentages of cases for which the information was not available (missing) for one or more of the key variables: CD4 count, transmission category, migrant status or age.")
+
+        plotCounter <- plotCounter + 1
+        widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. All cases within selected time period", plotCounter))
+        if (!is.null(missPlotsTotal)) {
+          widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsTotal"))
+        } else {
+          widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
+        }
+        plotCounter <- plotCounter + 1
+        widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. By gender", plotCounter))
+        if (!is.null(missPlotsByGender)) {
+          # i <- 1
+          genderCounter <- 0
+          for (i in seq_along(genderLabels)) {
+            gender <- names(genderLabels)[i]
+            if (gender %in% names(artifacts$MissPlotsByGender)) {
+              genderCounter <- genderCounter + 1
+              genderLabel <- genderLabels[gender]
+              plotOutputName <- sprintf("missPlotsGender%s", gender)
+
+              widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.%d %s cases within selected time period",
+                                                           plotCounter, genderCounter, genderLabel))
+              widgets[[length(widgets) + 1]] <- plotOutput(ns(plotOutputName))
+            }
+          }
+        } else {
+          widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
+        }
       } else {
-        widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
+        widgets[[length(widgets) + 1]] <- p("Please, upload input data and apply attribute mapping in \"Input data upload\" tab first.")
       }
-      plotCounter <- plotCounter + 1
-      widgets[[length(widgets) + 1]] <- h2(sprintf("1.%d. By gender", plotCounter))
-      if (!is.null(missPlotsByGender)) {
-        widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.1 Female cases within selected time period", plotCounter))
-        widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderF"))
-        widgets[[length(widgets) + 1]] <- h3(sprintf("1.%d.2 Male cases within selected time period", plotCounter))
-        widgets[[length(widgets) + 1]] <- plotOutput(ns("missPlotsGenderM"))
-      } else {
-        widgets[[length(widgets) + 1]] <- p("This plot cannot be created due to insufficient data.")
-      }
-    } else {
-      widgets[[length(widgets) + 1]] <- p("Please, upload input data and apply attribute mapping in \"Input data upload\" tab first.")
-    }
-    return(widgets)
+
+      widgets
+    })
   })
 
   output[["missPlotsTotal"]] <- renderPlot({
     PlotMultipleCharts(plots = artifacts()$MissPlotsTotal,
+                       cols = 3,
+                       widths = c(3, 1, 4))
+  })
+
+  output[["missPlotsGenderM"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$M,
                        cols = 3,
                        widths = c(3, 1, 4))
   })
@@ -275,8 +301,8 @@ dataSummary <- function(input, output, session, appStatus)
                        widths = c(3, 1, 4))
   })
 
-  output[["missPlotsGenderM"]] <- renderPlot({
-    PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$M,
+  output[["missPlotsGenderO"]] <- renderPlot({
+    PlotMultipleCharts(plots = artifacts()$MissPlotsByGender$O,
                        cols = 3,
                        widths = c(3, 1, 4))
   })

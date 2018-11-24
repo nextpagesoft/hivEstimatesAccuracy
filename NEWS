@@ -15,6 +15,8 @@ Version 0.11.0 (2018/11/--)
 * Misc: Enforce no missings in DateOfDiagnosisYear
 * Summary: Show message when start notification quarter is before start diagnosis
   year
+* Misc: Support gender "Other"
+* Misc: Updates to formatting and user experience
 
 Version 0.10.0 (2018/11/11)
 --------------------------------------------------------------------------------

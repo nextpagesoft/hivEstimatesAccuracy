@@ -58,7 +58,7 @@ GetDataSummaryArtifacts <- function(inputData)
                y = -Inf,
                hjust = 0,
                vjust = -1) +
-      scale_x_continuous(expand = c(0, 0)) +
+      scale_x_continuous(expand = c(0, 0), breaks = sort(unique(densDelay$VarX))) +
       scale_y_continuous(expand = c(0, 0)) +
       coord_cartesian(xlim = c(0, max(20, ceiling(quant99)))) +
       theme_classic() +
@@ -80,6 +80,9 @@ GetDataSummaryArtifacts <- function(inputData)
                          by = .(NotificationTime)]
 
   if (meanDelay[, .N > 0]) {
+    breaks <- meanDelay[, sort(unique(round(NotificationTime)))]
+    labels <- as.character(breaks)
+
     meanDelay[, rsd := RollingApply(MeanDelay, 10, sd)]
     meanDelayCurve <- meanDelay[, as.data.table(lowess(NotificationTime, MeanDelay))]
     meanDelayUpper <- meanDelay[, as.data.table(lowess(NotificationTime, MeanDelay + 1.96 * rsd))]
@@ -96,7 +99,9 @@ GetDataSummaryArtifacts <- function(inputData)
       scale_linetype_manual("Datasets",
                             values = c("Smoothed mean reporting delay" = "solid",
                                        "Expected upper bound" = "dotted")) +
-      scale_x_continuous(expand = c(0, 0)) +
+      scale_x_continuous(expand = c(0, 0),
+                         breaks = breaks,
+                         labels = labels) +
       scale_y_continuous(expand = c(0, 0)) +
       theme_classic() +
       theme(plot.title = element_text(size = 12, face = "plain"),

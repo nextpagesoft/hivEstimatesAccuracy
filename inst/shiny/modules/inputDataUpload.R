@@ -2,9 +2,6 @@
 adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
                           GetListObject)
 
-# Module globals
-currYear <- year(Sys.time())
-
 # Load application modules
 modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
 source(file.path(modulesPath, "inputDataUpload-Migrant.R"))
@@ -25,7 +22,7 @@ inputDataUploadUI <- function(id)
             offset = 2,
             width = 8,
             style = "text-align: center; font-weight: bold",
-            p("The ECDC HIV Estimates Accuracy Tool is an application that uses advanced statistical methods to correct for missing values in key HIV surveillance variables as well as for reporting delay."),
+            p("The ECDC HIV Estimates Accuracy Tool is an application that uses advanced statistical methods to correct for missing values in key HIV surveillance variables as well as for reporting delay, as defined by the time from case diagnosis to notification at the national level."),
             p("The tool accepts case based HIV surveillance data prepared in a specific format."),
             p("The outputs include results from pre-defined analyses in the form of a report containing tables and graphs, and datasets, in which the adjustments have been incorporated and which may be exported for further analysis.",
               style = "margin-bottom: 0")
@@ -487,16 +484,18 @@ inputDataUpload <- function(input, output, session, appStatus)
     }
   })
 
-  output[["inputDataTable"]] <- renderDataTable(
-    appStatus$InputData$Table[, -c("GroupOfOrigin", "SqCD4")],
-    options = list(
-      dom = '<"top">lirt<"bottom">p',
-      autoWidth = FALSE,
-      pageLength = 10,
-      scrollX = TRUE,
-      deferRender = TRUE,
-      serverSide = TRUE,
-      scroller = FALSE))
+  output[["inputDataTable"]] <- renderDataTable({
+    req(appStatus$InputData$Table)[, -c("GroupOfOrigin", "SqCD4")]
+  },
+  options = list(
+    dom = '<"top">lirt<"bottom">p',
+    autoWidth = FALSE,
+    pageLength = 10,
+    scrollX = TRUE,
+    deferRender = TRUE,
+    serverSide = TRUE,
+    scroller = FALSE)
+  )
 
   callModule(inputDataUploadMigrant, "migrant", appStatus, inputDataBeforeGrouping)
 

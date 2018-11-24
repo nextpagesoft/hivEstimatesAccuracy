@@ -6,6 +6,8 @@
 #' @param colorPalette Character vector of colors for plotted
 #'  series. Optional. Default = \code{c("#c7c7c7", "#69b023", "#7bbcc0",
 #'  "#9d8b56", "#ce80ce")}.
+#' @param genderLabels Named vector of mapping from Gender code to label.
+#'   Optional. Default = \code{c("M" = "Male", "F" = "Female", "O" = "Other")}
 #' @param xLimits Vector of two numbers (years), lower and upper limit for the
 #'   x axis. Optional. Default = \code{NULL}.
 #' @param markerLocations Vector of numbers (years) for positions of vertical
@@ -22,6 +24,7 @@
 GetDiagnosisYearDensityPlot <- function(
   plotData,
   colorPalette = c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"),
+  genderLabels = c("M" = "Male", "F" = "Female", "O" = "Other"),
   xLimits = NULL,
   markerLocations = NULL
 )
@@ -53,12 +56,10 @@ GetDiagnosisYearDensityPlot <- function(
     geom_col(aes(alpha = Selected), position = "stack", width = 1, size = 0.1) +
     scale_colour_manual("Gender",
                         values = colorPalette,
-                        labels = c("M" = "Male",
-                                   "F" = "Female")) +
+                        labels = genderLabels) +
     scale_fill_manual("Gender",
                       values = colorPalette,
-                      labels = c("M" = "Male",
-                                 "F" = "Female")) +
+                      labels = genderLabels) +
     scale_alpha_manual(values = c("TRUE" = 0.7, "FALSE" = 0.2), guide = "none") +
     scale_x_continuous(expand = c(0, 0), breaks = breaks, labels = labels) +
     scale_y_continuous(expand = c(0, 0)) +

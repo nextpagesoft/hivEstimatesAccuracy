@@ -27,24 +27,20 @@ PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
   inputData[, (charColNames) := lapply(.SD, toupper), .SDcols = charColNames]
 
   # Replace UNKs and BLANKS with NAs
-  for (i in charColNames) {
-    inputData[get(i) %chin% c("UNK", ""), (i) := NA]
+  for (colName in charColNames) {
+    inputData[get(colName) %chin% c("UNK", ""), (colName) := NA]
   }
 
-  # Drop unused levels (prior UNKs)
-  inputData <- droplevels(inputData)
+  # Merge RegionOfBirth and RegionOfNationality
+  inputData[countryData[, .(CountryOfBirth = Code, RegionOfBirth = TESSyCode)],
+            RegionOfBirth := RegionOfBirth,
+            on = .(CountryOfBirth)]
+  inputData[countryData[, .(CountryOfNationality = Code, RegionOfNationality = TESSyCode)],
+            RegionOfNationality := RegionOfNationality,
+            on = .(CountryOfNationality)]
 
-  inputData <- merge(inputData,
-                     countryData[, .(CountryOfBirth = Code, RegionOfBirth = TESSyCode)],
-                     by = c("CountryOfBirth"),
-                     all.x = TRUE)
   inputData[!is.na(CountryOfBirth) & CountryOfBirth %chin% ReportingCountry,
             RegionOfBirth := "REPCOUNTRY"]
-
-  inputData <- merge(inputData,
-                     countryData[, .(CountryOfNationality = Code, RegionOfNationality = TESSyCode)],
-                     by = c("CountryOfNationality"),
-                     all.x = TRUE)
   inputData[!is.na(CountryOfNationality) & CountryOfNationality %chin% ReportingCountry,
             RegionOfNationality := "REPCOUNTRY"]
 
@@ -74,7 +70,7 @@ PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
   # Create GroupOfOrigin variable 1, 2, 3...
   inputData[, GroupOfOrigin := factor(NA, levels = c("Reporting Country", "Other Country", "SSA"))]
   # ...based on RegionOfOrigin if not NA
-  inputData[is.na(GroupOfOrigin) & !is.na(RegionOfOrigin),
+  inputData[!is.na(RegionOfOrigin),
             GroupOfOrigin := ifelse(RegionOfOrigin == "REPCOUNTRY", 1L,
                                     ifelse(!RegionOfOrigin %chin% "SUBAFR", 2L,
                                            3L))]
@@ -99,18 +95,21 @@ PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
                                     "AIDS-No"))]
 
   # Imput Gender
-  selGenderMissing1 <- inputData[, is.na(Gender) & Transmission %chin% "MSM"]
-  inputData[selGenderMissing1, Gender := "M"]
-
+  selGenderMissing <- inputData[, is.na(Gender)]
+  selGenderReplaced <- selGenderMissing & inputData$Transmission %chin% "MSM"
+  selGenderImputed <- selGenderMissing & !selGenderReplaced
+  # If Gender missing and Transmission is MSM, then set Male gender
+  inputData[selGenderReplaced, Gender := "M"]
   # A single imputation based on categorical year and transmission
-  selGenderMissing2 <- inputData[, is.na(Gender)]
-  inputDataGender <- inputData[, .(Gender = as.factor(Gender),
-                                   DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
-                                   Transmission)]
-  set.seed(seed)
-  miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE))
-  inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
-  inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
+  if (any(selGenderImputed)) {
+    inputDataGender <- inputData[, .(Gender = as.factor(Gender),
+                                     DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
+                                     Transmission = Transmission)]
+    set.seed(seed)
+    miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = TRUE))
+    inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
+    inputData[selGenderImputed, Gender := inputDataGender$Gender[selGenderImputed]]
+  }
 
   # Create helper columns for filtering data on diagnosis and notification time
   inputData[, ":="(
@@ -123,8 +122,8 @@ PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
   inputData[, Transmission := factor(Transmission)]
 
   results <- list(Table = inputData,
-                  Artifacts = list(MissGenderReplaced = sum(selGenderMissing1),
-                                   MissGenderImputed = sum(selGenderMissing2)))
+                  Artifacts = list(MissGenderReplaced = sum(selGenderReplaced),
+                                   MissGenderImputed = sum(selGenderImputed)))
 
   return(results)
 }

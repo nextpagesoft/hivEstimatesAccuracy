@@ -5,8 +5,8 @@
 \title{GetNotificationQuarterDensityPlot}
 \usage{
 GetNotificationQuarterDensityPlot(plotData, colorPalette = c("#69b023",
-  "#7bbcc0", "#9d8b56", "#ce80ce"), xLimits = NULL,
-  markerLocations = NULL)
+  "#7bbcc0", "#9d8b56", "#ce80ce"), genderLabels = c(M = "Male", F =
+  "Female", O = "Other"), xLimits = NULL, markerLocations = NULL)
 }
 \arguments{
 \item{plotData}{Data table object. Required.}
@@ -14,6 +14,9 @@ GetNotificationQuarterDensityPlot(plotData, colorPalette = c("#69b023",
 \item{colorPalette}{Character vector of colors for plotted
 series. Optional. Default = \code{c("#c7c7c7", "#69b023", "#7bbcc0",
 "#9d8b56", "#ce80ce")}.}
+
+\item{genderLabels}{Named vector of mapping from Gender code to label.
+Optional. Default = \code{c("M" = "Male", "F" = "Female", "O" = "Other")}}
 
 \item{xLimits}{Vector of two numbers (years), lower and upper limit for the
 x axis. Optional. Default = \code{NULL}.}
