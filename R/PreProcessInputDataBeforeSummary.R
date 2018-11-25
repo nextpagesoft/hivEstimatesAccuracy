@@ -118,7 +118,9 @@ PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
   )]
 
   # Transform columns to factor
-  inputData[, Gender := factor(Gender)]
+  inputData[, Gender := factor(Gender,
+                               levels = c("M", "F", "O"))]
+  inputData[, Gender := droplevels(Gender)]
   inputData[, Transmission := factor(Transmission)]
 
   results <- list(Table = inputData,

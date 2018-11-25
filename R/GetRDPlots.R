@@ -91,7 +91,7 @@ GetRDPlots <- function(
     plot <-
       plot +
       ggtitle(paste("Reported and estimated total count of cases by", stratum)) +
-      facet_wrap(~StratumValue, ncol = 2, drop = FALSE, shrink = FALSE)
+      facet_wrap(~StratumValue, ncol = 2, drop = TRUE, shrink = FALSE)
   } else {
     plot <- plot +
       ggtitle("Reported and estimated total count of cases")

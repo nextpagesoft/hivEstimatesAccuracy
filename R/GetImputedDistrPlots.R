@@ -109,6 +109,20 @@ GetImputedDistPlots <- function(
           panel.grid = element_blank(),
           axis.line = element_line(colour = "#888888"),
           axis.ticks = element_line(colour = "#888888"))
+
+  # Rotate X-axis lables if there are too many
+  if (isFactor && length(levels(miMiss[[colName]])) > 2) {
+    p <- p +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+  }
+
+
+  # Relabel VarX to "Reporting delay"
+  if (colName == "VarX") {
+    p <- p +
+      xlab("Reporting delay [quarters]")
+  }
+
 #
 #   theme(strip.background = element_rect(fill = "#e9e9e9",
 #                                         linetype = "blank"),
