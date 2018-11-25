@@ -1,7 +1,8 @@
-Version 1.0-0 (2018/11/)
+Version 1.0-0 (2018/11/25)
 --------------------------------------------------------------------------------
 
-* UNDER DEVELOPMENT
+* Misc: Invalidate data when risk origing grouping changed
+* Summary: Add plot of proportion of missing in key variables
 
 
 Version 0.11.0 (2018/11/24)

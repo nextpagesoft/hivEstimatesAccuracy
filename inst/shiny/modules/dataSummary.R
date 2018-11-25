@@ -62,11 +62,12 @@ dataSummaryUI <- function(id)
       withSpinner(
         tagList(
           uiOutput(ns("missPlotDiv")),
+          uiOutput(ns("missPropOutput")),
           uiOutput(ns("missPlotRDOutput")),
           uiOutput(ns("delayDensityOutput")),
           uiOutput(ns("meanDelayOutput"))),
         type = 7,
-        proxy.height = "50px"
+        proxy.height = "40px"
       )
     )
   )
@@ -307,12 +308,33 @@ dataSummary <- function(input, output, session, appStatus)
                        widths = c(3, 1, 4))
   })
 
+  output[["missPropOutput"]] <- renderUI({
+    if (appStatus$AttrMappingValid) {
+      missPropPlot <- artifacts()$MissPropPlot
+      if (!is.null(missPropPlot)) {
+        elem <- plotOutput(ns("missPropPlot"))
+      } else {
+        elem <- p("This plot cannot be created due to insufficient data.")
+      }
+      tagList(
+        h1("2. Proportion of missing by diagnosis year"),
+        elem
+      )
+    } else {
+      return(NULL)
+    }
+  })
+
+  output[["missPropPlot"]] <- renderPlot({
+    artifacts()$MissPropPlot
+  })
+
   output[["missPlotRDOutput"]] <- renderUI({
     req(appStatus[["AttrMappingValid"]])
     req(artifacts()$MissPlotsRD)
 
     tagList(
-      h1("2. Missing data summary: reporting delay variables"),
+      h1("3. Missing data summary: reporting delay variables"),
       p("Percentages of cases for which the information was not available (missing) for one or more of the variables used for reporting delay calculations: Diagnosis year, Diagnosis quarter, Notification year, Notification quarter."),
       plotOutput(ns("MissPlotsRD"))
     )
@@ -334,7 +356,7 @@ dataSummary <- function(input, output, session, appStatus)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h1("3. Trends in reporting delay by notification time"),
+        h1("4. Trends in reporting delay by notification time"),
         p("Average reporting delay for cases notified within a quarter and the upper bound for typical average delay values. Quarters when the average delay exceeds the upper bound may indicate cleaning events in surveillance."),
         elem
       )
@@ -356,7 +378,7 @@ dataSummary <- function(input, output, session, appStatus)
         elem <- p("This plot cannot be created due to insufficient data.")
       }
       tagList(
-        h1("4. Observed delay by notification time"),
+        h1("5. Observed delay by notification time"),
         elem
       )
 
