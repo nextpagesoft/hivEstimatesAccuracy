@@ -29,7 +29,8 @@ createReportsUI <- function(id)
         column(12,
                uiOutput(ns("rerunInfo")),
                actionButton(ns("createReportBtn"), "Create",
-                            style = "background-color: #69b023; color: white")
+                            style = "background-color: #69b023; color: white"),
+               shinyjs::disabled(actionButton(ns("cancelReportBtn"), "Cancel"))
         )
       )),
     uiOutput(ns("report"))
@@ -40,6 +41,10 @@ createReportsUI <- function(id)
 createReports <- function(input, output, session, appStatus)
 {
   ns <- session$ns
+
+  # Make "task" behave like a reactive value
+  makeReactiveBinding("reportTask")
+  reportTask <- NULL
 
   # Store reactive values
   vals <- reactiveValues(selectedReportName = NULL,
@@ -145,42 +150,123 @@ createReports <- function(input, output, session, appStatus)
   observeEvent(input[["createReportBtn"]], {
     adjustedData <- req(appStatus$AdjustedData)
     fileName <- appStatus$FileName
-    yearRangeApply <- appStatus$YearRangeApply
-    yearRange <- appStatus$YearRange
-    withProgress(message = "Creating report",
-                 detail = "The report will be displayed shortly.",
-                 value = 0, {
-                   # Define parameters
-                   params <- append(list(AdjustedData = adjustedData),
-                                    vals$reportParams[[vals$selectedReportName]])
+    diagYearRangeApply <- appStatus$DiagYearRangeApply
+    diagYearRange <- appStatus$DiagYearRange
 
-                   setProgress(0.1)
+    shinyjs::disable("createReportBtn")
+    shinyjs::enable("cancelReportBtn")
 
-                   if (is.element(vals$selectedReportName, c("Main Report"))) {
-                     params <- GetMainReportArtifacts(params)
-                   }
+    appStatus$Report <- ""
 
-                   params <- modifyList(params,
-                                        list(Artifacts =
-                                               list(FileName = fileName,
-                                                    YearRange = yearRange,
-                                                    YearRangeApply = yearRangeApply)))
+    # Show progress message during task start
+    prog <- Progress$new(session)
+    prog$set(message = "Creating report...", value = 0.5)
 
-                   setProgress(0.5)
+    # Define parameters
+    params <- append(list(AdjustedData = adjustedData),
+                     vals$reportParams[[vals$selectedReportName]])
 
-                   # Store parameters for reuse when downloading
-                   vals$reportParamsFull <- params
+    if (isLinux) {
+      reportTask <<- CreateTask({
+        params <- GetMainReportArtifacts(params)
+        params <- modifyList(params,
+                             list(Artifacts =
+                                    list(FileName = fileName,
+                                         DiagYearRange = diagYearRange,
+                                         DiagYearRangeApply = diagYearRangeApply)))
 
-                   setProgress(0.7)
+        report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
+                                     params = params)
 
-                   report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
-                                                params = params)
+        list(Report = report,
+             Params = params)
+      })
+    } else {
+      reportTask <<- CreateTask(function(params, fileName, diagYearRange, diagYearRangeApply, reportFileName) {
+        params <- hivEstimatesAccuracy::GetMainReportArtifacts(params)
+        params <- modifyList(params,
+                             list(Artifacts =
+                                    list(FileName = fileName,
+                                         DiagYearRange = diagYearRange,
+                                         DiagYearRangeApply = diagYearRangeApply)))
 
-                   setProgress(1)
-                 })
+        report <- hivEstimatesAccuracy::RenderReportToHTML(reportFileName, params = params)
+
+        list(Report = report,
+             Params = params)
+      },
+      args = list(params,
+                  fileName,
+                  diagYearRange,
+                  diagYearRangeApply,
+                  reportFileNames[vals$selectedReportName]))
+    }
+
+    o <- observe({
+      # Only proceed when the task is completed (this could mean success,
+      # failure, or cancellation)
+      req(reportTask$completed())
+      endTime <- Sys.time()
+
+      taskResults <- reportTask$result()
+
+      if (is.list(taskResults)) {
+        appStatus$Report <- taskResults$Report
+        # Store parameters for reuse when downloading
+        vals$reportParamsFull <- taskResults$Params
+      }
+
+      reportTask <<- NULL
+
+      # This observer only runs once
+      o$destroy()
+
+      # Close the progress indicator and update button state
+      prog$close()
+      shinyjs::enable("createReportBtn")
+      shinyjs::disable("cancelReportBtn")
+    })
+
+
+    # withProgress(message = "Creating report",
+    #              detail = "The report will be displayed shortly.",
+    #              value = 0, {
+    #                # Define parameters
+    #                params <- append(list(AdjustedData = adjustedData),
+    #                                 vals$reportParams[[vals$selectedReportName]])
+    #
+    #                setProgress(0.1)
+    #
+    #                if (is.element(vals$selectedReportName, c("Main Report"))) {
+    #                  params <- GetMainReportArtifacts(params)
+    #                }
+    #
+    #                params <- modifyList(params,
+    #                                     list(Artifacts =
+    #                                            list(FileName = fileName,
+    #                                                 DiagYearRange = diagYearRange,
+    #                                                 DiagYearRangeApply = diagYearRangeApply)))
+    #
+    #                setProgress(0.5)
+    #
+    #                # Store parameters for reuse when downloading
+    #                vals$reportParamsFull <- params
+    #
+    #                setProgress(0.7)
+    #
+    #                report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
+    #                                             params = params)
+    #
+    #                setProgress(1)
+    #              })
 
     # Create report
-    appStatus$Report <- report
+    # appStatus$Report <- report
+  })
+
+  # EVENT: Button "Run adjustments" clicked
+  observeEvent(input[["cancelReportBtn"]], {
+    req(reportTask)$cancel()
   })
 
   # Output report when it has changed

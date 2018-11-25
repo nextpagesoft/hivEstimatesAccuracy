@@ -6,7 +6,7 @@ vcs.ignore.src: TRUE
 external.packages:
     roxygen2
     devtools
-local.repos:
+local.repos: 
 load.external.packages.on.startup: FALSE
 ignored.packages: testthat
 ignored.directories:
@@ -19,3 +19,4 @@ snapshot.fields:
     Imports
     Depends
     LinkingTo
+symlink.system.packages: TRUE

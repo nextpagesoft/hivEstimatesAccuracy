@@ -14,7 +14,8 @@ manualUI <- function(id)
       solidHeader = FALSE,
       collapsible = TRUE,
       status = "primary",
-      p("This is a placeholder for the manual.")
+      tags$iframe(style = "height:900px; width:100%; border: none",
+                  src = "./www/pdf/HIV_Estimates_Accuracy_manual.pdf#zoom=100")
     )
   )
 

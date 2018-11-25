@@ -67,9 +67,9 @@ list(
       yColNamesAll <- c("Age", "SqCD4", "Transmission", "GroupedRegionOfOrigin")
 
       if (imputeRD) {
-        dataSet[, LogMaxPossibleDelay := log(MaxPossibleDelay)]
+        dataSet[, LogTweakedMaxPossibleDelay := log(TweakedMaxPossibleDelay)]
 
-        xColNamesAll <- union(xColNamesAll, c("LogMaxPossibleDelay"))
+        xColNamesAll <- union(xColNamesAll, c("LogTweakedMaxPossibleDelay"))
         yColNamesAll <- union(yColNamesAll, c("VarX"))
       }
 
@@ -129,7 +129,7 @@ list(
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
       dataSetColNames <- setdiff(colnames(dataSet),
-                                 union(yColNames, "LogMaxPossibleDelay"))
+                                 union(yColNames, "LogTweakedMaxPossibleDelay"))
 
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])

@@ -4,8 +4,11 @@
 #'
 #' @param data data table object on which adjustments should be applied. Required.
 #' @param adjustmentSpecs List of adjustment specifications to execute. Optional. Default = \code{list()}.
-#' @param yearRange Numeric cector of length two with lower and upper bound for diagnosis year.
+#' @param diagYearRange Numeric vector of length two with lower and upper bound for diagnosis year.
 #'   Optional. Default = \code{NULL}.
+#' @param notifQuarterRange Numeric vector of length two with lower and upper bound for notification quarter.
+#'   Optional. Default = \code{NULL}.
+#' @param seed Random seed. Optional. Default = NULL
 #'
 #' @return data table object after adjustments applied.
 #'
@@ -15,7 +18,7 @@
 #' }
 #'
 #' @export
-RunAdjustments <- function(data, adjustmentSpecs = list(), yearRange = NULL)
+RunAdjustments <- function(data, adjustmentSpecs = list(), diagYearRange = NULL, notifQuarterRange = NULL, seed = NULL)
 {
   stopifnot(!missing(data))
 
@@ -23,12 +26,18 @@ RunAdjustments <- function(data, adjustmentSpecs = list(), yearRange = NULL)
   # We make a copy of the data to make sure the input object is not changed by the adjustment
   # procedures.
   data <- list(Table = copy(data))
-  if (!is.null(yearRange)) {
-    data$Table <- data$Table[DateOfDiagnosisYear %between% yearRange]
+  if (!is.null(diagYearRange)) {
+    data$Table <- data$Table[DateOfDiagnosisYear %between% diagYearRange || is.na(DateOfDiagnosisYear)]
+  }
+  if (!is.null(notifQuarterRange)) {
+    data$Table <- data$Table[NotificationTime %between% notifQuarterRange || is.na(NotificationTime)]
   }
 
-  results <- list()
+  PreProcessInputDataBeforeAdjustments(data$Table)
+
   # Process adjustments
+  set.seed(seed)
+  results <- list()
   i <- 0L
   for (adjustmentSpec in adjustmentSpecs) {
     i <- i + 1L

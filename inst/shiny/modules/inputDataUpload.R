@@ -2,9 +2,6 @@
 adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
                           GetListObject)
 
-# Module globals
-currYear <- year(Sys.time())
-
 # Load application modules
 modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
 source(file.path(modulesPath, "inputDataUpload-Migrant.R"))
@@ -25,7 +22,7 @@ inputDataUploadUI <- function(id)
             offset = 2,
             width = 8,
             style = "text-align: center; font-weight: bold",
-            p("The ECDC HIV Estimates Accuracy Tool is an application that uses advanced statistical methods to correct for missing values in key HIV surveillance variables as well as for reporting delay."),
+            p("The ECDC HIV Estimates Accuracy Tool is an application that uses advanced statistical methods to correct for missing values in key HIV surveillance variables as well as for reporting delay, as defined by the time from case diagnosis to notification at the national level."),
             p("The tool accepts case based HIV surveillance data prepared in a specific format."),
             p("The outputs include results from pre-defined analyses in the form of a report containing tables and graphs, and datasets, in which the adjustments have been incorporated and which may be exported for further analysis.",
               style = "margin-bottom: 0")
@@ -119,24 +116,27 @@ inputDataUpload <- function(input, output, session, appStatus)
     appStatus$InputUploading <- TRUE
 
     if (stateFile) {
-      originalData         <- req(uploadedData$OriginalData)
-      originalDataAttrs    <- uploadedData$OriginalDataAttrs
-      defaultValues        <- uploadedData$DefaultValues
-      attrMapping          <- uploadedData$AttrMapping
-      attrMappingStatus    <- uploadedData$AttrMappingStatus
-      attrMappingValid     <- uploadedData$AttrMappingValid
-      inputDataTest        <- uploadedData$InputDataTest
-      inputDataTestStatus  <- uploadedData$InputDataTestStatus
-      inputData            <- uploadedData$InputData
-      adjustedData         <- uploadedData$AdjustedData
-      adjustmentSpecs      <- uploadedData$AdjustmentSpecs
-      miAdjustmentName     <- uploadedData$MIAdjustmentName
-      rdAdjustmentName     <- uploadedData$RDAdjustmentName
-      yearRange            <- uploadedData$YearRange
-      yearRangeApply       <- uploadedData$YearRangeApply
-      runLog               <- uploadedData$RunLog
-      intermReport         <- uploadedData$IntermReport
-      report               <- uploadedData$Report
+      originalData           <- req(uploadedData$OriginalData)
+      originalDataAttrs      <- uploadedData$OriginalDataAttrs
+      defaultValues          <- uploadedData$DefaultValues
+      seed                   <- uploadedData$Seed
+      attrMapping            <- uploadedData$AttrMapping
+      attrMappingStatus      <- uploadedData$AttrMappingStatus
+      attrMappingValid       <- uploadedData$AttrMappingValid
+      inputDataTest          <- uploadedData$InputDataTest
+      inputDataTestStatus    <- uploadedData$InputDataTestStatus
+      inputData              <- uploadedData$InputData
+      adjustedData           <- uploadedData$AdjustedData
+      adjustmentSpecs        <- uploadedData$AdjustmentSpecs
+      miAdjustmentName       <- uploadedData$MIAdjustmentName
+      rdAdjustmentName       <- uploadedData$RDAdjustmentName
+      diagYearRange          <- uploadedData$DiagYearRange
+      diagYearRangeApply     <- uploadedData$DiagYearRangeApply
+      notifQuarterRange      <- uploadedData$NotifQuarterRange
+      notifQuarterRangeApply <- uploadedData$NotifQuarterRangeApply
+      runLog                 <- uploadedData$RunLog
+      intermReport           <- uploadedData$IntermReport
+      report                 <- uploadedData$Report
       appStatus$StateUploading  <- TRUE
     } else {
       originalData      <- req(uploadedData)
@@ -151,42 +151,48 @@ inputDataUpload <- function(input, output, session, appStatus)
           originalDataAttrs[tolower(originalDataAttrs) == "cd4_num"][1]
       }
 
-      attrMappingStatus    <- NULL
-      attrMappingValid     <- FALSE
-      inputDataTest        <- NULL
-      inputDataTestStatus  <- NULL
-      inputData            <- NULL
-      adjustedData         <- NULL
-      adjustmentSpecs      <- adjustmentSpecs
-      miAdjustmentName     <- "None"
-      rdAdjustmentName     <- "None"
-      yearRange            <- c(1980, 2025)
-      yearRangeApply       <- FALSE
-      runLog               <- ""
-      intermReport         <- ""
-      report               <- ""
+      seed                   <- NULL
+      attrMappingStatus      <- NULL
+      attrMappingValid       <- FALSE
+      inputDataTest          <- NULL
+      inputDataTestStatus    <- NULL
+      inputData              <- NULL
+      adjustedData           <- NULL
+      adjustmentSpecs        <- adjustmentSpecs
+      miAdjustmentName       <- "None"
+      rdAdjustmentName       <- "None"
+      diagYearRange          <- c(1980, 2025)
+      diagYearRangeApply     <- FALSE
+      notifQuarterRange      <- c(1980, 2025)
+      notifQuarterRangeApply <- FALSE
+      runLog                 <- ""
+      intermReport           <- ""
+      report                 <- ""
       appStatus$StateUploading  <- FALSE
     }
 
-    appStatus$FileName            <- input$fileInput$name
-    appStatus$OriginalData        <- originalData
-    appStatus$OriginalDataAttrs   <- originalDataAttrs
-    appStatus$DefaultValues       <- defaultValues
-    appStatus$AttrMapping         <- attrMapping
-    appStatus$AttrMappingStatus   <- attrMappingStatus
-    appStatus$AttrMappingValid    <- attrMappingValid
-    appStatus$InputDataTest       <- inputDataTest
-    appStatus$InputDataTestStatus <- inputDataTestStatus
-    appStatus$InputData           <- inputData
-    appStatus$AdjustedData        <- adjustedData
-    appStatus$AdjustmentSpecs     <- adjustmentSpecs
-    appStatus$MIAdjustmentName    <- miAdjustmentName
-    appStatus$RDAdjustmentName    <- rdAdjustmentName
-    appStatus$YearRange           <- yearRange
-    appStatus$YearRangeApply      <- yearRangeApply
-    appStatus$RunLog              <- runLog
-    appStatus$IntermReport        <- intermReport
-    appStatus$Report              <- report
+    appStatus$Seed                   <- seed
+    appStatus$FileName               <- input$fileInput$name
+    appStatus$OriginalData           <- originalData
+    appStatus$OriginalDataAttrs      <- originalDataAttrs
+    appStatus$DefaultValues          <- defaultValues
+    appStatus$AttrMapping            <- attrMapping
+    appStatus$AttrMappingStatus      <- attrMappingStatus
+    appStatus$AttrMappingValid       <- attrMappingValid
+    appStatus$InputDataTest          <- inputDataTest
+    appStatus$InputDataTestStatus    <- inputDataTestStatus
+    appStatus$InputData              <- inputData
+    appStatus$AdjustedData           <- adjustedData
+    appStatus$AdjustmentSpecs        <- adjustmentSpecs
+    appStatus$MIAdjustmentName       <- miAdjustmentName
+    appStatus$RDAdjustmentName       <- rdAdjustmentName
+    appStatus$DiagYearRange          <- diagYearRange
+    appStatus$DiagYearRangeApply     <- diagYearRangeApply
+    appStatus$NotifQuarterRange      <- notifQuarterRange
+    appStatus$NotifQuarterRangeApply <- notifQuarterRangeApply
+    appStatus$RunLog                 <- runLog
+    appStatus$IntermReport           <- intermReport
+    appStatus$Report                 <- report
     inputDataBeforeGrouping(NULL)
   }, ignoreNULL = TRUE)
 
@@ -351,7 +357,7 @@ inputDataUpload <- function(input, output, session, appStatus)
                                                            appStatus$DefaultValues)
                    setProgress(0.4, detail = "Pre-processing data with a single imputation of Gender")
 
-                   inputDataTest <- PreProcessInputData(inputDataTest)
+                   inputDataTest <- PreProcessInputDataBeforeSummary(inputDataTest, appStatus$Seed)
                    setProgress(0.9, detail = "Checking data validity")
 
                    appStatus$AttrMappingStatus <- GetAttrMappingStatus(appStatus$AttrMapping)
@@ -437,7 +443,7 @@ inputDataUpload <- function(input, output, session, appStatus)
             wrongValuesCol <- wrongValuesCols[[colName]]
             tags$li(sprintf("Attribute %s contains invalid value(s) %s.",
                             AddQuoteMarks(colName),
-                            paste(AddQuoteMarks(wrongValuesCol$WrongValues), collapse = ", ")))
+                            paste(AddQuoteMarks(as.character(wrongValuesCol$WrongValues)), collapse = ", ")))
           })
         )
       }
@@ -478,18 +484,18 @@ inputDataUpload <- function(input, output, session, appStatus)
     }
   })
 
-  output[["inputDataTable"]] <- renderDataTable(
-    appStatus$InputData$Table[, -c("GroupOfOrigin", "SqCD4", "MinNotificationTime",
-                                   "MaxNotificationTime", "VarX", "TweakedVarX",
-                                   "MaxPossibleDelay", "TweakedMaxPossibleDelay")],
-    options = list(
-      dom = '<"top">lirt<"bottom">p',
-      autoWidth = FALSE,
-      pageLength = 15,
-      scrollX = TRUE,
-      deferRender = TRUE,
-      serverSide = TRUE,
-      scroller = FALSE))
+  output[["inputDataTable"]] <- renderDataTable({
+    req(appStatus$InputData$Table)[, -c("GroupOfOrigin", "SqCD4")]
+  },
+  options = list(
+    dom = '<"top">lirt<"bottom">p',
+    autoWidth = FALSE,
+    pageLength = 10,
+    scrollX = TRUE,
+    deferRender = TRUE,
+    serverSide = TRUE,
+    scroller = FALSE)
+  )
 
   callModule(inputDataUploadMigrant, "migrant", appStatus, inputDataBeforeGrouping)
 

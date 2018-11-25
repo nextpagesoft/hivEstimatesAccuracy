@@ -21,36 +21,33 @@ cat(sprintf("# %d. Joint Modelling Multiple Imputation", params$InputData$RunIdx
 ```
 
 ```{r, results='asis'}
-femaleAllXCols <- params$InputData$Artifacts$F$X_COLS$All
-femaleKeptXCols <- params$InputData$Artifacts$F$X_COLS$Kept
 maleAllXCols <- params$InputData$Artifacts$M$X_COLS$All
 maleKeptXCols <- params$InputData$Artifacts$M$X_COLS$Kept
- 
-femaleRemovedXCols <- setdiff(femaleAllXCols, femaleKeptXCols)
-maleRemovedXCols <- setdiff(maleAllXCols, maleKeptXCols)
+femaleAllXCols <- params$InputData$Artifacts$F$X_COLS$All
+femaleKeptXCols <- params$InputData$Artifacts$F$X_COLS$Kept
+otherAllXCols <- params$InputData$Artifacts$O$X_COLS$All
+otherKeptXCols <- params$InputData$Artifacts$O$X_COLS$Kept
 
-femaleAllYCols <- params$InputData$Artifacts$F$Y_COLS$All
-femaleKeptYCols <- params$InputData$Artifacts$F$Y_COLS$Kept
+maleRemovedXCols <- setdiff(maleAllXCols, maleKeptXCols) 
+femaleRemovedXCols <- setdiff(femaleAllXCols, femaleKeptXCols)
+otherRemovedXCols <- setdiff(otherAllXCols, otherKeptXCols)
+
 maleAllYCols <- params$InputData$Artifacts$M$Y_COLS$All
 maleKeptYCols <- params$InputData$Artifacts$M$Y_COLS$Kept
- 
-femaleRemovedYCols <- setdiff(femaleAllYCols, femaleKeptYCols)
-maleRemovedYCols <- setdiff(maleAllYCols, maleKeptYCols)
+femaleAllYCols <- params$InputData$Artifacts$F$Y_COLS$All
+femaleKeptYCols <- params$InputData$Artifacts$F$Y_COLS$Kept
+otherAllYCols <- params$InputData$Artifacts$O$Y_COLS$All
+otherKeptYCols <- params$InputData$Artifacts$O$Y_COLS$Kept
 
-if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 | 
-    length(maleRemovedXCols) > 0 | length(maleRemovedYCols) > 0) {
+maleRemovedYCols <- setdiff(maleAllYCols, maleKeptYCols)
+femaleRemovedYCols <- setdiff(femaleAllYCols, femaleKeptYCols)
+otherRemovedYCols <- setdiff(otherAllYCols, otherKeptYCols)
+
+if (length(maleRemovedXCols) > 0 | length(maleRemovedYCols) > 0 | 
+    length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 | 
+    length(otherRemovedXCols) > 0 | length(otherRemovedYCols) > 0) {
   cat("<p>Some attributes in the input data have not been processed with this adjustment due to insufficient data:</p>",
       "<ul>")
-  if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0) {
-    cat("<li>Female gender<ul>")
-    if (length(femaleRemovedXCols) > 0) {
-      cat("<li>Covariates: ", femaleRemovedXCols, "</li>")
-    }
-    if (length(femaleRemovedYCols) > 0) {
-      cat("<li>Outputs: ", femaleRemovedYCols, "</li>")
-    }
-    cat("</ul></li>")
-  }
   if (length(maleRemovedXCols) > 0 | length(maleRemovedYCols) > 0) {
     cat("<li>Male gender<ul>")
     if (length(maleRemovedXCols) > 0) {
@@ -61,6 +58,27 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
     }
     cat("</ul></li>")
   }
+  if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0) {
+    cat("<li>Female gender<ul>")
+    if (length(femaleRemovedXCols) > 0) {
+      cat("<li>Covariates: ", femaleRemovedXCols, "</li>")
+    }
+    if (length(femaleRemovedYCols) > 0) {
+      cat("<li>Outputs: ", femaleRemovedYCols, "</li>")
+    }
+    cat("</ul></li>")
+  }
+  if (length(otherRemovedXCols) > 0 | length(otherRemovedYCols) > 0) {
+    cat("<li>Other gender<ul>")
+    if (length(otherRemovedXCols) > 0) {
+      cat("<li>Covariates: ", otherRemovedXCols, "</li>")
+    }
+    if (length(otherRemovedYCols) > 0) {
+      cat("<li>Outputs: ", otherRemovedYCols, "</li>")
+    }
+    cat("</ul></li>")
+  }
+  
   cat("</ul>")
 }
 ```
@@ -69,10 +87,13 @@ if (length(femaleRemovedXCols) > 0 | length(femaleRemovedYCols) > 0 |
 <div class="tabbable">
 <!--/html_preserve-->
 ```{r, results='asis', echo = FALSE}
-genders <- names(params$InputData$Artifacts)
-genderNameMapping <- c("F" = "Female", "M" = "Male", "O" = "Other")
+processedGenders <- names(params$InputData$Artifacts)
+genderNameMapping <- c("M" = "Male", "F" = "Female", "O" = "Other")
+genders <- names(genderNameMapping)
+genders <- genders[genders %in% processedGenders]
+
 tabIdx <- 0
-plotTypes <- c("Trace", "Autocorrelation", "Distribution")
+plotTypes <- c("Convergence", "Autocorrelation", "Observed vs. Imputed")
 tabsHeader <- c()
 for (gender in genders) {
   genderName <- genderNameMapping[gender]

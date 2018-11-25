@@ -31,11 +31,19 @@ GetInputDataValidityStatus <- function(inputData)
   for (columnName in names(columnSpecs)) {
     columnSpec <- columnSpecs[[columnName]]
     allowedValues <- columnSpec$values
+    restrictedValues <- columnSpec$restrictedValues
+
+    wrongValues <- c()
+
+    if (!is.null(restrictedValues)) {
+      wrongValues <- c(wrongValues,
+                       restrictedValues[inputData[, restrictedValues %in% unique(get(columnName))]])
+    }
+
     if (!is.null(allowedValues)) {
-      wrongValues <- inputData[!get(columnName) %in% c(allowedValues, NA),
-                               unique(get(columnName))]
-    } else {
-      wrongValues <- character()
+      wrongValues <- c(wrongValues,
+                       inputData[!get(columnName) %in% c(allowedValues, NA),
+                                 unique(get(columnName))])
     }
 
     valid <- length(wrongValues) == 0

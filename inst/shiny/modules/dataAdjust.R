@@ -148,8 +148,12 @@ dataAdjust <- function(input, output, session, appStatus)
       editedAdjustmentSpec <- appStatus$AdjustmentSpecs[[vals$editedAdjustmentName]]
       vals$editedAdjustmentParamsWidgets <- GetAdjustParamsWidgets(editedAdjustmentSpec)
 
+      dialogTitle <- ifelse(editedAdjustmentSpec$Type == "REPORTING_DELAYS",
+                            "Edit adjustment parameters for calculating weights",
+                            "Edit adjustment parameters")
+
       showModal(modalDialog(
-        title = "Edit adjustment parameters",
+        title = dialogTitle,
         uiOutput(ns("adjustmentParams")),
         easyClose = FALSE,
         footer = tagList(
@@ -204,10 +208,16 @@ dataAdjust <- function(input, output, session, appStatus)
   # EVENT: Button "Run adjustments" clicked
   observeEvent(input[["runAdjustBtn"]], {
     inputData <- req(appStatus$InputData)
-    if (appStatus$YearRangeApply) {
-      yearRange <- appStatus$YearRange
+    seed <- appStatus$Seed
+    if (appStatus$DiagYearRangeApply) {
+      diagYearRange <- appStatus$DiagYearRange
     } else {
-      yearRange <-  NULL
+      diagYearRange <-  NULL
+    }
+    if (appStatus$NotifQuarterRangeApply) {
+      notifQuarterRange <- appStatus$NotifQuarterRange
+    } else {
+      notifQuarterRange <-  NULL
     }
 
     adjustmentSpecs <- list()
@@ -237,18 +247,24 @@ dataAdjust <- function(input, output, session, appStatus)
         RunAdjustments(
           inputData$Table,
           adjustmentSpecs = adjustmentSpecs,
-          yearRange = yearRange)
+          diagYearRange = diagYearRange,
+          notifQuarterRange = notifQuarterRange,
+          seed = seed)
       })
     } else {
-      task <<- CreateTask(function(x, y, yearRange) {
+      task <<- CreateTask(function(x, y, diagYearRange, notifQuarterRange, seed) {
         hivEstimatesAccuracy::RunAdjustments(
           data = x,
           adjustmentSpecs = y,
-          yearRange = yearRange)
+          diagYearRange = diagYearRange,
+          notifQuarterRange = notifQuarterRange,
+          seed = seed)
       },
       args = list(inputData$Table,
                   adjustmentSpecs,
-                  yearRange))
+                  diagYearRange,
+                  notifQuarterRange,
+                  seed))
     }
 
     o <- observe({

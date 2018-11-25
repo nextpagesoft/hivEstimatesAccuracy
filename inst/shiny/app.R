@@ -24,11 +24,12 @@ source(file.path(modulesPath, "createReports.R"))
 source(file.path(modulesPath, "outputs.R"))
 source(file.path(modulesPath, "manual.R"))
 
+addResourcePath("www", wwwPath)
+
 # App globals
 titleString <- "HIV Estimates Accuracy"
 version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy",
                                            fields = "Version"))
-addResourcePath("www", system.file("shiny/www/", package = "hivEstimatesAccuracy"))
 
 # Define application user interface
 ui <- tagList(
@@ -95,8 +96,10 @@ server <- function(input, output, session)
     AttrMappingValid = FALSE,
     InputDataTest = NULL,
     InputDataTestStatus = NULL,
-    YearRange = NULL,
-    YearRangeApply = FALSE,
+    DiagYearRange = NULL,
+    DiagYearRangeApply = FALSE,
+    NotifQuarterRange = NULL,
+    NotifQuarterRangeApply = NULL,
     InputData = NULL,
     AdjustedData = NULL,
     AdjustmentSpecs = adjustmentSpecs,
@@ -118,8 +121,8 @@ server <- function(input, output, session)
     showModal(
       modalDialog(
         title = "Set seed",
-        p("Not operational - UNDER DEVELOPMENT"),
-        textInput("seed", label = NULL),
+        textInput("seed", label = "Seed value", value = appStatus$Seed),
+        p("Give empty value or type 'default' to remove fixed seed"),
         footer = tagList(
           actionButton("seedDlgOk", "OK",
                        style = "background-color: #69b023; color: white"),
@@ -133,17 +136,17 @@ server <- function(input, output, session)
   observeEvent(input[["seedDlgOk"]], {
     seed <- input$seed
     if (seed == "" || tolower(seed) == "default") {
-      appStatus$Seed <- seed
-    } else {
       appStatus$Seed <- NULL
+    } else {
+      appStatus$Seed <- seed
     }
     removeModal()
   })
 
 
-  if (!isServer) {
-    session$onSessionEnded(stopApp)
-  }
+  # if (!isServer) {
+  #   session$onSessionEnded(stopApp)
+  # }
 }
 
 # Run application

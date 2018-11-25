@@ -1,18 +1,19 @@
-#' PreProcessInputData
+#' PreProcessInputDataBeforeSummary
 #'
-#' Pre-processes input data before passing it to adjustment scripts.
+#' Pre-processes input data before making data summary and passing it to adjustment scripts.
 #'
 #' @param inputData Input data. Required.
+#' @param seed Random seed. Optional. Default = NULL
 #'
 #' @return data.table object
 #'
 #' @examples
 #' \dontrun{
-#' PreProcessInputData(inputData)
+#' PreProcessInputDataBeforeSummary(inputData)
 #' }
 #'
 #' @export
-PreProcessInputData <- function(inputData)
+PreProcessInputDataBeforeSummary <- function(inputData, seed = NULL)
 {
   stopifnot(!missing(inputData))
 
@@ -26,24 +27,20 @@ PreProcessInputData <- function(inputData)
   inputData[, (charColNames) := lapply(.SD, toupper), .SDcols = charColNames]
 
   # Replace UNKs and BLANKS with NAs
-  for (i in charColNames) {
-    inputData[get(i) %chin% c("UNK", ""), (i) := NA]
+  for (colName in charColNames) {
+    inputData[get(colName) %chin% c("UNK", ""), (colName) := NA]
   }
 
-  # Drop unused levels (prior UNKs)
-  inputData <- droplevels(inputData)
+  # Merge RegionOfBirth and RegionOfNationality
+  inputData[countryData[, .(CountryOfBirth = Code, RegionOfBirth = TESSyCode)],
+            RegionOfBirth := RegionOfBirth,
+            on = .(CountryOfBirth)]
+  inputData[countryData[, .(CountryOfNationality = Code, RegionOfNationality = TESSyCode)],
+            RegionOfNationality := RegionOfNationality,
+            on = .(CountryOfNationality)]
 
-  inputData <- merge(inputData,
-                     countryData[, .(CountryOfBirth = Code, RegionOfBirth = TESSyCode)],
-                     by = c("CountryOfBirth"),
-                     all.x = TRUE)
   inputData[!is.na(CountryOfBirth) & CountryOfBirth %chin% ReportingCountry,
             RegionOfBirth := "REPCOUNTRY"]
-
-  inputData <- merge(inputData,
-                     countryData[, .(CountryOfNationality = Code, RegionOfNationality = TESSyCode)],
-                     by = c("CountryOfNationality"),
-                     all.x = TRUE)
   inputData[!is.na(CountryOfNationality) & CountryOfNationality %chin% ReportingCountry,
             RegionOfNationality := "REPCOUNTRY"]
 
@@ -73,7 +70,7 @@ PreProcessInputData <- function(inputData)
   # Create GroupOfOrigin variable 1, 2, 3...
   inputData[, GroupOfOrigin := factor(NA, levels = c("Reporting Country", "Other Country", "SSA"))]
   # ...based on RegionOfOrigin if not NA
-  inputData[is.na(GroupOfOrigin) & !is.na(RegionOfOrigin),
+  inputData[!is.na(RegionOfOrigin),
             GroupOfOrigin := ifelse(RegionOfOrigin == "REPCOUNTRY", 1L,
                                     ifelse(!RegionOfOrigin %chin% "SUBAFR", 2L,
                                            3L))]
@@ -98,68 +95,37 @@ PreProcessInputData <- function(inputData)
                                     "AIDS-No"))]
 
   # Imput Gender
-  selGenderMissing1 <- inputData[, is.na(Gender) & Transmission %chin% "MSM"]
-  inputData[selGenderMissing1, Gender := "M"]
-
+  selGenderMissing <- inputData[, is.na(Gender)]
+  selGenderReplaced <- selGenderMissing & inputData$Transmission %chin% "MSM"
+  selGenderImputed <- selGenderMissing & !selGenderReplaced
+  # If Gender missing and Transmission is MSM, then set Male gender
+  inputData[selGenderReplaced, Gender := "M"]
   # A single imputation based on categorical year and transmission
-  selGenderMissing2 <- inputData[, is.na(Gender)]
-  inputDataGender <- inputData[, .(Gender = as.factor(Gender),
-                                   DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
-                                   Transmission)]
-  miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = FALSE))
-  inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
-  inputData[selGenderMissing2, Gender := inputDataGender$Gender[selGenderMissing2]]
+  if (any(selGenderImputed)) {
+    inputDataGender <- inputData[, .(Gender = as.factor(Gender),
+                                     DateOfDiagnosisYear = as.factor(DateOfDiagnosisYear),
+                                     Transmission = Transmission)]
+    set.seed(seed)
+    miceImputation <- suppressWarnings(mice::mice(inputDataGender, m = 1, maxit = 5, printFlag = TRUE))
+    inputDataGender <- setDT(mice::complete(miceImputation, action = 1))
+    inputData[selGenderImputed, Gender := inputDataGender$Gender[selGenderImputed]]
+  }
 
-  # Support imputing reporting delay -----------------------------------------------
-  # Create intermediate variables
+  # Create helper columns for filtering data on diagnosis and notification time
   inputData[, ":="(
     NotificationTime = DateOfNotificationYear + 1/4 * DateOfNotificationQuarter,
     DiagnosisTime = DateOfDiagnosisYear + 1/4 * DateOfDiagnosisQuarter
   )]
 
-  # Create Min and Max notification time
-  inputData[, ":="(
-    MinNotificationTime = min(NotificationTime, na.rm = TRUE),
-    MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
-  ), by = .(ReportingCountry)]
-
-  # Create VarX, MaxPossibleDelay
-  inputData[, c("VarX", "TweakedVarX", "MaxPossibleDelay", "TweakedMaxPossibleDelay") := {
-    # Compute MaxPossibleDelay
-    maxPossibleDelay <- ifelse(is.na(DiagnosisTime),
-                               4 * (MaxNotificationTime - DateOfDiagnosisYear - 0.25),
-                               4 * (MaxNotificationTime - DiagnosisTime))
-    maxPossibleDelay <- ifelse(is.na(DateOfDiagnosisYear),
-                               4 * (NotificationTime - MinNotificationTime),
-                               maxPossibleDelay)
-    maxPossibleDelay <- ifelse(is.na(maxPossibleDelay),
-                               4 * (MaxNotificationTime - MinNotificationTime),
-                               maxPossibleDelay)
-
-    # Compute VarX
-    varX <- 4 * (NotificationTime - DiagnosisTime)
-    tweakedVarX <- ifelse(varX == 0, 0.01, varX)
-    tweakedVarX <- ifelse(tweakedVarX == maxPossibleDelay,
-                          maxPossibleDelay - 0.01,
-                          varX)
-
-    # Tweak MaxPossibleDelay
-    tweakedMaxPossibleDelay <- ifelse(maxPossibleDelay == 0,
-                                      0.02,
-                                      maxPossibleDelay)
-
-    list(varX, tweakedVarX, maxPossibleDelay, tweakedMaxPossibleDelay)
-  }]
-
-
-
   # Transform columns to factor
-  inputData[, Gender := factor(Gender)]
+  inputData[, Gender := factor(Gender,
+                               levels = c("M", "F", "O"))]
+  inputData[, Gender := droplevels(Gender)]
   inputData[, Transmission := factor(Transmission)]
 
   results <- list(Table = inputData,
-                  Artifacts = list(MissGenderReplaced = sum(selGenderMissing1),
-                                   MissGenderImputed = sum(selGenderMissing2)))
+                  Artifacts = list(MissGenderReplaced = sum(selGenderReplaced),
+                                   MissGenderImputed = sum(selGenderImputed)))
 
   return(results)
 }

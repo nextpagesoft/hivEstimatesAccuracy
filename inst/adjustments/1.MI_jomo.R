@@ -73,14 +73,14 @@ list(
 
       if (imputeRD) {
         # Create logit transform of VarX
-        dataSet[, c("LogitVarX", "LogMaxPossibleDelay") := {
+        dataSet[, c("LogitVarX", "LogTweakedMaxPossibleDelay") := {
           p <- TweakedVarX / TweakedMaxPossibleDelay
           logitVarX <- log(p / (1 - p))
-          logMaxPossibleDelay <- log(MaxPossibleDelay)
-          list(logitVarX, logMaxPossibleDelay)
+          logTweakedMaxPossibleDelay <- log(TweakedMaxPossibleDelay)
+          list(logitVarX, logTweakedMaxPossibleDelay)
         }]
 
-        xColNamesAll <- union(xColNamesAll, c("LogMaxPossibleDelay"))
+        xColNamesAll <- union(xColNamesAll, c("LogTweakedMaxPossibleDelay"))
         yColNamesAll <- union(yColNamesAll, c("LogitVarX"))
       }
 
@@ -148,7 +148,7 @@ list(
       indexColNames <- c("Imputation", "id")
       impColNames <- union(indexColNames, yColNames)
       dataSetColNames <- setdiff(colnames(dataSet),
-                                 union(yColNames, "LogMaxPossibleDelay"))
+                                 union(yColNames, "LogTweakedMaxPossibleDelay"))
 
       mi <- cbind(imp[, ..impColNames],
                   dataSet[, ..dataSetColNames])
@@ -157,7 +157,6 @@ list(
       if ("LogitVarX" %in% colnames(mi)) {
         mi[Imputation != 0 & is.na(VarX),
            VarX := MaxPossibleDelay * round(exp(LogitVarX)/(1 + LogitVarX))]
-        mi[, LogitVarX := NULL]
       }
 
       setcolorder(mi, union(indexColNames, dataSetColNames))

@@ -27,13 +27,15 @@ if (is.null(attrMapping[["Age"]])) {
 if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"
 }
+
 attrMappingStatus <- GetAttrMappingStatus(attrMapping)
 if (attrMappingStatus[["Valid"]]) {
+  defaultValues <- GetPreliminaryDefaultValues()
   inputDataTest <- ApplyAttributesMapping(originalData,
                                           attrMapping,
-                                          GetPreliminaryDefaultValues())
-  inputDataTest <- PreProcessInputData(inputData = inputDataTest)
-  inputDataTestStatus <- GetInputDataValidityStatus(inputDataTest$Table)
+                                          defaultValues)
+  inputDataTest <- PreProcessInputDataBeforeSummary(inputData = inputDataTest)
+  inputDataTestStatus <- GetInputDataValidityStatus(inputData = inputDataTest$Table)
   if (inputDataTestStatus[["Valid"]]) {
     inputData <- inputDataTest
   } else {
@@ -50,12 +52,18 @@ if (!is.null(inputData)) {
   inputData <- ApplyOriginGroupingMap(inputData, map)
 
   # Get "Summary" page plots (optionally)
-  summaryArtifacts <- GetDataSummaryArtifacts(inputData = inputData$Table)
+  GetDiagnosisYearDensityPlot(plotData = inputData$Table)
+  GetNotificationQuarterDensityPlot(plotData = inputData$Table)
+  summaryInputData <- inputData$Table
+  PreProcessInputDataBeforeAdjustments(summaryInputData)
+  summaryArtifacts <- GetDataSummaryArtifacts(inputData = summaryInputData)
 
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
   adjustedData <- RunAdjustments(data = inputData$Table,
                                  adjustmentSpecs = adjustmentSpecs,
-                                 yearRange = NULL)
+                                 diagYearRange = NULL,
+                                 notifQuarterRange = NULL,
+                                 seed = NULL)
 
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Take the last adjustment output as final data
@@ -80,8 +88,8 @@ if (!is.null(inputData)) {
   params <- modifyList(params,
                        list(Artifacts =
                               list(FileName = inputDataFilePath,
-                                   YearRange = c(2000, 2010),
-                                   YearRangeApply = TRUE)))
+                                   DiagYearRange = c(2000, 2010),
+                                   DiagYearRangeApply = TRUE)))
 
   htmlReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,
