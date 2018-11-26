@@ -18,11 +18,10 @@ file.copy(file.path(repoPath, "pkgBuilds", paste0("hivEstimatesAccuracy_", versi
 file.copy(file.path(repoPath, "pkgBuilds", paste0("hivEstimatesAccuracy_", version, ".zip")),
           file.path(repoPath, "CRAN/bin/windows/contrib/3.5", paste0("hivEstimatesAccuracy_", version, ".zip")),
           overwrite = TRUE)
-# unlink(file.path(repoPath, paste0("hivEstimatesAccuracy_", version, ".zip")))
 
 # Update repo metafiles
 tools::write_PACKAGES(dir = file.path(repoPath, "CRAN/src/contrib"), type = "source")
 tools::write_PACKAGES(dir = file.path(repoPath, "CRAN/bin/windows/contrib/3.5"), type = "win.binary")
 
 # Update currect version string
-writeLines(version, file.path(repoPath, "version.txt"))
+writeLines(version, file.path(repoPath, "pkgBuilds", "version.txt"))
