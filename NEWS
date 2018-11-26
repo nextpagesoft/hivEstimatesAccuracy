@@ -1,8 +1,9 @@
-Version 1.0-0 (2018/11/25)
+Version 1.0 (2018/11/26)
 --------------------------------------------------------------------------------
 
 * Misc: Invalidate data when risk origing grouping changed
 * Summary: Add plot of proportion of missing in key variables
+* Misc: Show number of instances open
 
 
 Version 0.11.0 (2018/11/24)
@@ -24,6 +25,7 @@ Version 0.11.0 (2018/11/24)
   year
 * Misc: Support gender "Other"
 * Misc: Updates to formatting and user experience
+
 
 Version 0.10.0 (2018/11/11)
 --------------------------------------------------------------------------------

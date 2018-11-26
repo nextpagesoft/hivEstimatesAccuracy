@@ -1,8 +1,9 @@
+isLocalRun <- TRUE
+
+users <- reactiveValues(count = 0)
+
 # Allow uploading files up to 70MB in size
 options(shiny.maxRequestSize = 70 * 1024^2)
-
-# Determine if the app is run on the server or locally
-isServer <- tolower(Sys.info()[["nodename"]]) == "shinyapps"
 
 # Load standard libraries
 suppressPackageStartupMessages(library(shiny))
@@ -43,6 +44,7 @@ ui <- tagList(
         class = "navbar navbar-static-top",
         div(class = "navbar-custom-menu",
             div(sprintf("v. %s", version)),
+            textOutput("userCount"),
             div(tags$a(href = "./", target = "_blank", list(icon("external-link"), "Open new instance in separate tab"))),
             actionLink("setSeed", "Set seed", icon = icon("random"))
         )
@@ -144,9 +146,22 @@ server <- function(input, output, session)
   })
 
 
-  # if (!isServer) {
-  #   session$onSessionEnded(stopApp)
-  # }
+  onSessionStart <- isolate({
+    users$count <- users$count + 1
+  })
+
+  onSessionEnded(function() {
+    isolate({
+      users$count <- users$count - 1
+      if (isLocalRun && users$count == 0) {
+        stopApp()
+      }
+    })
+  })
+
+  output[["userCount"]] <- renderText({
+    sprintf("Number of open instances: %d", users$count)
+  })
 }
 
 # Run application
