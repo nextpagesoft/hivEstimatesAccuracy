@@ -27,10 +27,10 @@ RunAdjustments <- function(data, adjustmentSpecs = list(), diagYearRange = NULL,
   # procedures.
   data <- list(Table = copy(data))
   if (!is.null(diagYearRange)) {
-    data$Table <- data$Table[DateOfDiagnosisYear %between% diagYearRange || is.na(DateOfDiagnosisYear)]
+    data$Table <- data$Table[DateOfDiagnosisYear %between% diagYearRange | is.na(DateOfDiagnosisYear)]
   }
   if (!is.null(notifQuarterRange)) {
-    data$Table <- data$Table[NotificationTime %between% notifQuarterRange || is.na(NotificationTime)]
+    data$Table <- data$Table[NotificationTime %between% notifQuarterRange | is.na(NotificationTime)]
   }
 
   PreProcessInputDataBeforeAdjustments(data$Table)
