@@ -439,8 +439,8 @@ Requires: glue, magrittr, stringi
 
 Package: survival
 Source: CRAN
-Version: 2.43-1
-Hash: 65efd41b0fb013ae71ba36dcf85ba9b0
+Version: 2.43-3
+Hash: cf78cc39c84ee0d3541ba154de36cc5b
 
 Package: tibble
 Source: CRAN
