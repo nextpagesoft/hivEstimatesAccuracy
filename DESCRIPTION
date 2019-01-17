@@ -8,6 +8,7 @@ Authors@R: c(person("Magdalena", "Rosinska", email = "mrosinska@pzh.gov.pl",
     "npantaz@med.uoa.gr", role = c("aut")), person("Daniel", "Lewandowski",
     email = "daniel@nextpagesoft.net", role = c("aut", "cre")),
     person("Janusz", "Janiec", email = "jjaniec@pzh.gov.pl", role = c("aut",
+    "ctb")), person("Chantal", "Quinten", email = "chantal.quinten@ecdc.europa.eu", role = c("aut",
     "ctb")))
 Maintainer: Daniel Lewandowski <daniel@nextpagesoft.net>
 Description: Improves the accuracy of HIV estimates in EU/EEA countries.
