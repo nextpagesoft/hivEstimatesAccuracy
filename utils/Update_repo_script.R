@@ -2,10 +2,13 @@
 devtools::document()
 
 # Build source and binary versions
-repoPath <- "d:/_DEPLOYMENT/hivEstimatesAccuracy/miniCRAN"
+repoPath <- "d:/_DEPLOYMENT/hivEstimatesAccuracy/pkgBuilds"
 dir.create(repoPath, showWarnings = FALSE, recursive = TRUE)
-devtools::build(path = file.path(repoPath, "pkgBuilds"), binary = FALSE)
-devtools::build(path = file.path(repoPath, "pkgBuilds"), binary = TRUE, args = c('--preclean'))
+devtools::build(path = file.path(repoPath, "pkgBuilds"),
+                binary = FALSE)
+devtools::build(path = repoPath,
+                binary = TRUE,
+                args = c('--preclean'))
 
 # Read new version string
 descr <- as.data.frame(read.dcf(file = "DESCRIPTION"))
