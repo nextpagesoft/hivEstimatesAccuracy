@@ -1,3 +1,5 @@
+packrat::restore()
+
 # Documentation, testing, check
 devtools::document()
 
@@ -43,7 +45,6 @@ UploadFiles <- function(fileNames, sourcePath, destPath) {
 
 ftpPath <- keyring::key_get("HIV-server", "ftpPath")
 userpwd <- keyring::key_get("HIV-server", "userpwd")
-
 
 UploadFiles(fileNames = c("version.txt", tarFileName),
             sourcePath = file.path(repoPath, "pkgBuilds"),
