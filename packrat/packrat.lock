@@ -196,8 +196,8 @@ Requires: BH, Rcpp, later, promises
 
 Package: jomo
 Source: CRAN
-Version: 2.6-5
-Hash: eb20e93446780dcbd51c47716a82e087
+Version: 2.6-6
+Hash: 59c3855ed979ef5b57631d7dc56c941c
 Requires: lme4, ordinal, survival
 
 Package: jsonlite
@@ -357,9 +357,9 @@ Hash: 1d4cae95887ffe5b1a22bea5994476cd
 
 Package: purrr
 Source: CRAN
-Version: 0.2.5
-Hash: 8b0c16db10c7e20b70cd37779a673a8b
-Requires: magrittr, rlang, tibble
+Version: 0.3.0
+Hash: 39be04d964bc2b860f09147ce4b8e2ef
+Requires: magrittr, rlang
 
 Package: quantreg
 Source: CRAN

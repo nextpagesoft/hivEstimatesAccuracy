@@ -3,7 +3,8 @@
 # inputDataFilePath <- "g:/My Drive/Projects/19. PZH/Scripts/Received/csv_pilot/PL.csv"
 # inputDataFilePath <- "~/share/baza30czer2018_mod_QRT.xlsx"
 # inputDataFilePath <- "/media/sf_VirtualBox_Shared/Nikos_test/AT.csv"
-inputDataFilePath <- "/media/sf_VirtualBox_Shared/dummy_miss1.zip"
+# inputDataFilePath <- "/media/sf_VirtualBox_Shared/dummy_miss1.zip"
+inputDataFilePath <- "/home/daniel/share/2017forMIok - Copy.csv"
 # inputDataFilePath <- "~/share/StateTestings/StateData_20181014212132.rds"
 # inputDataFilePath <- "/media/sf_VirtualBox_Share/hiv_2017.zip"
 

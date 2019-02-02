@@ -49,6 +49,14 @@ if (!is.null(inputData)) {
   # Apply GroupedRegionOfOrigin mapping
   distr <- GetOriginDistribution(inputData$Table)
   map <- GetOriginGroupingMap(migrMappingType, distr)
+
+  map[FullRegionOfOrigin %in% c("CENTEUR", "EASTEUR", "EUROPE", "WESTEUR"),
+      GroupedRegionOfOrigin := "EUROPE"]
+  map[FullRegionOfOrigin %in% c("SUBAFR"),
+      GroupedRegionOfOrigin := "SUBAFR"]
+  map[GroupedRegionOfOrigin %in% c("OTHER"),
+      GroupedRegionOfOrigin := FullRegionOfOrigin]
+
   inputData <- ApplyOriginGroupingMap(inputData, map)
 
   # Get "Summary" page plots (optionally)

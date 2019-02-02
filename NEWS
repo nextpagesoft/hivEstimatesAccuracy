@@ -1,3 +1,9 @@
+Version 1.0.2 (2019/02/02)
+
+* Report: Fix creating plots where number of categories is more than 8.
+* Misc: Update dependencies
+
+
 Version 1.0.1 (2019/01/19)
 
 * Misc: Update manual

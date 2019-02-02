@@ -16,6 +16,13 @@ GetMainReportArtifacts <- function(params)
 {
   # Functions ------------------------------------------------------------------
 
+  GenerateColors <- function(n) {
+    hues <- seq(15, 375, length = n + 1)
+    colors <- hcl(h = hues, l = 65, c = 100)[1:n]
+    return(colors)
+  }
+
+
   FormatNumbers <- function(
     x,
     digits = 0
@@ -158,6 +165,12 @@ GetMainReportArtifacts <- function(params)
 
     filter <- sprintf("DateOfDiagnosisYear != 'Total' & %s != 'Overall'", colvar)
     data <- data[eval(parse(text = filter))]
+
+    n <- data[, length(unique(get(colvar)))]
+    if (n > length(colors)) {
+      extraColors <- GenerateColors(n - length(colors))
+      colors <- c(colors, extraColors)
+    }
 
     plotObj <- ggplot(data = data,
                       aes(x = as.integer(get(rowvar)),
