@@ -1,6 +1,7 @@
 Version 1.0.2 (2019/02/02)
 
 * Report: Fix creating plots where number of categories is more than 8.
+* Report: Fix missing "IsEmptyString" function on Windows.
 * Misc: Update dependencies
 
 
