@@ -62,6 +62,9 @@ params:
 ---
 
 ```{r setup, eval = TRUE, include = FALSE}
+
+IsEmptyString <- hivEstimatesAccuracy::IsEmptyString
+
 knitr::opts_chunk$set(echo = FALSE, 
                       cache = FALSE,
                       results = "asis", 

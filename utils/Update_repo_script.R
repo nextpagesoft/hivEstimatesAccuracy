@@ -1,4 +1,4 @@
-packrat::restore()
+packrat::restore(overwrite.dirty = TRUE)
 
 # Documentation, testing, check
 devtools::document()
@@ -47,13 +47,13 @@ ftpPath <- keyring::key_get("HIV-server", "ftpPath")
 userpwd <- keyring::key_get("HIV-server", "userpwd")
 
 UploadFiles(fileNames = c("version.txt", tarFileName),
-            sourcePath = file.path(repoPath, "pkgBuilds"),
+            sourcePath = repoPath,
             destPath = ftpPath)
 
-UploadFiles(fileNames = c("PACKAGES.rds", "PACKAGES.gz", "PACKAGES", tarFileName),
-            sourcePath = file.path(repoPath, "CRAN", "src", "contrib"),
-            destPath = file.path(ftpPath, "repo", "src", "contrib"))
-
-UploadFiles(fileNames = c("PACKAGES.rds", "PACKAGES.gz", "PACKAGES", zipFileName),
-            sourcePath = file.path(repoPath, "CRAN", "bin", "windows", "contrib", "3.5"),
-            destPath = file.path(ftpPath, "repo", "bin", "windows", "contrib", "3.5"))
+# UploadFiles(fileNames = c("PACKAGES.rds", "PACKAGES.gz", "PACKAGES", tarFileName),
+#             sourcePath = file.path(repoPath, "CRAN", "src", "contrib"),
+#             destPath = file.path(ftpPath, "repo", "src", "contrib"))
+#
+# UploadFiles(fileNames = c("PACKAGES.rds", "PACKAGES.gz", "PACKAGES", zipFileName),
+#             sourcePath = file.path(repoPath, "CRAN", "bin", "windows", "contrib", "3.5"),
+#             destPath = file.path(ftpPath, "repo", "bin", "windows", "contrib", "3.5"))
