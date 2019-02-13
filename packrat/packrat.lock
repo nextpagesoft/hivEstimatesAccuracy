@@ -124,8 +124,8 @@ Requires: BH, R6, Rcpp, assertthat, bindrcpp, glue, magrittr,
 
 Package: evaluate
 Source: CRAN
-Version: 0.12
-Hash: c32505adba4f6eca5aa20dd32300b019
+Version: 0.13
+Hash: 1853557a0ea0db2daebf597c7ce58d70
 
 Package: fansi
 Source: CRAN
@@ -191,13 +191,13 @@ Requires: Rcpp, digest
 Package: httpuv
 Source: CRAN
 Version: 1.4.5.1
-Hash: c1952824aa156a78fb421ea09b67473d
+Hash: d9e43248a4355da57d5e29260e962c95
 Requires: BH, Rcpp, later, promises
 
 Package: jomo
 Source: CRAN
-Version: 2.6-6
-Hash: 59c3855ed979ef5b57631d7dc56c941c
+Version: 2.6-7
+Hash: 6316d389d131f9a35da4cab17267d717
 Requires: lme4, ordinal, survival
 
 Package: jsonlite
@@ -218,8 +218,8 @@ Hash: ecf589b42cd284b03a4beb9665482d3e
 
 Package: later
 Source: CRAN
-Version: 0.7.5
-Hash: cb28cae55bfd79567db23db127f09d3c
+Version: 0.8.0
+Hash: 6628995e683466b279077e796a4f0a1c
 Requires: BH, Rcpp, rlang
 
 Package: lazyeval
@@ -229,8 +229,8 @@ Hash: 88926ad9c43581fd0822a37c8ed09f05
 
 Package: lme4
 Source: CRAN
-Version: 1.1-19
-Hash: a41689abe3f94da2e136f97e129dbdcb
+Version: 1.1-20
+Hash: 66c9f0cf40bf115183124f7b6a95b32b
 Requires: Rcpp, RcppEigen, minqa, nloptr
 
 Package: magrittr
@@ -347,7 +347,7 @@ Requires: R6, crayon, hms, prettyunits
 Package: promises
 Source: CRAN
 Version: 1.0.1
-Hash: 9ecc9727826384f2b4e0c8cf11adfc58
+Hash: 9bd4f07515f0bb5e649fa9a91a387ec9
 Requires: R6, Rcpp, later, magrittr, rlang
 
 Package: ps
@@ -445,8 +445,8 @@ Hash: 03ab60ef7fa4627b38ad67c95ce6b04c
 
 Package: stringr
 Source: CRAN
-Version: 1.3.1
-Hash: 9f417a1d899ed1f080942ab36998e8b5
+Version: 1.4.0
+Hash: 67da32dbb2a7a16f2ef124336358e54a
 Requires: glue, magrittr, stringi
 
 Package: survival
