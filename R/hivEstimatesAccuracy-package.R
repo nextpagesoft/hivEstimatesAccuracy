@@ -21,7 +21,7 @@
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
 #' @importFrom utils unzip head zip tail
 #' @importFrom tools file_path_sans_ext
-#' @importFrom grDevices dev.control dev.off pdf recordPlot
+#' @importFrom grDevices dev.control dev.off pdf recordPlot hcl
 #'
 NULL
 
