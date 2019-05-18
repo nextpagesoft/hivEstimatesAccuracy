@@ -1,3 +1,4 @@
+rVersion <- "3.6"
 packrat::restore(overwrite.dirty = TRUE)
 
 # Documentation, testing, check
@@ -24,12 +25,12 @@ file.copy(file.path(repoPath, tarFileName),
           file.path(repoPath, "..", "repo", "src", "contrib", tarFileName),
           overwrite = TRUE)
 file.copy(file.path(repoPath, zipFileName),
-          file.path(repoPath, "..", "repo", "bin", "windows", "contrib", "3.5", zipFileName),
+          file.path(repoPath, "..", "repo", "bin", "windows", "contrib", rVersion, zipFileName),
           overwrite = TRUE)
 
 # Update repo metafiles
 tools::write_PACKAGES(dir = file.path(repoPath, "..", "repo", "src", "contrib"), type = "source")
-tools::write_PACKAGES(dir = file.path(repoPath, "..", "repo", "bin", "windows", "contrib", "3.5"), type = "win.binary")
+tools::write_PACKAGES(dir = file.path(repoPath, "..", "repo", "bin", "windows", "contrib", rVersion), type = "win.binary")
 
 # Update currect version string
 writeLines(version, file.path(repoPath, "version.txt"))
