@@ -269,8 +269,8 @@ list(
                           fitStratum[, c(..mergeVars, "P", "Weight", "Var")],
                           by = mergeVars,
                           all.x = TRUE)
-      outputData[, MissingData := is.na(Weight) | is.infinite(Weight)]
-      outputData[MissingData == TRUE, ":="(
+      outputData[, MissingData := VarX != 0 & (is.na(Weight) | is.infinite(Weight))]
+      outputData[MissingData == TRUE | VarX == 0, ":="(
         Weight = 1,
         P = 1
       )]
