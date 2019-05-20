@@ -73,9 +73,6 @@ inputData <- inputData$Table
 # Work on a copy
 compData <- copy(inputData)
 
-# Initialize output data
-outputData <- copy(inputData)
-
 # Separator used for creating a composite of stratum columns. Should not occur in the stratum
 # values.
 stratSep <- "_"
@@ -241,7 +238,7 @@ if (nrow(compData) > 0) {
     Weight = 1,
     P = 1
   )]
-  outputData[is.na(Var), Var := 0]
+  outputData[is.na(Var) | is.infinite(Var), Var := 0]
 
   # ------------------------------------------------------------------------
 
