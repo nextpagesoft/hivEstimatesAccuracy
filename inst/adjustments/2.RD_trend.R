@@ -108,7 +108,7 @@ list(
       VarTs = Tf - VarT
     )]
     # NOTE: Otherwise survival model complains
-    compData <- compData[VarXs > VarTs]
+    compData <- droplevels(compData[VarXs > VarTs])
 
     totalPlot <- NULL
     totalPlotData <- NULL

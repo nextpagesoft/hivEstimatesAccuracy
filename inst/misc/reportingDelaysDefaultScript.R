@@ -14,14 +14,14 @@ endQrt <- 2017.25
 
 # Stratifiation columns
 # stratVarNames <- c("Gender", "Transmission")
-stratVarNames <- c()
+stratVarNames <- c("Transmission")
 
 # Run mice adjustment before RD
 runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "/media/sf_VirtualBox_Shared/Nikos_test/EL2.csv"
+inputDataFilePath <- "~/share/dummy2019_exclUK.zip"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -125,6 +125,7 @@ compData[, ":="(
 )]
 # NOTE: Otherwise survival model complains
 compData <- compData[VarXs > VarTs]
+compData <- droplevels(compData)
 
 totalPlot <- NULL
 totalPlotData <- NULL
