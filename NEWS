@@ -1,3 +1,10 @@
+Version 1.0.4 (2019/05/20)
+
+* RD: Droplevels of Stratum after filter in RD adjustments
+* Misc: Implement matching original columns using adist function
+* RD: In RD adjustment replace infinite variance by 0
+
+
 Version 1.0.3 (2019/05/18)
 
 * Misc: Update dependencies
