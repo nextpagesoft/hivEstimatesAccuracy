@@ -287,7 +287,7 @@ if (nrow(compData) > 0) {
     Weight = 1,
     P = 1
   )]
-  outputData[is.na(Var), Var := 0]
+  outputData[is.na(Var) | is.infinite(Var), Var := 0]
   outputData[, ":="(
     DateOfDiagnosisYear = DateOfDiagnosisYearOrig,
     DateOfDiagnosisYearOrig = NULL
