@@ -16,7 +16,14 @@ editor_options:
 ```{r setup, include = FALSE}
 require(hivEstimatesAccuracy, quietly = TRUE)
 knitr::opts_chunk$set(echo = FALSE, results = "asis", message = FALSE, warning = FALSE, include = TRUE)
-calcFigHeight <- function(plot) max(plot$layout$layout$ROW) * 2 + 0.5
+calcFigHeight <- function(plot) {
+  height <- 0.5
+  if (!is.null(plot$layout$layout$ROW)) {
+    height <- height + max(plot$layout$layout$ROW) * 2
+  }
+  
+  return(height)
+}
 formatNumbers <- function(x) sprintf("%.2f", x)
 ```
 
@@ -40,7 +47,7 @@ print(params$InputData$Artifacts$OutputPlotStrat$Transmission$plot)
 print(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin$plot)
 ```
 
-```{r, eval = {!is.null(params$InputData$Artifacts$UnivAnalysis)}}
+```{r, eval = {!is.null(params$InputData$Artifacts$UnivAnalysis) && nrow(params$InputData$Artifacts$UnivAnalysis) > 0}}
 dt <- params$InputData$Artifacts$UnivAnalysis
 knitr::kable(dt, align = rep("r", ncol(dt)))
 ```
