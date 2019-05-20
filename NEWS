@@ -1,3 +1,11 @@
+Version 1.0.5 (2019/05/20)
+
+* RD: Set MissingData to FALSE for VarX equal 0
+* RD: Estimate the number of rows in the RD intermediate report based on
+  ggplot_built object
+* RD: Let GetRDPlots return ggplot_built object instead of ggplot object
+
+
 Version 1.0.4 (2019/05/20)
 
 * RD: Droplevels of Stratum after filter in RD adjustments

@@ -1,8 +1,7 @@
 # Load libraries
-library(hivEstimatesAccuracy)
 library(data.table)
 library(survival)
-
+library(hivEstimatesAccuracy)
 
 # A) SETUP ---------------------------------------------------------------------
 
@@ -10,7 +9,7 @@ library(survival)
 startYear <- 2000L
 
 # End quarter
-endQrt <- 2017.25
+endQrt <- 2016.25
 
 # Stratifiation columns
 # stratVarNames <- c("Gender", "Transmission")

@@ -15,7 +15,7 @@ inputDataFilePath <- "~/share/dummy2019_exclUK.zip"
 # c) "Reporting Delays"
 adjustmentNames <- c(
   # "Joint Modelling Multiple Imputation"
-  # "Multiple Imputation using Chained Equations - MICE"
+  "Multiple Imputation using Chained Equations - MICE",
   "Reporting Delays"
 )
 adjustmentFilePaths <- GetAdjustmentSpecFileNames()
@@ -26,8 +26,10 @@ adjustmentSpecs <-
 
 # Optionally adjust parameters of the adjustments
 # For instance stratify "Reporting Delays" adjustment by Migration category:
-# adjustmentSpecs[["Multiple Imputation using Chained Equations - MICE"]]$Parameters$imputeRD$value <- TRUE
+adjustmentSpecs[["Multiple Imputation using Chained Equations - MICE"]]$Parameters$imputeRD$value <- FALSE
+adjustmentSpecs[["Reporting Delays"]]$Parameters$stratGender$value <- TRUE
 adjustmentSpecs[["Reporting Delays"]]$Parameters$stratTrans$value <- TRUE
+adjustmentSpecs[["Reporting Delays"]]$Parameters$stratMigr$value <- TRUE
 
 # 3. FULLMIGR MAPPING ----------------------------------------------------------
 migrMappingType <- "REPCOUNTRY + UNK + OTHER"
