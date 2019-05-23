@@ -229,7 +229,7 @@ list(
                  ), on = .(VarT, Stratum)]
       outputData[, ":="(
         Source = ifelse(Imputation == 0, "Reported", "Imputed"),
-        MissingData = VarX != 0 & (is.na(Weight) | is.infinite(Weight))
+        MissingData = is.na(Weight) | is.infinite(Weight)
       )]
       outputData[MissingData == TRUE, ":="(
         Weight = 1,
