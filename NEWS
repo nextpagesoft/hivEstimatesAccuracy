@@ -1,3 +1,7 @@
+Version 1.0.6 (2019/05/23)
+
+* Do not overwrite Weight for VarX equal 0
+
 Version 1.0.5 (2019/05/20)
 
 * RD: Set MissingData to FALSE for VarX equal 0
