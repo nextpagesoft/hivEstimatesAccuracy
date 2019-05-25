@@ -220,8 +220,13 @@ dataSummary <- function(input, output, session, appStatus)
     diagYearRange <- req(input[['diagYearRange']])
     notifQuarterRange <- req(input[['notifQuarterRange']])
 
-    req(appStatus$InputData$Table)[, DateOfDiagnosisYear %between% diagYearRange &
-                                     NotificationTime %between% notifQuarterRange]
+    req(appStatus$InputData$Table)[, is.na(DateOfDiagnosisYear) |
+                                     is.na(NotificationTime) |
+                                     (DateOfDiagnosisYear %between% diagYearRange &
+                                        NotificationTime %between% notifQuarterRange)]
+
+    # req(appStatus$InputData$Table)[, DateOfDiagnosisYear %between% diagYearRange &
+    #                                  NotificationTime %between% notifQuarterRange]
   })
 
   output[["filterInfo"]] <- renderText({
@@ -231,7 +236,9 @@ dataSummary <- function(input, output, session, appStatus)
 
   artifacts <- reactive({
     dataSelection <- dataSelection()
+    print(dataSelection)
     inputData <- appStatus$InputData$Table[dataSelection]
+    print(inputData[, unique(DateOfNotificationYear)])
     PreProcessInputDataBeforeAdjustments(inputData)
     GetDataSummaryArtifacts(inputData)
   })
