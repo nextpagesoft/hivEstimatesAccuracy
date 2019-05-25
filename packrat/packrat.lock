@@ -117,8 +117,8 @@ Hash: b1642cf2ee0ab1d1b152ffacdb4401f7
 
 Package: digest
 Source: CRAN
-Version: 0.6.18
-Hash: 65f62365ec69ddd17230d2ffe891a6ab
+Version: 0.6.19
+Hash: 99a5cdd9144b03b7a2ddbbef862fb07f
 
 Package: dplyr
 Source: CRAN
@@ -206,8 +206,8 @@ Requires: BH, R6, Rcpp, later, promises
 
 Package: jomo
 Source: CRAN
-Version: 2.6-7
-Hash: 6316d389d131f9a35da4cab17267d717
+Version: 2.6-8
+Hash: 12a599a815867f92354c1e90ab0a44ba
 Requires: lme4, ordinal, survival
 
 Package: jsonlite
@@ -217,8 +217,8 @@ Hash: 5f969e213e966135393e3e304abf3f49
 
 Package: knitr
 Source: CRAN
-Version: 1.22
-Hash: d7581079d36fa69f84ff721384355734
+Version: 1.23
+Hash: 97e380b89b7561ff23821e60296b394c
 Requires: evaluate, highr, markdown, stringr, xfun, yaml
 
 Package: labeling
@@ -408,10 +408,10 @@ Hash: 6a5220d1a973463418286038095d8c0b
 
 Package: rmarkdown
 Source: CRAN
-Version: 1.12
-Hash: 241424e590a32decf6e9f0cd32a5760b
+Version: 1.13
+Hash: 599a223f7b4c5cb17a3f8409f1f39aa5
 Requires: base64enc, evaluate, htmltools, jsonlite, knitr, mime,
-    stringr, tinytex, yaml
+    stringr, tinytex, xfun, yaml
 
 Package: scales
 Source: CRAN
