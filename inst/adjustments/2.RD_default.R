@@ -86,8 +86,7 @@ list(
 
     # Make sure the strata columns exist in the data
     stratVarNames <- stratVarNames[stratVarNames %in% colnames(compData)]
-    stratVarNamesImp <- union(c("Imputation", "ReportingCountry"),
-                              stratVarNames)
+    stratVarNamesImp <- union(c("Imputation"), stratVarNames)
 
     # Create a stratum variable - will be used to merge with the estimations,
     # takes missing categories as separate categories
@@ -111,8 +110,8 @@ list(
                            NotificationTime <= endQrt]
 
     compData[, ":="(
-      VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
-      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)),
+      VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1,
+      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)) + 1,
       ReportingDelay = 1L
     )]
     compData[, ":="(

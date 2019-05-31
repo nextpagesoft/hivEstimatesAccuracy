@@ -99,8 +99,8 @@ list(
                            NotificationTime <= endQrt]
 
     compData[, ":="(
-      VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
-      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)),
+      VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1,
+      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)) + 1,
       ReportingDelay = 1L
     )]
     compData[, ":="(
