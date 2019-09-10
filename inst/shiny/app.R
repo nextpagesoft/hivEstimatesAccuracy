@@ -24,6 +24,7 @@ source(file.path(modulesPath, "dataAdjust.R"))
 source(file.path(modulesPath, "createReports.R"))
 source(file.path(modulesPath, "outputs.R"))
 source(file.path(modulesPath, "manual.R"))
+source(file.path(modulesPath, "hivModel.R"))
 
 addResourcePath("www", wwwPath)
 
@@ -57,6 +58,7 @@ ui <- tagList(
         menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
         menuItem("Reports",            tabName = "reports",     icon = icon("book")),
         menuItem("Outputs",            tabName = "outputs",     icon = icon("download")),
+        menuItem("HIV Modelling",      tabName = "hivModel",    icon = icon("calculator")),
         menuItem("Manual",             tabName = "manual",      icon = icon("book"))
       ),
       width = 180
@@ -74,6 +76,7 @@ ui <- tagList(
         tabItem(tabName = "adjustments", fluidRow(dataAdjustUI("adjustments"))),
         tabItem(tabName = "reports",     fluidRow(createReportsUI("reports"))),
         tabItem(tabName = "outputs",     fluidRow(outputsUI("outputs"))),
+        tabItem(tabName = "hivModel",    fluidRow(hivModelUI("hivModel"))),
         tabItem(tabName = "manual",      fluidRow(manualUI("manual")))
       )
     )
@@ -117,6 +120,7 @@ server <- function(input, output, session)
   callModule(dataAdjust,      "adjustments", appStatus)
   callModule(createReports,   "reports",     appStatus)
   callModule(outputs,         "outputs",     appStatus)
+  callModule(hivModel,        "hivModel",    appStatus)
   callModule(manual,          "manual")
 
   observeEvent(input[["setSeed"]], {
