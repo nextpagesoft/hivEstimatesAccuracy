@@ -13,7 +13,6 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(data.table))
 
 # Load main library
-library(hivModelling)
 library(hivEstimatesAccuracy)
 
 # Load application modules
