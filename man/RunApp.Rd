@@ -4,13 +4,16 @@
 \alias{RunApp}
 \title{RunApp}
 \usage{
-RunApp()
+RunApp(launchBrowser = TRUE)
+}
+\arguments{
+\item{launchBrowser}{Logical indicating to open the app in a newly open web browser}
 }
 \value{
 NULL (invisibly)
 }
 \description{
-Run the whole application. A Shiny application will start in the default web browser.
+Run the application.
 }
 \examples{
 \dontrun{

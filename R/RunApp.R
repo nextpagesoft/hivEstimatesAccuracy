@@ -1,6 +1,8 @@
 #' RunApp
 #'
-#' Run the whole application. A Shiny application will start in the default web browser.
+#' Run the application.
+#'
+#' @param launchBrowser Logical indicating to open the app in a newly open web browser
 #'
 #' @return NULL (invisibly)
 #'
@@ -10,10 +12,10 @@
 #' }
 #'
 #' @export
-RunApp <- function()
+RunApp <- function(launchBrowser = TRUE)
 {
   appDir <- system.file("shiny", package = "hivEstimatesAccuracy")
-  shiny::runApp(appDir, display.mode = "normal", launch.browser = TRUE)
+  shiny::runApp(appDir, display.mode = "normal", launch.browser = launchBrowser)
 
   return(invisible(NULL))
 }
