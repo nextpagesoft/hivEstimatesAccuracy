@@ -13,6 +13,7 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(data.table))
 
 # Load main library
+library(hivModelling)
 library(hivEstimatesAccuracy)
 
 # Load application modules
@@ -30,8 +31,7 @@ addResourcePath("www", wwwPath)
 
 # App globals
 titleString <- "HIV Estimates Accuracy"
-version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy",
-                                           fields = "Version"))
+version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy", fields = "Version"))
 
 # Define application user interface
 ui <- tagList(

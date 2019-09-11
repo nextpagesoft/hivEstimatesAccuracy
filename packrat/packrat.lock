@@ -154,6 +154,12 @@ Source: CRAN
 Version: 0.8-72
 Hash: 3c4fdecc4c94b6c5071bf71eff3fc95f
 
+Package: future
+Source: CRAN
+Version: 1.14.0
+Hash: be5e13b4f7a76297c720059f04845aeb
+Requires: digest, globals, listenv
+
 Package: generics
 Source: CRAN
 Version: 0.0.2
@@ -165,6 +171,11 @@ Version: 3.2.1
 Hash: 7cf3f9df0089475f133ec23befca1032
 Requires: digest, gtable, lazyeval, reshape2, rlang, scales, tibble,
     viridisLite, withr
+
+Package: globals
+Source: CRAN
+Version: 0.12.4
+Hash: 813a6280042ee82fa529833489333322
 
 Package: glue
 Source: CRAN
@@ -186,6 +197,21 @@ Package: highr
 Source: CRAN
 Version: 0.8
 Hash: 16aa2cc98d7b68c9d148c263c8dcdbcd
+
+Package: hivModelling
+Source: github
+Version: 0.9.9
+Hash: 31676aad9866efb77abc4242c4248d57
+Requires: Rcpp, data.table, future, ggplot2, nloptr, xml2
+GithubRepo: hivModelling
+GithubUsername: nextpagesoft
+GithubRef: master
+GithubSha1: 2a0f8a603c6b7976dff22b64250065bd27c9fb38
+RemoteHost: api.github.com
+RemoteRepo: hivModelling
+RemoteUsername: nextpagesoft
+RemoteRef: master
+RemoteSha: 2a0f8a603c6b7976dff22b64250065bd27c9fb38
 
 Package: hms
 Source: CRAN
@@ -237,6 +263,11 @@ Package: lazyeval
 Source: CRAN
 Version: 0.2.2
 Hash: 563563691bea3cde6945a98996d7c166
+
+Package: listenv
+Source: CRAN
+Version: 0.7.0
+Hash: f5e0d09f4e42d749ae0f893cff1817b6
 
 Package: lme4
 Source: CRAN
@@ -521,6 +552,12 @@ Package: xfun
 Source: CRAN
 Version: 0.9
 Hash: 66003709a6aa47339b94a2aef066bddb
+
+Package: xml2
+Source: CRAN
+Version: 1.2.2
+Hash: c5258a3beb15da46d4682eda667bf5ec
+Requires: Rcpp
 
 Package: xtable
 Source: CRAN
