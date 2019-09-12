@@ -201,17 +201,17 @@ Hash: 16aa2cc98d7b68c9d148c263c8dcdbcd
 Package: hivModelling
 Source: github
 Version: 0.9.10
-Hash: ee8c5743a9c8c7a4198a4750dc5df7c9
+Hash: 887d9f2c788279260806b75e3519d07d
 Requires: Rcpp, data.table, future, ggplot2, nloptr, xml2
 GithubRepo: hivModelling
 GithubUsername: nextpagesoft
 GithubRef: master
-GithubSha1: 29315d7fb5400d73ca71290c866b19558e000279
+GithubSha1: 0d0cdb86c8fc13e85f8c6252eabad7b9b8d1b87d
 RemoteHost: api.github.com
 RemoteRepo: hivModelling
 RemoteUsername: nextpagesoft
 RemoteRef: master
-RemoteSha: 29315d7fb5400d73ca71290c866b19558e000279
+RemoteSha: 0d0cdb86c8fc13e85f8c6252eabad7b9b8d1b87d
 
 Package: hms
 Source: CRAN
