@@ -50,6 +50,10 @@ pre {
   white-space: pre;
 }
 
+.shiny-output-error-validation {
+  color: red;
+}
+
 /* Header  */
 .main-header {
   background-image: url("../images/ECDC_logo.svg");
@@ -334,3 +338,4 @@ div.box-body .shiny-input-container h3 {
 #summary-notifQuarterFilterInfo {
   color: red;
 }
+

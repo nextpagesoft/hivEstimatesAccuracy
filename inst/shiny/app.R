@@ -9,6 +9,7 @@ options(shiny.maxRequestSize = 70 * 1024^2)
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(shinydashboard))
 suppressPackageStartupMessages(library(shinycssloaders))
+suppressPackageStartupMessages(library(DT))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(data.table))
 

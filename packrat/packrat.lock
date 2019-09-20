@@ -227,8 +227,8 @@ Requires: Rcpp, digest
 
 Package: httpuv
 Source: CRAN
-Version: 1.5.1
-Hash: e7053b7c5df23c54946e5e641d0c4c25
+Version: 1.5.2
+Hash: 02c5d6690357a7f768329bb7449ab5e6
 Requires: BH, R6, Rcpp, later, promises
 
 Package: jomo
@@ -244,8 +244,8 @@ Hash: 5f969e213e966135393e3e304abf3f49
 
 Package: knitr
 Source: CRAN
-Version: 1.24
-Hash: 6f49966079cf15bce4f8a94aff3c0313
+Version: 1.25
+Hash: c0b5316240a79d38f4785884b95a9609
 Requires: evaluate, highr, markdown, stringr, xfun, yaml
 
 Package: labeling
@@ -263,6 +263,12 @@ Package: lazyeval
 Source: CRAN
 Version: 0.2.2
 Hash: 563563691bea3cde6945a98996d7c166
+
+Package: lifecycle
+Source: CRAN
+Version: 0.1.0
+Hash: fd2ceffa778c010fab2df12b2eccd835
+Requires: glue, rlang
 
 Package: listenv
 Source: CRAN
@@ -505,10 +511,10 @@ Requires: cli, crayon, fansi, pillar, pkgconfig, rlang
 
 Package: tidyr
 Source: CRAN
-Version: 0.8.3
-Hash: f9eea52e81d9a7f5551877287e6da586
-Requires: Rcpp, dplyr, glue, magrittr, purrr, rlang, stringi, tibble,
-    tidyselect
+Version: 1.0.0
+Hash: 52f95ddff9a8bbc8e5d7dc0050d6cda4
+Requires: Rcpp, dplyr, ellipsis, glue, lifecycle, magrittr, purrr,
+    rlang, stringi, tibble, tidyselect, vctrs
 
 Package: tidyselect
 Source: CRAN
@@ -518,8 +524,8 @@ Requires: Rcpp, glue, purrr, rlang
 
 Package: tinytex
 Source: CRAN
-Version: 0.15
-Hash: 76b10a07a55ecf1e34feddb4ed7f5116
+Version: 0.16
+Hash: 569143c7e98bfbd9727b462b57276b09
 Requires: xfun
 
 Package: ucminf
