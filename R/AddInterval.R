@@ -1,3 +1,4 @@
+#' @export
 AddInterval <- function(
   intervals,
   interval,
