@@ -4,6 +4,7 @@
 # Load application modules
 modulesPath <- system.file("shiny/modules/hivModel", package = "hivEstimatesAccuracy")
 source(file.path(modulesPath, "diagRateWidget.R"))
+source(file.path(modulesPath, "paramsWidget.R"))
 
 # User interface
 hivModelUI <- function(id)
@@ -36,7 +37,8 @@ hivModelUI <- function(id)
       solidHeader = FALSE,
       collapsible = TRUE,
       status = 'primary',
-      diagRateWidgetUI(ns('diagRate'))
+      diagRateWidgetUI(ns('diagRate')),
+      paramsWidgetUI(ns('params'))
     ),
     shinyjs::hidden(
       div(
@@ -424,7 +426,8 @@ hivModel <- function(input, output, session, appStatus)
     localState$Plots[['Proportion undiagnosed of all those alive']]
   })
 
-  callModule(diagRateWidget, "diagRate", appStatus)
+  callModule(diagRateWidget, 'diagRate', appStatus)
+  callModule(paramsWidget, 'params', appStatus)
 
   return(NULL)
 }
