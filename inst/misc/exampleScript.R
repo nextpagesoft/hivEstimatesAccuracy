@@ -28,6 +28,8 @@ if (is.null(attrMapping[["FirstCD4Count"]])) {
   attrMapping[["FirstCD4Count"]] <- "cd4_num"
 }
 
+attrMapping[["FirstCD4Count"]] <- "cd4_num"
+
 attrMappingStatus <- GetAttrMappingStatus(attrMapping)
 if (attrMappingStatus[["Valid"]]) {
   defaultValues <- GetPreliminaryDefaultValues()
@@ -60,10 +62,14 @@ if (!is.null(inputData)) {
   inputData <- ApplyOriginGroupingMap(inputData, map)
 
   # Get "Summary" page plots (optionally)
+  inputData$Table <-
+    inputData$Table[is.na(DateOfDiagnosisYear) | is.na(NotificationTime) |
+                      (DateOfDiagnosisYear %between% diagYearRange & NotificationTime %between% notifQuarterRange)]
+
   GetDiagnosisYearDensityPlot(plotData = inputData$Table)
   GetNotificationQuarterDensityPlot(plotData = inputData$Table)
   summaryInputData <- inputData$Table
-  PreProcessInputDataBeforeAdjustments(summaryInputData)
+  PreProcessInputDataBeforeAdjustments(inputData = summaryInputData)
   summaryArtifacts <- GetDataSummaryArtifacts(inputData = summaryInputData)
 
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
@@ -86,8 +92,8 @@ if (!is.null(inputData)) {
   reportFilePath <- GetReportFileNames()[reportName]
   params <- list(AdjustedData = adjustedData,
                  ReportingDelay = TRUE,
-                 Smoothing = FALSE,
-                 CD4ConfInt = TRUE)
+                 Smoothing = TRUE,
+                 CD4ConfInt = FALSE)
 
   if (is.element(reportName, c("Main Report"))) {
     params <- GetMainReportArtifacts(params)
@@ -96,7 +102,8 @@ if (!is.null(inputData)) {
   params <- modifyList(params,
                        list(Artifacts =
                               list(FileName = inputDataFilePath,
-                                   DiagYearRange = c(2000, 2010),
+                                   DiagYearRange = diagYearRange,
+                                   NotifQuarterRange = notifQuarterRange,
                                    DiagYearRangeApply = TRUE)))
 
   htmlReportFileName <- RenderReportToFile(

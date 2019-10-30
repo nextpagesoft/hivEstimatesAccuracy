@@ -38,9 +38,8 @@ RunAdjustments <- function(data, adjustmentSpecs = list(), diagYearRange = NULL,
   # Process adjustments
   set.seed(seed)
   results <- list()
-  i <- 0L
-  for (adjustmentSpec in adjustmentSpecs) {
-    i <- i + 1L
+  for (i in seq_along(adjustmentSpecs)) {
+    adjustmentSpec <- adjustmentSpecs[[i]]
 
     caption <- sprintf("%d. %s", i, adjustmentSpec$Name)
     if (!"Key" %in% names(adjustmentSpec)) {

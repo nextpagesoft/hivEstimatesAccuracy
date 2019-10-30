@@ -30,6 +30,9 @@ PreProcessInputDataBeforeAdjustments <- function(inputData)
     MaxNotificationTime = max(NotificationTime, na.rm = TRUE)
   ), by = .(ReportingCountry)]
 
+  inputData[is.infinite(MinNotificationTime), MinNotificationTime := NA]
+  inputData[is.infinite(MaxNotificationTime), MaxNotificationTime := NA]
+
   # Create VarX, MaxPossibleDelay
   inputData[, c("VarX", "TweakedVarX", "MaxPossibleDelay", "TweakedMaxPossibleDelay") := {
     # Compute VarX
