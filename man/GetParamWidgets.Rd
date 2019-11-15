@@ -4,8 +4,12 @@
 \alias{GetParamWidgets}
 \title{GetParamWidgets}
 \usage{
-GetParamWidgets(paramSpecs, params = NULL, skipParamNames = c(),
-  ns = function(x) x)
+GetParamWidgets(
+  paramSpecs,
+  params = NULL,
+  skipParamNames = c(),
+  ns = function(x) x
+)
 }
 \arguments{
 \item{paramSpecs}{List of parameter specifications. Required.}

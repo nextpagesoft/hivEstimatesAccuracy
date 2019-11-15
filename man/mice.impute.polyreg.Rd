@@ -4,8 +4,16 @@
 \alias{mice.impute.polyreg}
 \title{mice.impute.polyreg}
 \usage{
-mice.impute.polyreg(y, ry, x, wy = NULL, nnet.maxit = 100,
-  nnet.trace = FALSE, nnet.MaxNWts = 1500, ...)
+mice.impute.polyreg(
+  y,
+  ry,
+  x,
+  wy = NULL,
+  nnet.maxit = 100,
+  nnet.trace = FALSE,
+  nnet.MaxNWts = 1500,
+  ...
+)
 }
 \arguments{
 \item{y}{y}
