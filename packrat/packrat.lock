@@ -35,8 +35,8 @@ Hash: 99f6a1855b2f9434e1399d565d2ed9df
 
 Package: RcppEigen
 Source: CRAN
-Version: 0.3.3.5.0
-Hash: d7be9da13587bc13001693fa74e7c985
+Version: 0.3.3.7.0
+Hash: 51d5477069dbb800ff89686c6bdd69fc
 Requires: Rcpp
 
 Package: SparseM
@@ -132,6 +132,11 @@ Source: CRAN
 Version: 0.4.0
 Hash: f147621f72b561485bfffcae78c4f5d5
 
+Package: farver
+Source: CRAN
+Version: 2.0.1
+Hash: eb671f52c8ebb4b81617eba93abda72b
+
 Package: fastmap
 Source: CRAN
 Version: 1.0.1
@@ -195,17 +200,17 @@ Hash: 16aa2cc98d7b68c9d148c263c8dcdbcd
 Package: hivModelling
 Source: github
 Version: 0.9.10
-Hash: 290e3eeea3a6f0875f6d768ef4a7a7f0
+Hash: 73e58bf0fd352d67ee214a96a6c2011f
 Requires: Rcpp, data.table, future, ggplot2, nloptr, xml2
 GithubRepo: hivModelling
 GithubUsername: nextpagesoft
 GithubRef: master
-GithubSha1: 96cd6481b4a28800f839f6f374b9d16921d49e81
+GithubSha1: a442ed0575124fa0b5bcbeb40169fb16009ed6a2
 RemoteHost: api.github.com
 RemoteRepo: hivModelling
 RemoteUsername: nextpagesoft
 RemoteRef: master
-RemoteSha: 96cd6481b4a28800f839f6f374b9d16921d49e81
+RemoteSha: a442ed0575124fa0b5bcbeb40169fb16009ed6a2
 
 Package: hms
 Source: CRAN
@@ -272,7 +277,7 @@ Hash: f5e0d09f4e42d749ae0f893cff1817b6
 Package: lme4
 Source: CRAN
 Version: 1.1-21
-Hash: cc0a79e26e2e2099220e4eb21480795a
+Hash: da533552720180efd05502f70527e859
 Requires: Rcpp, RcppEigen, minqa, nloptr
 
 Package: magrittr
@@ -447,9 +452,10 @@ Requires: base64enc, evaluate, htmltools, jsonlite, knitr, mime,
 
 Package: scales
 Source: CRAN
-Version: 1.0.0
-Hash: 8b512f84c93a820d25221eaa1ca25ad8
-Requires: R6, RColorBrewer, Rcpp, labeling, munsell, viridisLite
+Version: 1.1.0
+Hash: fa53af4e3ceba05fc79a31bde5962445
+Requires: R6, RColorBrewer, farver, labeling, lifecycle, munsell,
+    viridisLite
 
 Package: shiny
 Source: CRAN
