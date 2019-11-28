@@ -106,8 +106,8 @@ Hash: 4fbfebe60de9b5c065ba21f37c68e544
 
 Package: digest
 Source: CRAN
-Version: 0.6.22
-Hash: 824be063463b3709782ef29a3e8d7079
+Version: 0.6.23
+Hash: 7ec748e53ca45166e0824224421529ad
 
 Package: dplyr
 Source: CRAN
@@ -155,8 +155,8 @@ Hash: 3c4fdecc4c94b6c5071bf71eff3fc95f
 
 Package: future
 Source: CRAN
-Version: 1.15.0
-Hash: 0c417600bf231809142b436937897a6d
+Version: 1.15.1
+Hash: 5973fb0744e5d3a3bc2f2a424187c66c
 Requires: digest, globals, listenv
 
 Package: generics
@@ -199,18 +199,18 @@ Hash: 16aa2cc98d7b68c9d148c263c8dcdbcd
 
 Package: hivModelling
 Source: github
-Version: 0.9.10
-Hash: 73e58bf0fd352d67ee214a96a6c2011f
+Version: 0.9.11
+Hash: 67e3f2d8117b58fd2e2aa30267a22032
 Requires: Rcpp, data.table, future, ggplot2, nloptr, xml2
 GithubRepo: hivModelling
 GithubUsername: nextpagesoft
 GithubRef: master
-GithubSha1: a442ed0575124fa0b5bcbeb40169fb16009ed6a2
+GithubSha1: 1595866ba7bd7cb987b5f647754e4e4b5dddd6be
 RemoteHost: api.github.com
 RemoteRepo: hivModelling
 RemoteUsername: nextpagesoft
 RemoteRef: master
-RemoteSha: a442ed0575124fa0b5bcbeb40169fb16009ed6a2
+RemoteSha: 1595866ba7bd7cb987b5f647754e4e4b5dddd6be
 
 Package: hms
 Source: CRAN
@@ -440,13 +440,13 @@ Requires: Rcpp, plyr, stringr
 
 Package: rlang
 Source: CRAN
-Version: 0.4.1
-Hash: 686b7c4593f009713b9df03a2bb33124
+Version: 0.4.2
+Hash: c5cfcde637bbff4e42edad2e69dac5c7
 
 Package: rmarkdown
 Source: CRAN
-Version: 1.17
-Hash: 87d245e49bfca1e043ef5aaa2f8dc521
+Version: 1.18
+Hash: 996bad8949320d17845ebb31bfc853c5
 Requires: base64enc, evaluate, htmltools, jsonlite, knitr, mime,
     stringr, tinytex, xfun, yaml
 
