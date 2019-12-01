@@ -291,10 +291,10 @@
     },
     "haven": {
       "Package": "haven",
-      "Version": "2.1.1",
+      "Version": "2.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "d1f21b8ced82ba581c26edfcc69d0c41"
+      "Hash": "086fad0dd7ec01e7576118a05ea3da9b"
     },
     "highr": {
       "Package": "highr",
@@ -312,8 +312,8 @@
       "RemoteRepo": "hivModelling",
       "RemoteUsername": "nextpagesoft",
       "RemoteRef": "master",
-      "RemoteSha": "d009ef0bd92b7ee757ec081cb89892a2f5ef34be",
-      "Hash": "9d9ac92c9baffb685e69449bcd7dec80"
+      "RemoteSha": "b41eb92b4eb097b043683060832bf0962c030649",
+      "Hash": "3824cd7537d2a39206338fb0eed9bc7f"
     },
     "hms": {
       "Package": "hms",
