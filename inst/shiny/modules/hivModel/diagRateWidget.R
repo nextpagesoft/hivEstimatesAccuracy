@@ -18,7 +18,7 @@ diagRateWidgetUI <- function(id)
   fluidRow(
     column(
       width = 12,
-      h1('1. Diagnosis rates')
+      h1('2. Diagnosis rates')
     ),
     column(
       width = 6,

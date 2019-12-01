@@ -2,9 +2,10 @@
 # NONE
 
 # Load application modules
-modulesPath <- system.file("shiny/modules/hivModel", package = "hivEstimatesAccuracy")
-source(file.path(modulesPath, "diagRateWidget.R"))
-source(file.path(modulesPath, "paramsWidget.R"))
+modulesPath <- system.file('shiny/modules/hivModel', package = 'hivEstimatesAccuracy')
+source(file.path(modulesPath, 'riskGroupsWidget.R'))
+source(file.path(modulesPath, 'diagRateWidget.R'))
+source(file.path(modulesPath, 'paramsWidget.R'))
 
 # User interface
 hivModelUI <- function(id)
@@ -31,14 +32,20 @@ hivModelUI <- function(id)
         )
       )
     ),
-    box(
-      width = 12,
-      title = 'Inputs',
-      solidHeader = FALSE,
-      collapsible = TRUE,
-      status = 'primary',
-      diagRateWidgetUI(ns('diagRate')),
-      paramsWidgetUI(ns('params'))
+    shinyjs::hidden(
+      div(
+        id = ns('paramBox'),
+        box(
+          width = 12,
+          title = 'Inputs',
+          solidHeader = FALSE,
+          collapsible = TRUE,
+          status = 'primary',
+          riskGroupsWidgetUI(ns('riskGroups')),
+          diagRateWidgetUI(ns('diagRate')),
+          paramsWidgetUI(ns('params'))
+        )
+      )
     ),
     shinyjs::hidden(
       div(
@@ -107,8 +114,10 @@ hivModel <- function(input, output, session, appStatus)
 
   # Local state
   localState <- reactiveValues(
+    InputDataPath = NULL,
     Context = NULL,
     Data = NULL,
+    PopData = NULL,
     MainResults = NULL,
     BSResultsList = NULL,
     Plots = NULL,
@@ -120,37 +129,35 @@ hivModel <- function(input, output, session, appStatus)
     data <- localState$Data
     if (is.null(data)) {
       shinyjs::hide('runBox', anim = TRUE, animType = 'fade')
+      shinyjs::hide('paramBox', anim = TRUE, animType = 'fade')
     } else {
       shinyjs::show('runBox')
+      shinyjs::show('paramBox')
     }
   })
 
   # EVENT: Input data file name changed
   observeEvent(input[['fileInput']], {
-    # Get reference to file input
-    fileInput <- input$fileInput
-
     # Validate
-    validate(need(fileInput, message = FALSE))
+    validate(need(input$fileInput, message = FALSE))
 
+    localState$InputDataPath <- input$fileInput$datapath
+  })
+
+  # EVENT: Input data file name changed
+  observeEvent(localState$InputDataPath, {
     context <- hivModelling::GetRunContext(
       settings = list(
-        ModelsToRun = c('INCIDENCE'),
-        InputDataPath = fileInput$datapath
-      ),
-      parameters = list(
-        Models = list(
-          INCIDENCE = list(
-            Country = 'NL'
-          )
-        )
+        InputDataPath = localState$InputDataPath
       )
     )
 
     data <- hivModelling::ReadInputData(context)
+    popData <- hivModelling::GetPopulationData(context, data)
 
     localState$Context <- context
     localState$Data <- data
+    localState$PopData <- popData
   })
 
   # Output data details when they have changed
@@ -161,6 +168,10 @@ hivModel <- function(input, output, session, appStatus)
       # Get reference to file input
       fileInput <- input$fileInput
 
+      fileList <- setDT(unzip(input$fileInput$datapath, list = TRUE))
+      dataFileNames <- fileList[Length > 0 & tools::file_ext(Name) == 'csv', basename(Name)]
+      modelFileName <- fileList[Length > 0 & tools::file_ext(Name) == 'xml', basename(Name)][1]
+
       # Get input data details
       dataDetails <-
         fluidRow(
@@ -169,12 +180,15 @@ hivModel <- function(input, output, session, appStatus)
             p(strong('Name:'), fileInput$name),
             p(strong('Size:'), FormatObjectSize(fileInput$size)),
             p(strong('Type:'), fileInput$type),
-            p(strong('Number of files:'), length(data))
+            p(strong('Number of files:'), nrow(fileList[Length > 0]))
           ),
           column(
             width = 9,
-            p(strong('File names:')),
-            p(paste(names(data), collapse = ', ')))
+            p(strong('Model file name:')),
+            p(modelFileName),
+            p(strong('Data file names:')),
+            p(paste(dataFileNames, collapse = ', '))
+          )
         )
 
       return(dataDetails)
@@ -188,7 +202,7 @@ hivModel <- function(input, output, session, appStatus)
     shinyjs::disable('cancelBootstrapBtn')
 
     context <- req(localState$Context)
-    data <- req(localState$Data)
+    popData <- req(localState$PopData)
     localState$MainResults <- NULL
     localState$BSResultsList <- NULL
     localState$Plots <- NULL
@@ -201,13 +215,13 @@ hivModel <- function(input, output, session, appStatus)
     startTime <- Sys.time()
     if (isLinux) {
       task <<- CreateTask({
-        hivModelling::PerformMainFit(context, data, maxNoFit = 20, ctol = 1e-5, ftol = 1e-4)
+        hivModelling::PerformMainFit(context, popData, maxNoFit = 20, ctol = 1e-5, ftol = 1e-4)
       })
     } else {
-      task <<- CreateTask(function(context, data) {
-        hivModelling::PerformMainFit(context, data, maxNoFit = 20, ctol = 1e-5, ftol = 1e-4)
+      task <<- CreateTask(function(context, popData) {
+        hivModelling::PerformMainFit(context, popData, maxNoFit = 20, ctol = 1e-5, ftol = 1e-4)
       },
-      args = list(context, data))
+      args = list(context, popData))
     }
 
     o <- observe({
@@ -278,22 +292,20 @@ hivModel <- function(input, output, session, appStatus)
     if (isLinux) {
       task <<- CreateTask({
         hivModelling::PerformBootstrapFits(
-          bsCount = 20,
           context,
           data,
           mainResults,
-          algorithm = 'NLOPT_LN_BOBYQA',
-          executionPlan = future::sequential
+          bsCount = 20,
+          executionPlan = future::multiprocess
         )
       })
     } else {
       task <<- CreateTask(function(context, data) {
         hivModelling::PerformBootstrapFits(
-          bsCount = 20,
           context,
           data,
           mainResults,
-          algorithm = 'NLOPT_LN_BOBYQA',
+          bsCount = 20,
           executionPlan = future::multiprocess
         )
       },
@@ -426,8 +438,10 @@ hivModel <- function(input, output, session, appStatus)
     localState$Plots[['Proportion undiagnosed of all those alive']]
   })
 
+  callModule(riskGroupsWidget, 'riskGroups', appStatus)
   callModule(diagRateWidget, 'diagRate', appStatus)
   callModule(paramsWidget, 'params', appStatus)
+
 
   return(NULL)
 }

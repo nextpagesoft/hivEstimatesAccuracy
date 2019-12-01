@@ -6,12 +6,12 @@ users <- reactiveValues(count = 0)
 options(shiny.maxRequestSize = 70 * 1024^2)
 
 # Load standard libraries
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(DT))
+suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(shinydashboard))
 suppressPackageStartupMessages(library(shinycssloaders))
-suppressPackageStartupMessages(library(DT))
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(data.table))
 
 # Load main library
 library(hivEstimatesAccuracy)

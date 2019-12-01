@@ -12,7 +12,7 @@ paramsWidgetUI <- function(id)
   fluidRow(
     column(
       width = 12,
-      h1('2. Parameters'),
+      h1('3. Parameters'),
       column(
         width = 6,
         fluidRow(
