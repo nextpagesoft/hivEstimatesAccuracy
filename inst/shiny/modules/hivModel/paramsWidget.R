@@ -1,18 +1,18 @@
 # Module globals
-rangeMinYear <- 1975L
-rangeMaxYear <- 2020L
-minYear <- 1980L
-maxYear <- 2016L
+# NONE
 
 # User interface
 paramsWidgetUI <- function(id)
 {
+  rangeMinYear <- 1975L
+  rangeMaxYear <- 2025L
+
   ns <- NS(id)
 
   fluidRow(
     column(
       width = 12,
-      h1('3. Parameters'),
+      h1('Incidence Method Advanced Parameters'),
       column(
         width = 6,
         fluidRow(
@@ -23,7 +23,9 @@ paramsWidgetUI <- function(id)
               label = NULL,
               min = rangeMinYear,
               max = rangeMaxYear,
-              value = c(minYear, maxYear)
+              value = c(rangeMinYear, rangeMaxYear),
+              sep = '',
+              step = 1L
             )
           )
         ),
@@ -35,7 +37,9 @@ paramsWidgetUI <- function(id)
               label = NULL,
               min = rangeMinYear,
               max = rangeMaxYear,
-              value = c(minYear, maxYear)
+              value = c(rangeMinYear, rangeMaxYear),
+              sep = '',
+              step = 1L
             )
           )
         ),
@@ -47,7 +51,9 @@ paramsWidgetUI <- function(id)
               label = NULL,
               min = rangeMinYear,
               max = rangeMaxYear,
-              value = c(minYear, maxYear)
+              value = c(rangeMinYear, rangeMaxYear),
+              sep = '',
+              step = 1L
             )
           )
         ),
@@ -59,7 +65,9 @@ paramsWidgetUI <- function(id)
               label = NULL,
               min = rangeMinYear,
               max = rangeMaxYear,
-              value = c(minYear, maxYear)
+              value = c(rangeMinYear, rangeMaxYear),
+              sep = '',
+              step = 1L
             )
           )
         ),
@@ -71,7 +79,9 @@ paramsWidgetUI <- function(id)
               label = NULL,
               min = rangeMinYear,
               max = rangeMaxYear,
-              value = c(minYear, maxYear)
+              value = c(rangeMinYear, rangeMaxYear),
+              sep = '',
+              step = 1L
             )
           )
         ),
@@ -90,21 +100,21 @@ paramsWidgetUI <- function(id)
             )
           )
         ),
-        fluidRow(
-          h2('Confidence intervals'),
-          wellPanel(
-            fluidRow(
-              column(
-                width = 6,
-                'Number of iterations'
-              ),
-              column(
-                width = 6,
-                numericInput(ns('numIter'), label = NULL, value = 20)
-              )
-            )
-          )
-        ),
+        # fluidRow(
+        #   h2('Confidence intervals'),
+        #   wellPanel(
+        #     fluidRow(
+        #       column(
+        #         width = 6,
+        #         'Number of iterations'
+        #       ),
+        #       column(
+        #         width = 6,
+        #         numericInput(ns('numIter'), label = NULL, value = 20)
+        #       )
+        #     )
+        #   )
+        # ),
         fluidRow(
           h2('Incidence curve'),
           wellPanel(
@@ -196,10 +206,144 @@ paramsWidgetUI <- function(id)
 }
 
 # Server logic
-paramsWidget <- function(input, output, session, appStatus)
+paramsWidget <- function(input, output, session, appStatus, parentState)
 {
   # Get namespace
   ns <- session$ns
+
+  localState <- reactiveValues(
+    Params = NULL
+  )
+
+  observeEvent(parentState$Context$Parameters$INCIDENCE, {
+    localState$Params <- parentState$Context$Parameters$INCIDENCE
+  })
+
+  observeEvent({
+    localState$Params$ModelMinYear
+    localState$Params$ModelMaxYear
+  }, {
+    range <- c(localState$Params$ModelMinYear, localState$Params$ModelMaxYear)
+    updateSliderInput(session, 'rangeMain', value = range)
+  })
+
+  observeEvent(input$rangeMain, {
+    range <- input$rangeMain
+    localState$Params$ModelMinYear <- range[1]
+    localState$Params$ModelMaxYear <- range[2]
+  })
+
+  observeEvent({
+    localState$Params$FitPosMinYear
+    localState$Params$FitPosMaxYear
+  }, {
+    range <- c(localState$Params$FitPosMinYear, localState$Params$FitPosMaxYear)
+    updateSliderInput(session, 'rangeHIVTotal', value = range)
+  })
+
+  observeEvent(input$rangeHIVTotal, {
+    range <- input$rangeHIVTotal
+    localState$Params$FitPosMinYear <- range[1]
+    localState$Params$FitPosMaxYear <- range[2]
+  })
+
+  observeEvent({
+    localState$Params$FitPosCD4MinYear
+    localState$Params$FitPosCD4MaxYear
+  }, {
+    range <- c(localState$Params$FitPosCD4MinYear, localState$Params$FitPosCD4MaxYear)
+    updateSliderInput(session, 'rangeHIVCD4', value = range)
+  })
+
+  observeEvent(input$rangeHIVCD4, {
+    range <- input$rangeHIVCD4
+    localState$Params$FitPosCD4MinYear <- range[1]
+    localState$Params$FitPosCD4MaxYear <- range[2]
+  })
+
+  observeEvent({
+    localState$Params$FitAIDSMinYear
+    localState$Params$FitAIDSMaxYear
+  }, {
+    range <- c(localState$Params$FitAIDSMinYear, localState$Params$FitAIDSMaxYear)
+    updateSliderInput(session, 'rangeAIDSTotal', value = range)
+  })
+
+  observeEvent(input$rangeAIDSTotal, {
+    range <- input$rangeAIDSTotal
+    localState$Params$FitAIDSMinYear <- range[1]
+    localState$Params$FitAIDSMaxYear <- range[2]
+  })
+
+  observeEvent({
+    localState$Params$FitAIDSPosMinYear
+    localState$Params$FitAIDSPosMaxYear
+  }, {
+    range <- c(localState$Params$FitAIDSPosMinYear, localState$Params$FitAIDSPosMaxYear)
+    updateSliderInput(session, 'rangeHIVAIDSTotal', value = range)
+  })
+
+  observeEvent(input$rangeHIVAIDSTotal, {
+    range <- input$rangeHIVAIDSTotal
+    localState$Params$FitAIDSPosMinYear <- range[1]
+    localState$Params$FitAIDSPosMaxYear <- range[2]
+  })
+
+  observeEvent(localState$Params$FullData, {
+    updateRadioButtons(session, 'fullPartial', selected = localState$Params$FullData)
+  })
+
+  observeEvent(input$fullPartial, {
+    localState$Params$FullData <- as.logical(input$fullPartial)
+  })
+
+  observeEvent(localState$Params$ModelNoKnots, {
+    updateNumericInput(session, 'incidNumKnots', value = localState$Params$ModelNoKnots)
+  })
+
+  observeEvent(input$incidNumKnots, {
+    localState$Params$ModelNoKnots <- as.numeric(input$incidNumKnots)
+  })
+
+  observeEvent(localState$Params$StartIncZero, {
+    updateCheckboxInput(session, 'incidStartZero', value = localState$Params$StartIncZero)
+  })
+
+  observeEvent(input$incidStartZero, {
+    localState$Params$StartIncZero <- as.logical(input$incidStartZero)
+  })
+
+  observeEvent(localState$Params$MaxIncCorr, {
+    updateCheckboxInput(session, 'incidPreventChange', value = localState$Params$MaxIncCorr)
+  })
+
+  observeEvent(input$incidPreventChange, {
+    localState$Params$MaxIncCorr <- as.logical(input$incidStartZero)
+  })
+
+  observeEvent(localState$Params$FitDistribution, {
+    updateRadioButtons(session, 'distr', selected = localState$Params$FitDistribution)
+  })
+
+  observeEvent(input$distr, {
+    localState$Params$FitDistribution <- input$distr
+  })
+
+  observeEvent(localState$Params$Delta4Fac, {
+    updateNumericInput(session, 'extraDiagRate', value = localState$Params$Delta4Fac)
+  })
+
+  observeEvent(input$extraDiagRate, {
+    localState$Params$Delta4Fac <- as.numeric(input$extraDiagRate)
+  })
+
+  observeEvent(localState$Params$Country, {
+    updateSelectInput(session, 'country', selected = localState$Params$Country)
+  })
+
+  observeEvent(input$country, {
+    localState$Params$Country <- input$country
+  })
 
   return(NULL)
 }

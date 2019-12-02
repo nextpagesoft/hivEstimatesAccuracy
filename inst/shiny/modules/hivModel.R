@@ -37,13 +37,17 @@ hivModelUI <- function(id)
         id = ns('paramBox'),
         box(
           width = 12,
-          title = 'Inputs',
+          title = 'Model',
           solidHeader = FALSE,
           collapsible = TRUE,
           status = 'primary',
           riskGroupsWidgetUI(ns('riskGroups')),
-          diagRateWidgetUI(ns('diagRate')),
-          paramsWidgetUI(ns('params'))
+          h1('Incidence Method parameters'),
+          tabsetPanel(
+            type = 'tabs',
+            tabPanel('Inputs', diagRateWidgetUI(ns('diagRate'))),
+            tabPanel('Advanced', paramsWidgetUI(ns('params')))
+          )
         )
       )
     ),
@@ -278,7 +282,7 @@ hivModel <- function(input, output, session, appStatus)
     shinyjs::enable('cancelBootstrapBtn')
 
     context <- req(localState$Context)
-    data <- req(localState$Data)
+    popData <- req(localState$PopData)
     mainResults <- req(localState$MainResults)
     bsCount <- req(input$bsNumIter)
 
@@ -293,23 +297,23 @@ hivModel <- function(input, output, session, appStatus)
       task <<- CreateTask({
         hivModelling::PerformBootstrapFits(
           context,
-          data,
+          popData,
           mainResults,
-          bsCount = 20,
-          executionPlan = future::multiprocess
+          bsCount,
+          executionPlan = future::sequential
         )
       })
     } else {
-      task <<- CreateTask(function(context, data) {
+      task <<- CreateTask(function(context, popData, mainResults, bsCount) {
         hivModelling::PerformBootstrapFits(
           context,
-          data,
+          popData,
           mainResults,
-          bsCount = 20,
-          executionPlan = future::multiprocess
+          bsCount,
+          executionPlan = future::sequential
         )
       },
-      args = list(bsCount, context, data, mainResults))
+      args = list(context, popData, mainResults, bsCount))
     }
 
     o <- observe({
@@ -438,10 +442,9 @@ hivModel <- function(input, output, session, appStatus)
     localState$Plots[['Proportion undiagnosed of all those alive']]
   })
 
-  callModule(riskGroupsWidget, 'riskGroups', appStatus)
-  callModule(diagRateWidget, 'diagRate', appStatus)
-  callModule(paramsWidget, 'params', appStatus)
-
+  callModule(riskGroupsWidget, 'riskGroups', appStatus, localState)
+  callModule(diagRateWidget, 'diagRate', appStatus, localState)
+  callModule(paramsWidget, 'params', appStatus, localState)
 
   return(NULL)
 }

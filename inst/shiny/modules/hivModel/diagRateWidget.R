@@ -1,14 +1,5 @@
 # Module globals
-minYear <- 1980L
-maxYear <- 2016L
-
-initInterval <- data.table(
-  StartYear = minYear,
-  EndYear = maxYear,
-  Jump = FALSE,
-  DiffByCD4 = FALSE,
-  ChangeInInterval = FALSE
-)
+# NONE
 
 # User interface
 diagRateWidgetUI <- function(id)
@@ -18,11 +9,11 @@ diagRateWidgetUI <- function(id)
   fluidRow(
     column(
       width = 12,
-      h1('2. Diagnosis rates')
+      h1('Time Intervals and Diagnosis Rate Modelling')
     ),
     column(
       width = 6,
-      h2('Intervals list'),
+      h2('Time Intervals list'),
       wellPanel(
         dataTableOutput(ns('tableDT'))
       )
@@ -36,16 +27,39 @@ diagRateWidgetUI <- function(id)
 }
 
 # Server logic
-diagRateWidget <- function(input, output, session, appStatus)
+diagRateWidget <- function(input, output, session, appStatus, parentState)
 {
   # Get namespace
   ns <- session$ns
 
   localState <- reactiveValues(
-    Intervals = initInterval,
+    Intervals = NULL,
     SelectedIntervalIdx = NULL,
-    EditMode = NULL
+    EditMode = NULL,
+    MinYear = NULL,
+    MaxYear = NULL
   )
+
+  observeEvent(parentState$Context$Parameters$INCIDENCE$ModelMinYear, {
+    localState$MinYear <- parentState$Context$Parameters$INCIDENCE$ModelMinYear
+  })
+
+  observeEvent(parentState$Context$Parameters$INCIDENCE$ModelMaxYear, {
+    localState$MaxYear <- parentState$Context$Parameters$INCIDENCE$ModelMaxYear
+  })
+
+  observeEvent(parentState$Context$Parameters$INCIDENCE$Intervals, {
+    intervals <- copy(parentState$Context$Parameters$INCIDENCE$Intervals)
+    intervals[, EndYear := c(.SD$StartYear[-1], localState$MaxYear)]
+    setcolorder(intervals, c('StartYear', 'EndYear', 'Jump', 'DiffByCD4', 'ChangeInInterval'))
+    localState$Intervals <- intervals
+  })
+
+  observeEvent(localState$Intervals, {
+    intervals <- copy(localState$Intervals)
+    intervals[, EndYear := NULL]
+    parentState$Context$Parameters$INCIDENCE$Intervals <- intervals
+  })
 
   tableProxy <- dataTableProxy(ns('tableDT'))
 
@@ -116,7 +130,7 @@ diagRateWidget <- function(input, output, session, appStatus)
     } else {
       localState$EditMode <- 'ADD'
       title <- 'Add interval'
-      startYear <- ifelse(!is.null(intervals), intervals[, max(EndYear)], minYear)
+      startYear <- ifelse(!is.null(intervals), intervals[, max(EndYear)], localState$MinYear)
       jump <- FALSE
       diffByCD4 <- FALSE
       changeInInterval <- FALSE
@@ -190,6 +204,8 @@ diagRateWidget <- function(input, output, session, appStatus)
 
   output[['startYearMsg']] <- renderText({
     startYear <- input$startYear
+    minYear <- localState$MinYear
+    maxYear <- localState$MaxYear
     validate(
       need(startYear >= minYear, sprintf('Start year must be at least %d', minYear)),
       need(startYear <= maxYear, sprintf('Start year must be at most %d', maxYear))
@@ -199,6 +215,8 @@ diagRateWidget <- function(input, output, session, appStatus)
 
   observeEvent(input[['addNewBtn']], {
     startYear <- input$startYear
+    minYear <- localState$MinYear
+    maxYear <- localState$MaxYear
     if (startYear %between% c(minYear, maxYear)) {
       interval <- data.table(
         StartYear = input$startYear,
@@ -216,6 +234,8 @@ diagRateWidget <- function(input, output, session, appStatus)
   })
 
   observeEvent(input[['deleteBtn']], {
+    minYear <- localState$MinYear
+    maxYear <- localState$MaxYear
     idx <- req(localState$SelectedIntervalIdx)
     intervals <- req(localState$Intervals)
 
@@ -236,6 +256,8 @@ diagRateWidget <- function(input, output, session, appStatus)
 
   observeEvent(input[['applyChangesBtn']], {
     startYear <- input$startYear
+    minYear <- localState$MinYear
+    maxYear <- localState$MaxYear
     idx <- localState$SelectedIntervalIdx
     intervals <- localState$Intervals
     if (startYear %between% c(minYear, maxYear) && idx %between% c(1, nrow(intervals))) {
