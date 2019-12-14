@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "3.6.1",
+    "Version": "3.6.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -81,10 +81,10 @@
     },
     "SparseM": {
       "Package": "SparseM",
-      "Version": "1.77",
+      "Version": "1.78",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "4bad08e504cd054199ff5658ef341b43"
+      "Hash": "fbe4ac267bf42a91e495cc68ad3f8b63"
     },
     "assertthat": {
       "Package": "assertthat",
@@ -436,10 +436,10 @@
     },
     "mice": {
       "Package": "mice",
-      "Version": "3.6.0",
+      "Version": "3.7.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "749d2e57110cb2390952e4183b494042"
+      "Hash": "85634e661eb195210416e5b75fbda41b"
     },
     "mime": {
       "Package": "mime",
@@ -590,10 +590,10 @@
     },
     "quantreg": {
       "Package": "quantreg",
-      "Version": "5.52",
+      "Version": "5.54",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "8eb881a9cd95de9ef75c6a8dec92b0e8"
+      "Hash": "12895b7bc4cd4f5209aa8ff52f6cf6b3"
     },
     "readr": {
       "Package": "readr",
@@ -639,10 +639,10 @@
     },
     "rmarkdown": {
       "Package": "rmarkdown",
-      "Version": "1.18",
+      "Version": "2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "2a1b6baa83112f3c8e1909f3989ea9d9"
+      "Hash": "745a60d9256842b1abae2dcf7b64ebc1"
     },
     "rpart": {
       "Package": "rpart",
