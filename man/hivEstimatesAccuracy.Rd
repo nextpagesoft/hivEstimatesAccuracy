@@ -3,7 +3,6 @@
 \docType{package}
 \name{hivEstimatesAccuracy}
 \alias{hivEstimatesAccuracy}
-\alias{hivEstimatesAccuracy-package}
 \title{Improving Accuracy of HIV Estimates in EU/EEA Countries}
 \description{
 Improves accuracy of HIV estimates in EU/EEA countries.

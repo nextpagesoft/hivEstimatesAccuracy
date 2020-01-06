@@ -78,6 +78,7 @@ GetImputedDistPlots <- function(
                          breaks = imps,
                          labels = labels) +
       ggtitle(sprintf("Proportion of observed and imputed values%s\n", dataDesc)) +
+      scale_y_continuous(expand = c(0, 0), limits = c(0, 1)) +
       ylab("Proportion")
   } else {
     p <- ggplot(data = miMiss) +
@@ -95,6 +96,7 @@ GetImputedDistPlots <- function(
       scale_linetype_manual(name = "Data", values = linetypes, breaks = imps, labels = labels) +
       scale_size_manual(name = "Data", values = sizes, breaks = imps, labels = labels) +
       scale_x_continuous(expand = c(0, 0)) +
+      scale_y_continuous(expand = c(0, 0)) +
       ggtitle(sprintf("Density of observed and imputed values%s\n", dataDesc)) +
       xlab(colName) +
       ylab("Density")
@@ -102,7 +104,6 @@ GetImputedDistPlots <- function(
 
   p <- p +
     xlab(colName) +
-    scale_y_continuous(expand = c(0, 0)) +
     theme_classic() +
     theme(plot.title = element_text(size = 10, face = "plain"),
           text = element_text(size = 10, face = "plain"),

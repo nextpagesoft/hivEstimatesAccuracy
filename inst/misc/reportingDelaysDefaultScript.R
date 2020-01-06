@@ -1,8 +1,7 @@
 # Load libraries
-library(hivEstimatesAccuracy)
 library(data.table)
 library(survival)
-
+library(hivEstimatesAccuracy)
 
 # A) SETUP ---------------------------------------------------------------------
 
@@ -10,18 +9,20 @@ library(survival)
 startYear <- 2000L
 
 # End quarter
-endQrt <- 2017.25
+endQrt <- 2016.25
 
 # Stratifiation columns
-# stratVarNames <- c("Gender", "Transmission")
 stratVarNames <- c()
+# stratVarNames <- c("Gender", "Transmission")
+# stratVarNames <- c("Transmission")
+# stratVarNames <- c("GroupedRegionOfOrigin")
 
 # Run mice adjustment before RD
 runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "/media/sf_VirtualBox_Shared/Nikos_test/EL2.csv"
+inputDataFilePath <- "~/share/dummy2019_forTRAINING.zip"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -73,9 +74,6 @@ inputData <- inputData$Table
 # Work on a copy
 compData <- copy(inputData)
 
-# Initialize output data
-outputData <- copy(inputData)
-
 # Separator used for creating a composite of stratum columns. Should not occur in the stratum
 # values.
 stratSep <- "_"
@@ -90,8 +88,7 @@ if (isOriginalData) {
 
 # Make sure the strata columns exist in the data
 stratVarNames <- stratVarNames[stratVarNames %in% colnames(compData)]
-stratVarNamesImp <- union(c("Imputation", "ReportingCountry"),
-                          stratVarNames)
+stratVarNamesImp <- union(c("Imputation"), stratVarNames)
 
 # Create a stratum variable - will be used to merge with the estimations,
 # takes missing categories as separate categories
@@ -115,8 +112,8 @@ compData <- compData[VarX >= 0 &
                        NotificationTime <= endQrt]
 
 compData[, ":="(
-  VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
-  Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)),
+  VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1,
+  Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)) + 1,
   ReportingDelay = 1L
 )]
 compData[, ":="(
@@ -125,6 +122,7 @@ compData[, ":="(
 )]
 # NOTE: Otherwise survival model complains
 compData <- compData[VarXs > VarTs]
+compData <- droplevels(compData)
 
 totalPlot <- NULL
 totalPlotData <- NULL
@@ -224,6 +222,7 @@ if (nrow(compData) > 0) {
   # Convert "NA" to NA
   fitStratum[, (stratVarNamesImp) := lapply(.SD, function(x) ifelse(x == "NA", NA_character_, x)),
              .SDcols = stratVarNamesImp]
+  fitStratum[, Imputation := as.integer(Imputation)]
 
   # Create final output object
   outputData[fitStratum[, c("Stratum", "VarT", "Weight", "P", "Var"), with = FALSE],
@@ -232,15 +231,18 @@ if (nrow(compData) > 0) {
                P = P,
                Var = Var
              ), on = .(VarT, Stratum)]
+
+  print(outputData[, table(is.na(Weight))])
+
   outputData[, ":="(
     Source = ifelse(Imputation == 0, "Reported", "Imputed"),
-    MissingData = VarX != 0 & (is.na(Weight) | is.infinite(Weight))
+    MissingData = is.na(Weight) | is.infinite(Weight)
   )]
-  outputData[MissingData == TRUE | VarX == 0, ":="(
+  outputData[MissingData == TRUE, ":="(
     Weight = 1,
     P = 1
   )]
-  outputData[is.na(Var), Var := 0]
+  outputData[is.na(Var) | is.infinite(Var), Var := 0]
 
   # ------------------------------------------------------------------------
 
@@ -253,8 +255,9 @@ if (nrow(compData) > 0) {
   setnames(rdDistribution,
            old = "VarT",
            new = "Quarter")
-  setorderv(rdDistribution, union(varNames, "Quarter"))
+  setorderv(rdDistribution, union("Quarter", varNames))
 
+  # OPTION 1 -------------------------------------------------------------------
   # Aggregate and keep only required dimensions
   agregat <- outputData[, .(Count = .N,
                             P = mean(P),
@@ -263,9 +266,30 @@ if (nrow(compData) > 0) {
                         by = eval(union(stratVarNamesImp,
                                         c("Source", "MissingData", "DateOfDiagnosisYear")))]
 
-  # Compute estimated count and its variance
+  # # OPTION 2 -------------------------------------------------------------------
+  # agregat <- outputData[, .(Count = .N),
+  #                       by = eval(union(stratVarNamesImp,
+  #                                       c("VarT", "Source", "DateOfDiagnosisYear")))]
+  #
+  # agregat <- merge(agregat,
+  #                  fitStratum[, c(stratVarNamesImp, "VarT", "P", "Weight", "Var"), with = FALSE],
+  #                  by = union(stratVarNamesImp, c("VarT")),
+  #                  all.x = TRUE)
+  #
+  # agregat[, ":="(
+  #   Source = ifelse(Imputation == 0, "Reported", "Imputed"),
+  #   MissingData = is.na(Weight) | is.infinite(Weight)
+  # )]
+  # agregat[MissingData == TRUE, ":="(
+  #   Weight = 1,
+  #   P = 1
+  # )]
+  # agregat[is.na(Var) | is.infinite(Var), Var := 0]
+
+  # END OF OPTIONS -------------------------------------------------------------
+
   agregat[, ":="(
-    EstCount = Count * Weight,
+    EstCount = Count / P,
     EstCountVar = (Count * (Count + 1) / P^4 * Var) + Count * (1 - P) / P^2
   )]
 

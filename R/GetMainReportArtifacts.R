@@ -16,6 +16,13 @@ GetMainReportArtifacts <- function(params)
 {
   # Functions ------------------------------------------------------------------
 
+  GenerateColors <- function(n) {
+    hues <- seq(15, 375, length = n + 1)
+    colors <- hcl(h = hues, l = 65, c = 100)[1:n]
+    return(colors)
+  }
+
+
   FormatNumbers <- function(
     x,
     digits = 0
@@ -159,6 +166,12 @@ GetMainReportArtifacts <- function(params)
     filter <- sprintf("DateOfDiagnosisYear != 'Total' & %s != 'Overall'", colvar)
     data <- data[eval(parse(text = filter))]
 
+    n <- data[, length(unique(get(colvar)))]
+    if (n > length(colors)) {
+      extraColors <- GenerateColors(n - length(colors))
+      colors <- c(colors, extraColors)
+    }
+
     plotObj <- ggplot(data = data,
                       aes(x = as.integer(get(rowvar)),
                           y = get(vvars[1]),
@@ -206,34 +219,53 @@ GetMainReportArtifacts <- function(params)
     probs = c(CD4_Low = 0.25, CD4_Median = 0.5, CD4_High = 0.75)
   ) {
     dataList <- mitools::imputationList(split(
-      dt[, c(vvar, colvar, rowvar, "DY", "Imputation", "ModelWeight"),
-         with = FALSE],
-      by = "Imputation"))
+      dt[, c(vvar, colvar, rowvar, "DY", "Imputation", "ModelWeight"), with = FALSE],
+      by = "Imputation"
+    ))
+
+    if (dt[, length(unique(get(colvar))) > 1]) {
+      colVar1 <- colvar
+    } else {
+      colVar1 <- "1"
+    }
+    colVar2 <- ""
+
     result <- NULL
     for (probName in names(probs)) {
       prob <- probs[probName]
       if (optSmoothing) {
+        if (dt[, length(unique(DY)) > 1]) {
+          colVar2 <- "* splines::ns(DY, df = nsdf)"
+        }
         models <-
-          with(dataList,
-               quantreg::rq(formula =
-                    as.formula(sprintf("%s ~ %s * splines::ns(DY, df = nsdf)",
-                                       vvar, colvar)),
-                  tau = prob,
-                  data = dataList$imputations,
-                  weights = ModelWeight,
-                  method = "br"))
+          with(
+            dataList,
+            quantreg::rq(
+              formula = as.formula(sprintf("%s ~ %s %s", vvar, colVar1, colVar2)),
+              tau = prob,
+              data = dataList$imputations,
+              weights = ModelWeight,
+              method = "br"
+            )
+          )
         vars <- mitools::MIextract(models, fun = function(model) {
           SparseM::diag(summary(model, covariance = TRUE)$cov)
         })
       } else {
+        if (dt[, length(unique(DY)) > 1]) {
+          colVar2 <- "* as.factor(DY)"
+        }
         models <-
-          with(dataList,
-               quantreg::rqss(formula =
-                      as.formula(sprintf("%s ~ %s * as.factor(DY)", vvar, colvar)),
-                    tau = prob,
-                    data = dataList$imputations,
-                    weights = ModelWeight,
-                    method = "sfn"))
+          with(
+            dataList,
+            quantreg::rqss(
+              formula = as.formula(sprintf("%s ~ %s %s", vvar, colVar1, colVar2)),
+              tau = prob,
+              data = dataList$imputations,
+              weights = ModelWeight,
+              method = "sfn"
+            )
+          )
         vars <- mitools::MIextract(models, fun = function(model) {
           SparseM::diag(SparseM::as.matrix(summary(model, cov = TRUE)$Vcov))
         })
@@ -281,25 +313,25 @@ GetMainReportArtifacts <- function(params)
     dataList <- mitools::imputationList(split(dt, by = "Imputation"))
 
     # Main model
-    if (optSmoothing) {
-      suppressWarnings({
-        models <-
-          with(dataList,
-               glm(formula =
-                     as.formula(sprintf("Count_Val ~ as.factor(%s) * splines::ns(DY, df = nsdf)",
-                                        colvar)),
-                   family = poisson(link = log)))
-      })
-    } else {
-      suppressWarnings({
-        models <-
-          with(dataList,
-               glm(formula =
-                     as.formula(sprintf("Count_Val ~ as.factor(%s) * as.factor(DY)",
-                                        colvar)),
-                   family = poisson(link = log)))
-      })
+    colVar2 <- ""
+    if (dt[, length(unique(DY)) > 1]) {
+      if (optSmoothing) {
+        colVar2 <- "* splines::ns(DY, df = nsdf)"
+      } else {
+        colVar2 <- "* as.factor(DY)"
+      }
     }
+
+    suppressWarnings({
+      models <-
+        with(
+          dataList,
+          glm(
+            formula = as.formula(sprintf("Count_Val ~ as.factor(%s) %s", colvar, colVar2)),
+            family = poisson(link = log)
+          )
+        )
+    })
 
     # Extract betas and var
     betas <- mitools::MIextract(models, fun = coefficients)
@@ -338,10 +370,34 @@ GetMainReportArtifacts <- function(params)
     message <- NULL
     badCategories <- c()
     categories <- distr[order(-Perc), get(colvar)]
+    iter <- 0
     repeat {
-      filteredData <- FilterData(data = data,
-                                 colvar = colvar,
-                                 badCategories = badCategories)
+      iter <- iter + 1
+
+      filteredData <- FilterData(
+        data = data,
+        colvar = colvar,
+        badCategories = badCategories
+      )
+
+      if (nrow(filteredData) == 0) {
+        return(list(
+          Result = NULL,
+          Message = sprintf(
+            "<p>No records left after removing persons which were %s anywhere (i.e. even in one imputed dataset).</p>",
+            paste(colNamesMapping[as.character(badCategories)], collapse = ", ")
+          ),
+          BadCategories = badCategories
+        ))
+      }
+
+      if (iter > 10) {
+        return(list(
+          Result = NULL,
+          Message = "<p>No results reached after 10 iterations of adaptive modelling algorithm.</p>",
+          BadCategories = badCategories
+        ))
+      }
 
       result <- suppressWarnings({
         try(modelFunc(colvar = colvar, dt = filteredData, ...),
@@ -356,15 +412,17 @@ GetMainReportArtifacts <- function(params)
         }
         break
       } else {
-        badCategories <- tail(categories, 1)
+        badCategories <- union(badCategories, tail(categories, 1))
         categories <- setdiff(categories, badCategories)
         result <- NULL
       }
     }
 
-    return(list(Result = result,
-                Message = message,
-                BadCategories = badCategories))
+    return(list(
+      Result = result,
+      Message = message,
+      BadCategories = badCategories
+    ))
   }
 
   FilterData <- function(data, colvar, badCategories)
@@ -888,8 +946,8 @@ GetMainReportArtifacts <- function(params)
         DataMIGenderCD4Message = dataMIGenderCD4List[["Message"]],
         DataMITransCountMessage = dataMITransCountList[["Message"]],
         DataMITransCD4Message = dataMITransCD4List[["Message"]],
-        DataMIMigrCountMessage = dataMITransCountList[["Message"]],
-        DataMIMigrCD4Message = dataMITransCD4List[["Message"]],
+        DataMIMigrCountMessage = dataMIMigrCountList[["Message"]],
+        DataMIMigrCD4Message = dataMIMigrCD4List[["Message"]],
         TblRd = tblRd)
       )
     )

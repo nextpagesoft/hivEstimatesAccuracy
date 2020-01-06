@@ -102,8 +102,13 @@ list(
                                     Kept = yColNames)
 
       # Create splines with proper names and intercept
-      splineBasisMatrix <- as.data.table(splines::ns(dataSet$DY, df = nsdf))
-      setnames(splineBasisMatrix, paste0("SplineKnot.", colnames(splineBasisMatrix)))
+      splineBasisMatrix <- try(as.data.table(splines::ns(dataSet$DY, df = nsdf)), silent = TRUE)
+      if (inherits(splineBasisMatrix, "try-error")) {
+        splineBasisMatrix <- data.table()
+      } else {
+        setnames(splineBasisMatrix, paste0("SplineKnot.", colnames(splineBasisMatrix)))
+      }
+
       intercept <- 1L
 
       # Define covariates of joint imputation model

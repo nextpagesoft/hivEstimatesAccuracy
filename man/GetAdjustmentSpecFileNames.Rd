@@ -4,8 +4,9 @@
 \alias{GetAdjustmentSpecFileNames}
 \title{GetAdjustmentSpecFileNames}
 \usage{
-GetAdjustmentSpecFileNames(path = system.file("adjustments", package =
-  "hivEstimatesAccuracy"))
+GetAdjustmentSpecFileNames(
+  path = system.file("adjustments", package = "hivEstimatesAccuracy")
+)
 }
 \arguments{
 \item{path}{Path to the folder with adjustment specifications. Optional.

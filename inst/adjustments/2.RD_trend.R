@@ -99,8 +99,8 @@ list(
                            NotificationTime <= endQrt]
 
     compData[, ":="(
-      VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime),
-      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)),
+      VarT = 4 * (pmin.int(MaxNotificationTime, endQrt) - DiagnosisTime) + 1,
+      Tf = 4 * (pmin.int(MaxNotificationTime, endQrt) - pmax.int(min(DiagnosisTime), startYear + 0.25)) + 1,
       ReportingDelay = 1L
     )]
     compData[, ":="(
@@ -108,7 +108,7 @@ list(
       VarTs = Tf - VarT
     )]
     # NOTE: Otherwise survival model complains
-    compData <- compData[VarXs > VarTs]
+    compData <- droplevels(compData[VarXs > VarTs])
 
     totalPlot <- NULL
     totalPlotData <- NULL
@@ -270,11 +270,12 @@ list(
                           by = mergeVars,
                           all.x = TRUE)
       outputData[, MissingData := is.na(Weight) | is.infinite(Weight)]
+
       outputData[MissingData == TRUE, ":="(
         Weight = 1,
         P = 1
       )]
-      outputData[is.na(Var), Var := 0]
+      outputData[is.na(Var) | is.infinite(Var), Var := 0]
       outputData[, ":="(
         DateOfDiagnosisYear = DateOfDiagnosisYearOrig,
         DateOfDiagnosisYearOrig = NULL

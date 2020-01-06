@@ -1,15 +1,17 @@
+isLocalRun <- TRUE
+
+users <- reactiveValues(count = 0)
+
 # Allow uploading files up to 70MB in size
 options(shiny.maxRequestSize = 70 * 1024^2)
 
-# Determine if the app is run on the server or locally
-isServer <- tolower(Sys.info()[["nodename"]]) == "shinyapps"
-
 # Load standard libraries
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(DT))
+suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(shinydashboard))
 suppressPackageStartupMessages(library(shinycssloaders))
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(data.table))
 
 # Load main library
 library(hivEstimatesAccuracy)
@@ -23,13 +25,13 @@ source(file.path(modulesPath, "dataAdjust.R"))
 source(file.path(modulesPath, "createReports.R"))
 source(file.path(modulesPath, "outputs.R"))
 source(file.path(modulesPath, "manual.R"))
+source(file.path(modulesPath, "hivModel.R"))
 
 addResourcePath("www", wwwPath)
 
 # App globals
 titleString <- "HIV Estimates Accuracy"
-version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy",
-                                           fields = "Version"))
+version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy", fields = "Version"))
 
 # Define application user interface
 ui <- tagList(
@@ -43,6 +45,7 @@ ui <- tagList(
         class = "navbar navbar-static-top",
         div(class = "navbar-custom-menu",
             div(sprintf("v. %s", version)),
+            textOutput("userCount"),
             div(tags$a(href = "./", target = "_blank", list(icon("external-link"), "Open new instance in separate tab"))),
             actionLink("setSeed", "Set seed", icon = icon("random"))
         )
@@ -55,6 +58,7 @@ ui <- tagList(
         menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
         menuItem("Reports",            tabName = "reports",     icon = icon("book")),
         menuItem("Outputs",            tabName = "outputs",     icon = icon("download")),
+        menuItem("HIV Modelling",      tabName = "hivModel",    icon = icon("calculator")),
         menuItem("Manual",             tabName = "manual",      icon = icon("book"))
       ),
       width = 180
@@ -72,6 +76,7 @@ ui <- tagList(
         tabItem(tabName = "adjustments", fluidRow(dataAdjustUI("adjustments"))),
         tabItem(tabName = "reports",     fluidRow(createReportsUI("reports"))),
         tabItem(tabName = "outputs",     fluidRow(outputsUI("outputs"))),
+        tabItem(tabName = "hivModel",    fluidRow(hivModelUI("hivModel"))),
         tabItem(tabName = "manual",      fluidRow(manualUI("manual")))
       )
     )
@@ -115,6 +120,7 @@ server <- function(input, output, session)
   callModule(dataAdjust,      "adjustments", appStatus)
   callModule(createReports,   "reports",     appStatus)
   callModule(outputs,         "outputs",     appStatus)
+  callModule(hivModel,        "hivModel",    appStatus)
   callModule(manual,          "manual")
 
   observeEvent(input[["setSeed"]], {
@@ -144,9 +150,22 @@ server <- function(input, output, session)
   })
 
 
-  # if (!isServer) {
-  #   session$onSessionEnded(stopApp)
-  # }
+  onSessionStart <- isolate({
+    users$count <- users$count + 1
+  })
+
+  onSessionEnded(function() {
+    isolate({
+      users$count <- users$count - 1
+      if (isLocalRun && users$count == 0) {
+        stopApp()
+      }
+    })
+  })
+
+  output[["userCount"]] <- renderText({
+    sprintf("Number of open instances: %d", users$count)
+  })
 }
 
 # Run application

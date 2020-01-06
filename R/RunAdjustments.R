@@ -27,10 +27,10 @@ RunAdjustments <- function(data, adjustmentSpecs = list(), diagYearRange = NULL,
   # procedures.
   data <- list(Table = copy(data))
   if (!is.null(diagYearRange)) {
-    data$Table <- data$Table[DateOfDiagnosisYear %between% diagYearRange || is.na(DateOfDiagnosisYear)]
+    data$Table <- data$Table[DateOfDiagnosisYear %between% diagYearRange | is.na(DateOfDiagnosisYear)]
   }
   if (!is.null(notifQuarterRange)) {
-    data$Table <- data$Table[NotificationTime %between% notifQuarterRange || is.na(NotificationTime)]
+    data$Table <- data$Table[NotificationTime %between% notifQuarterRange | is.na(NotificationTime)]
   }
 
   PreProcessInputDataBeforeAdjustments(data$Table)
@@ -38,9 +38,8 @@ RunAdjustments <- function(data, adjustmentSpecs = list(), diagYearRange = NULL,
   # Process adjustments
   set.seed(seed)
   results <- list()
-  i <- 0L
-  for (adjustmentSpec in adjustmentSpecs) {
-    i <- i + 1L
+  for (i in seq_along(adjustmentSpecs)) {
+    adjustmentSpec <- adjustmentSpecs[[i]]
 
     caption <- sprintf("%d. %s", i, adjustmentSpec$Name)
     if (!"Key" %in% names(adjustmentSpec)) {

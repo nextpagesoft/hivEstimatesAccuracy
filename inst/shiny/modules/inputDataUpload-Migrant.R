@@ -238,6 +238,7 @@ inputDataUploadMigrant <- function(input, output, session, appStatus, inputDataB
     inputData <- req(inputDataBeforeGrouping())
     map <- req(vals$map)
     appStatus$InputData <- ApplyOriginGroupingMap(inputData, map)
+    appStatus$AdjustedData <- NULL
   })
 
   return(NULL)

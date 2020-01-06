@@ -4,8 +4,12 @@
 \alias{GetImputedDistPlots}
 \title{GetImputedDistPlots}
 \usage{
-GetImputedDistPlots(colName, dt, missingOnly = TRUE,
-  colorPalette = c("#69b023", "#7bbcc0"))
+GetImputedDistPlots(
+  colName,
+  dt,
+  missingOnly = TRUE,
+  colorPalette = c("#69b023", "#7bbcc0")
+)
 }
 \arguments{
 \item{colName}{Name of column to show density/proportion. Required.}

@@ -1,6 +1,7 @@
-^packrat/
 ^utils/
 ^\.Rprofile$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.travis\.yml$
+^renv$
+^renv\.lock$

@@ -21,7 +21,7 @@ runMice <- FALSE
 
 # B) PROCESS DATA --------------------------------------------------------------
 
-inputDataFilePath <- "/media/sf_VirtualBox_Shared/Nikos_test/BE.csv"
+inputDataFilePath <- "~/share/dummy2019_forTRAINING.zip"
 # inputDataFilePath <- "C:/Users/mrosinska/Desktop/programy/ecdc_adjustment/TESSy_new/PLtest.csv"
 # inputDataFilePath <- "C:/Users/mrosinska/Documents/projekty/ecdc adjustment/data2017/EL_imp.csv"
 
@@ -283,11 +283,11 @@ if (nrow(compData) > 0) {
                       by = mergeVars,
                       all.x = TRUE)
   outputData[, MissingData := VarX != 0 & (is.na(Weight) | is.infinite(Weight))]
-  outputData[MissingData == TRUE | VarX == 0, ":="(
+  outputData[MissingData == TRUE, ":="(
     Weight = 1,
     P = 1
   )]
-  outputData[is.na(Var), Var := 0]
+  outputData[is.na(Var) | is.infinite(Var), Var := 0]
   outputData[, ":="(
     DateOfDiagnosisYear = DateOfDiagnosisYearOrig,
     DateOfDiagnosisYearOrig = NULL

@@ -4,9 +4,13 @@
 \alias{GetNotificationQuarterDensityPlot}
 \title{GetNotificationQuarterDensityPlot}
 \usage{
-GetNotificationQuarterDensityPlot(plotData, colorPalette = c("#69b023",
-  "#7bbcc0", "#9d8b56", "#ce80ce"), genderLabels = c(M = "Male", F =
-  "Female", O = "Other"), xLimits = NULL, markerLocations = NULL)
+GetNotificationQuarterDensityPlot(
+  plotData,
+  colorPalette = c("#69b023", "#7bbcc0", "#9d8b56", "#ce80ce"),
+  genderLabels = c(M = "Male", F = "Female", O = "Other"),
+  xLimits = NULL,
+  markerLocations = NULL
+)
 }
 \arguments{
 \item{plotData}{Data table object. Required.}

@@ -19,9 +19,9 @@
 #' @importFrom shiny HTML
 #' @importFrom stats setNames lowess quantile sd var acf glm poisson as.formula coef coefficients vcov runif
 #' @importFrom grid grid.newpage grid.layout viewport pushViewport
-#' @importFrom utils unzip head zip tail
+#' @importFrom utils unzip head zip tail adist
 #' @importFrom tools file_path_sans_ext
-#' @importFrom grDevices dev.control dev.off pdf recordPlot
+#' @importFrom grDevices dev.control dev.off pdf recordPlot hcl
 #'
 NULL
 

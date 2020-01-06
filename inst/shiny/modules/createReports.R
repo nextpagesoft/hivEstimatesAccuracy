@@ -227,41 +227,6 @@ createReports <- function(input, output, session, appStatus)
       shinyjs::disable("cancelReportBtn")
     })
 
-
-    # withProgress(message = "Creating report",
-    #              detail = "The report will be displayed shortly.",
-    #              value = 0, {
-    #                # Define parameters
-    #                params <- append(list(AdjustedData = adjustedData),
-    #                                 vals$reportParams[[vals$selectedReportName]])
-    #
-    #                setProgress(0.1)
-    #
-    #                if (is.element(vals$selectedReportName, c("Main Report"))) {
-    #                  params <- GetMainReportArtifacts(params)
-    #                }
-    #
-    #                params <- modifyList(params,
-    #                                     list(Artifacts =
-    #                                            list(FileName = fileName,
-    #                                                 DiagYearRange = diagYearRange,
-    #                                                 DiagYearRangeApply = diagYearRangeApply)))
-    #
-    #                setProgress(0.5)
-    #
-    #                # Store parameters for reuse when downloading
-    #                vals$reportParamsFull <- params
-    #
-    #                setProgress(0.7)
-    #
-    #                report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
-    #                                             params = params)
-    #
-    #                setProgress(1)
-    #              })
-
-    # Create report
-    # appStatus$Report <- report
   })
 
   # EVENT: Button "Run adjustments" clicked

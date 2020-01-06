@@ -21,9 +21,59 @@ GetDataSummaryArtifacts <- function(inputData)
                 MeanDelayPlot = NULL))
   }
 
-  colors <- c("#69b023", "#d9d9d9", "#7bbcc0")
+  colors <- c("#69b023", "#9d8b56", "#7bbcc0", "#ce80ce")
+  fillColor <- "#d9d9d9"
 
   inputData <- copy(inputData)
+
+  # Proportion of missing
+  missPropData <- inputData[, .(
+    Transmission = sum(is.na(Transmission)) / .N,
+    Age = sum(is.na(Age)) / .N,
+    CD4 = sum(is.na(SqCD4)) / .N,
+    GroupedRegionOfOrigin = sum(is.na(GroupedRegionOfOrigin)) / .N
+  ), by = .(DateOfDiagnosisYear)]
+  missPropData <- melt(missPropData,
+               id.vars = c("DateOfDiagnosisYear"),
+               variable.name = "Data",
+               variable.factor = TRUE,
+               value.name = "Proportion")
+  breaks <- missPropData[, sort(unique(DateOfDiagnosisYear))]
+  labels <- as.character(breaks)
+  missPropPlot <- ggplot(data = missPropData) +
+    geom_point(
+      mapping = aes(
+        x = DateOfDiagnosisYear,
+        y = Proportion,
+        color = Data,
+        group = Data
+      ),
+      position = 'identity',
+      size = 2) +
+    geom_line(
+      mapping = aes(
+        x = DateOfDiagnosisYear,
+        y = Proportion,
+        color = Data,
+        group = Data
+      ),
+      linetype = 'dotted',
+      position = 'identity',
+      size = 0.5) +
+    scale_x_continuous(expand = c(0, 0),
+                       breaks = breaks,
+                       labels = labels) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_color_manual(name = "Data",
+                       values = colors) +
+    ggtitle("Proportion of missing values") +
+    xlab("Diagnosis year") +
+    theme_classic() +
+    theme(plot.title = element_text(size = 12, face = "plain"),
+          text = element_text(size = 12, face = "plain"),
+          panel.grid = element_blank(),
+          axis.line = element_line(colour = "#888888"),
+          axis.ticks = element_line(colour = "#888888"))
 
   # Generic missingness plots
   missPlotsTotal <- GetMissingnessPlots(inputData)
@@ -49,7 +99,7 @@ GetDataSummaryArtifacts <- function(inputData)
     quant95 <- quantile(densDelay$VarX, probs = 0.95, na.rm = TRUE)
     quant99 <- quantile(densDelay$VarX, probs = 0.99, na.rm = TRUE)
     delayDensFullPlot <- ggplot(data = densDelay, mapping = aes(x = VarX)) +
-      geom_density(fill = colors[2], alpha = 0.6, adjust = 4, size = 1, colour = colors[1]) +
+      geom_density(fill = fillColor, alpha = 0.6, adjust = 4, size = 1, colour = colors[1]) +
       geom_vline(xintercept = quant95, linetype = "dashed") +
       annotate("text",
                label = paste("95% of cases reported \nby", prettyNum(quant95), "quarters"),
@@ -123,5 +173,6 @@ GetDataSummaryArtifacts <- function(inputData)
               MissPlotsByGender = missPlotsByGender,
               MissPlotsRD = missPlotsRD,
               DelayDensFullPlot = delayDensFullPlot,
-              MeanDelayPlot = meanDelayPlot))
+              MeanDelayPlot = meanDelayPlot,
+              MissPropPlot = missPropPlot))
 }

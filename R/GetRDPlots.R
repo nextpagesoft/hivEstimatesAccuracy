@@ -97,5 +97,7 @@ GetRDPlots <- function(
       ggtitle("Reported and estimated total count of cases")
   }
 
+  plot <- ggplot_build(plot)
+
   return(plot)
 }

@@ -35,19 +35,18 @@ body p {
   font-size: 15px;
 }
 
-/*
-h2 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-top: 0;
-  padding-top: 10px;
-}
-*/
-
 pre {
   word-break: normal;
   word-wrap: normal;
   white-space: pre;
+}
+
+.shiny-output-error-validation {
+  color: red;
+}
+
+.form-group {
+  margin-bottom: 0px !important;
 }
 
 /* Header  */
@@ -334,3 +333,4 @@ div.box-body .shiny-input-container h3 {
 #summary-notifQuarterFilterInfo {
   color: red;
 }
+

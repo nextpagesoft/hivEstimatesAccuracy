@@ -16,7 +16,15 @@ editor_options:
 ```{r setup, include = FALSE}
 require(hivEstimatesAccuracy, quietly = TRUE)
 knitr::opts_chunk$set(echo = FALSE, results = "asis", message = FALSE, warning = FALSE, include = TRUE)
-calcFigHeight <- function(stratum) ((length(levels(params$InputData$Table[[stratum]])) + 1) %/% 2) * 3
+calcFigHeight <- function(plot) {
+  height <- 0.5
+  if (!is.null(plot$layout$layout$ROW)) {
+    height <- height + max(plot$layout$layout$ROW) * 2
+  }
+  
+  return(height)
+}
+
 formatNumbers <- function(x) sprintf("%.2f", x)
 ```
 
@@ -24,23 +32,23 @@ formatNumbers <- function(x) sprintf("%.2f", x)
 cat(sprintf("# %d. Reporting Delays with trend", params$InputData$RunIdx))
 ```
 
-```{r, fig.width = 10, fig.height = 4, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}}
-params$InputData$Artifacts$OutputPlotTotal
+```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotTotal)}, fig.width = 10, fig.height = 4}
+print(params$InputData$Artifacts$OutputPlotTotal$plot)
 ```
 
-```{r, fig.width = 10, fig.height = calcFigHeight("Gender"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Gender)}}
-params$InputData$Artifacts$OutputPlotStrat$Gender
+```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Gender)}, fig.width = 10, fig.height = calcFigHeight(params$InputData$Artifacts$OutputPlotStrat$Gender)}
+print(params$InputData$Artifacts$OutputPlotStrat$Gender$plot)
 ```
 
-```{r, fig.width = 10, fig.height = calcFigHeight("Transmission"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Transmission)}}
-params$InputData$Artifacts$OutputPlotStrat$Transmission
+```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$Transmission)}, fig.width = 10, fig.height = calcFigHeight(params$InputData$Artifacts$OutputPlotStrat$Transmission)}
+print(params$InputData$Artifacts$OutputPlotStrat$Transmission$plot)
 ```
 
-```{r, fig.width = 10, fig.height = calcFigHeight("GroupedRegionOfOrigin"), eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin)}}
-params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin
+```{r, eval = {!is.null(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin)}, fig.width = 10, fig.height = calcFigHeight(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin)}
+print(params$InputData$Artifacts$OutputPlotStrat$GroupedRegionOfOrigin$plot)
 ```
 
-```{r, eval = {!is.null(params$InputData$Artifacts$UnivAnalysis)}}
+```{r, eval = {!is.null(params$InputData$Artifacts$UnivAnalysis) && nrow(params$InputData$Artifacts$UnivAnalysis) > 0}}
 dt <- params$InputData$Artifacts$UnivAnalysis
 knitr::kable(dt, align = rep("r", ncol(dt)))
 ```
