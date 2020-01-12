@@ -236,9 +236,7 @@ dataSummary <- function(input, output, session, appStatus)
 
   artifacts <- reactive({
     dataSelection <- dataSelection()
-    print(dataSelection)
     inputData <- appStatus$InputData$Table[dataSelection]
-    print(inputData[, unique(DateOfNotificationYear)])
     PreProcessInputDataBeforeAdjustments(inputData)
     GetDataSummaryArtifacts(inputData)
   })

@@ -4,12 +4,12 @@
 \alias{PrepareDataSetsForModel}
 \title{PrepareDataSetsForModel}
 \usage{
-PrepareDataSetsForModel(dt, by = c())
+PrepareDataSetsForModel(dt, by = NULL)
 }
 \arguments{
 \item{dt}{Input data set as data.table object. Required.}
 
-\item{by}{Character vector of strata names. Optional. Def = \code{c()}}
+\item{by}{Character vector of strata names. Optional. Def = \code{NULL}}
 }
 \value{
 List of HIV models
