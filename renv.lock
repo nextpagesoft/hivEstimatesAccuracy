@@ -11,10 +11,10 @@
   "Packages": {
     "BH": {
       "Package": "BH",
-      "Version": "1.72.0-2",
+      "Version": "1.72.0-3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "00d67366d2b1bbd0a4dd0279817a66d4"
+      "Hash": "8f9ce74c6417d61f0782cbae5fd2b7b0"
     },
     "DBI": {
       "Package": "DBI",
@@ -137,10 +137,10 @@
     },
     "cli": {
       "Package": "cli",
-      "Version": "2.0.0",
+      "Version": "2.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f41a3aa27b911750a6526b450d0b8ea4"
+      "Hash": "5173d8ab28680cf263636b110f4f3220"
     },
     "clipr": {
       "Package": "clipr",
@@ -214,10 +214,10 @@
     },
     "fansi": {
       "Package": "fansi",
-      "Version": "0.4.0",
+      "Version": "0.4.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b31d9e5d051553d1177083aeba04b5b9"
+      "Hash": "7fce217eaaf8016e72065e85c73027b5"
     },
     "farver": {
       "Package": "farver",
@@ -317,10 +317,10 @@
     },
     "hms": {
       "Package": "hms",
-      "Version": "0.5.2",
+      "Version": "0.5.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e8700e1bc2963a77ff8d80f42faa5a46"
+      "Hash": "726671f634529d470545f9fd1a9d1869"
     },
     "htmltools": {
       "Package": "htmltools",
@@ -548,10 +548,10 @@
     },
     "prettyunits": {
       "Package": "prettyunits",
-      "Version": "1.0.2",
+      "Version": "1.1.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f3c960f0105f2ed179460864979fc37c"
+      "Hash": "51bcc03e24fa50b5da40f285a916a1d6"
     },
     "processx": {
       "Package": "processx",
@@ -695,10 +695,10 @@
     },
     "stringi": {
       "Package": "stringi",
-      "Version": "1.4.3",
+      "Version": "1.4.5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "74a50760af835563fb2c124e66aa134e"
+      "Hash": "ced3b63472796155f74abc4eb5266c78"
     },
     "stringr": {
       "Package": "stringr",
