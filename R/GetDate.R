@@ -1,9 +1,17 @@
-#' y <- 1977
-#' q <- 2
-#' m <- 5
-#' w <- NA
-#' d <- 20
-#' GetDate(y, q, m, w, d)
+#' GetDate
+#'
+#' @param y y
+#' @param q q
+#' @param m m
+#' @param w w
+#' @param d d
+#'
+#' @return Date
+#'
+#' @examples
+#' GetDate(1977, 2, 5, NA, 20)
+#'
+#' @export
 GetDate <- function(
   y = NA,
   q = NA,

@@ -1,3 +1,13 @@
+#' AddInterval
+#'
+#' @param intervals intervals
+#' @param interval interval
+#' @param idx idx
+#' @param minYear minYear
+#' @param maxYear maxYear
+#'
+#' @return data.table
+#'
 #' @export
 AddInterval <- function(
   intervals,

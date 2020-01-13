@@ -2,20 +2,28 @@
 % Please edit documentation in R/GetDate.R
 \name{GetDate}
 \alias{GetDate}
-\title{y <- 1977
-q <- 2
-m <- 5
-w <- NA
-d <- 20
-GetDate(y, q, m, w, d)}
+\title{GetDate}
 \usage{
 GetDate(y = NA, q = NA, m = NA, w = NA, d = NA)
 }
+\arguments{
+\item{y}{y}
+
+\item{q}{q}
+
+\item{m}{m}
+
+\item{w}{w}
+
+\item{d}{d}
+}
+\value{
+Date
+}
 \description{
-y <- 1977
-q <- 2
-m <- 5
-w <- NA
-d <- 20
-GetDate(y, q, m, w, d)
+GetDate
+}
+\examples{
+GetDate(1977, 2, 5, NA, 20)
+
 }

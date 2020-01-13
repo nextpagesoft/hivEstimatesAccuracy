@@ -9,7 +9,9 @@
 #' List of HIV models
 #'
 #' @examples
-#' PrepareDataSetsForModel(dt, by = 'transmission')
+#' \dontrun{
+#'   PrepareDataSetsForModel(dt, by = 'transmission')
+#' }
 #'
 #' @export
 PrepareDataSetsForModel <- function(

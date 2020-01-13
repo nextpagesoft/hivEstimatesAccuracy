@@ -18,6 +18,8 @@ List of HIV models
 Prepares data sets for HIV Model
 }
 \examples{
-PrepareDataSetsForModel(dt, by = 'transmission')
+\dontrun{
+  PrepareDataSetsForModel(dt, by = 'transmission')
+}
 
 }

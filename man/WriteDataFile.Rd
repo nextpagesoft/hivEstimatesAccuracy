@@ -17,8 +17,7 @@ WriteDataFile(data, fileName, ...)
 NULL (invisibly)
 }
 \description{
-Write content of a data table to file, currently only text file.\cr
-It is a wrapper around \code{\link{WriteTextFile}}.
+Write content of a data table to file.
 }
 \examples{
 \dontrun{

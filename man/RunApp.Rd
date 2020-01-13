@@ -4,10 +4,12 @@
 \alias{RunApp}
 \title{RunApp}
 \usage{
-RunApp(launchBrowser = TRUE)
+RunApp(launchBrowser = TRUE, appName = "shiny")
 }
 \arguments{
 \item{launchBrowser}{Logical indicating to open the app in a newly open web browser}
+
+\item{appName}{Name of the application to run.}
 }
 \value{
 NULL (invisibly)
