@@ -1,7 +1,6 @@
 #' WriteDataFile
 #'
-#' Write content of a data table to file, currently only text file.\cr
-#' It is a wrapper around \code{\link{WriteTextFile}}.
+#' Write content of a data table to file.
 #'
 #' @param data data.table object to save. Required.
 #' @param fileName Name of the saved file. Required.
@@ -56,6 +55,18 @@ WriteDataFile <- function(data, fileName, ...)
     },
     "rds" = {
       WriteRdsFile(data, fileName, ...)
+    },
+    "zip" = {
+      # Default separator
+      defSep <- ifelse(Sys.localeconv()[["decimal_point"]] == ",", ";", ",")
+      # If separator is provided in the actual argument list (...) then use it.
+      # Otherwise, use the default one.
+      extraParams <- list(...)
+      if ("sep" %in% names(extraParams)) {
+        WriteZipFile(data, fileName, ...)
+      } else {
+        WriteZipFile(data, fileName, sep = defSep, ...)
+      }
     },
     {stop("Unsupported file extension")}
   )

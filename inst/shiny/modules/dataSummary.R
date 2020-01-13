@@ -81,6 +81,7 @@ dataSummary <- function(input, output, session, appStatus)
 
   invalidateAdjustments <- function() {
     appStatus$AdjustedData <- NULL
+    appStatus$HIVModelData <- NULL
   }
 
   observeEvent(appStatus$InputData, {

@@ -127,6 +127,7 @@ inputDataUpload <- function(input, output, session, appStatus)
       inputDataTestStatus    <- uploadedData$InputDataTestStatus
       inputData              <- uploadedData$InputData
       adjustedData           <- uploadedData$AdjustedData
+      hivModelData           <- uploadedData$HIVModelData
       adjustmentSpecs        <- uploadedData$AdjustmentSpecs
       miAdjustmentName       <- uploadedData$MIAdjustmentName
       rdAdjustmentName       <- uploadedData$RDAdjustmentName
@@ -158,6 +159,7 @@ inputDataUpload <- function(input, output, session, appStatus)
       inputDataTestStatus    <- NULL
       inputData              <- NULL
       adjustedData           <- NULL
+      hivModelData           <- NULL
       adjustmentSpecs        <- adjustmentSpecs
       miAdjustmentName       <- "None"
       rdAdjustmentName       <- "None"
@@ -183,6 +185,7 @@ inputDataUpload <- function(input, output, session, appStatus)
     appStatus$InputDataTestStatus    <- inputDataTestStatus
     appStatus$InputData              <- inputData
     appStatus$AdjustedData           <- adjustedData
+    appStatus$HIVModelData           <- hivModelData
     appStatus$AdjustmentSpecs        <- adjustmentSpecs
     appStatus$MIAdjustmentName       <- miAdjustmentName
     appStatus$RDAdjustmentName       <- rdAdjustmentName

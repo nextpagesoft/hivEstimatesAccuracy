@@ -56,9 +56,9 @@ ui <- tagList(
         menuItem("Input data upload",  tabName = "upload",      icon = icon("upload")),
         menuItem("Input data summary", tabName = "summary",     icon = icon("bar-chart")),
         menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
+        menuItem("HIV Modelling",      tabName = "hivModel",    icon = icon("calculator")),
         menuItem("Reports",            tabName = "reports",     icon = icon("book")),
         menuItem("Outputs",            tabName = "outputs",     icon = icon("download")),
-        menuItem("HIV Modelling",      tabName = "hivModel",    icon = icon("calculator")),
         menuItem("Manual",             tabName = "manual",      icon = icon("book"))
       ),
       width = 180
@@ -74,9 +74,9 @@ ui <- tagList(
         tabItem(tabName = "upload",      fluidRow(inputDataUploadUI("upload"))),
         tabItem(tabName = "summary",     fluidRow(dataSummaryUI("summary"))),
         tabItem(tabName = "adjustments", fluidRow(dataAdjustUI("adjustments"))),
+        tabItem(tabName = "hivModel",    fluidRow(hivModelUI("hivModel"))),
         tabItem(tabName = "reports",     fluidRow(createReportsUI("reports"))),
         tabItem(tabName = "outputs",     fluidRow(outputsUI("outputs"))),
-        tabItem(tabName = "hivModel",    fluidRow(hivModelUI("hivModel"))),
         tabItem(tabName = "manual",      fluidRow(manualUI("manual")))
       )
     )
@@ -107,6 +107,7 @@ server <- function(input, output, session)
     NotifQuarterRangeApply = NULL,
     InputData = NULL,
     AdjustedData = NULL,
+    HIVModelData = NULL,
     AdjustmentSpecs = adjustmentSpecs,
     MIAdjustmentName = "None",
     RDAdjustmentName = "None",

@@ -83,11 +83,7 @@ if (!is.null(inputData)) {
   # Take the last adjustment output as final data
   finalData <- adjustedData[[length(adjustedData)]][["Table"]]
 
-  hivModelData <- lapply(
-    split(finalData, by = 'Imputation'),
-    PrepareDataSetsForModel,
-    by = c('Gender', 'Transmission')
-  )
+  hivModelData <- PrepareDataSetsForModel(finalData, by = c('Gender', 'Transmission'))
 
   # Write output
   outputDataFilePath <- CreateOutputFileName(inputDataFilePath,

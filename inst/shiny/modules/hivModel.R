@@ -23,8 +23,8 @@ hivModelUI <- function(id)
       fluidRow(
         column(
           width = 4,
-          fileInput(ns('fileInput'), width = '100%', label = 'File input:'),
-          p('Maximum file size: 70MB', tags$br(), 'Supported files types: zip')
+          fileInput(ns('fileInput'), width = '100%', label = 'XML Model parameters file input:'),
+          fileInput(ns('deadFileInput'), width = '100%', label = 'CSV Mortality data ("Dead.csv") file input:')
         ),
         column(
           width = 8,

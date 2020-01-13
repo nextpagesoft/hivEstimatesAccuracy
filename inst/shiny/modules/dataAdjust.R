@@ -70,6 +70,7 @@ dataAdjust <- function(input, output, session, appStatus)
 
   invalidateAdjustments <- function() {
     appStatus$AdjustedData <- NULL
+    appStatus$HIVModelData <- NULL
   }
 
   observeEvent(appStatus$AdjustedData, {
@@ -232,6 +233,7 @@ dataAdjust <- function(input, output, session, appStatus)
     shinyjs::enable("cancelAdjustBtn")
 
     appStatus$AdjustedData <- NULL
+    appStatus$HIVModelData <- NULL
 
     appStatus$RunLog <- ""
     appStatus$IntermReport <- ""
@@ -277,6 +279,8 @@ dataAdjust <- function(input, output, session, appStatus)
       task <<- NULL
       if (is.list(adjustedData)) {
         appStatus$AdjustedData <- adjustedData
+        appStatus$HIVModelData <-
+          PrepareDataSetsForModel(adjustedData[[length(adjustedData)]][['Table']])
 
         intermReport <- RenderReportToHTML(
           reportFilePath = system.file("reports/intermediate/0.PreProcess.Rmd",
@@ -293,6 +297,7 @@ dataAdjust <- function(input, output, session, appStatus)
         appStatus$RunLog <- "Done"
       } else {
         appStatus$AdjustedData <- NULL
+        appStatus$HIVModelData <- NULL
         appStatus$RunLog <- "Adjustments cancelled"
       }
       appStatus$RunLog <- paste(paste("Start time  :", FormatTime(startTime)),
