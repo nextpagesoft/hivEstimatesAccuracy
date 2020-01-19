@@ -11,10 +11,10 @@
   "Packages": {
     "BH": {
       "Package": "BH",
-      "Version": "1.72.0-2",
+      "Version": "1.72.0-3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "00d67366d2b1bbd0a4dd0279817a66d4"
+      "Hash": "8f9ce74c6417d61f0782cbae5fd2b7b0"
     },
     "DBI": {
       "Package": "DBI",
@@ -137,10 +137,10 @@
     },
     "cli": {
       "Package": "cli",
-      "Version": "2.0.0",
+      "Version": "2.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f41a3aa27b911750a6526b450d0b8ea4"
+      "Hash": "5173d8ab28680cf263636b110f4f3220"
     },
     "clipr": {
       "Package": "clipr",
@@ -214,17 +214,17 @@
     },
     "fansi": {
       "Package": "fansi",
-      "Version": "0.4.0",
+      "Version": "0.4.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b31d9e5d051553d1177083aeba04b5b9"
+      "Hash": "7fce217eaaf8016e72065e85c73027b5"
     },
     "farver": {
       "Package": "farver",
-      "Version": "2.0.1",
+      "Version": "2.0.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e1e33215c942e78d2128221079b5dc35"
+      "Hash": "dad6793a5a1f73c8e91f1a1e3e834b05"
     },
     "fastmap": {
       "Package": "fastmap",
@@ -249,10 +249,10 @@
     },
     "future": {
       "Package": "future",
-      "Version": "1.15.1",
+      "Version": "1.16.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "359c17ff42bf8d352e25ce4499909b48"
+      "Hash": "20c20385da360f28c07364f2d099a6d7"
     },
     "generics": {
       "Package": "generics",
@@ -311,16 +311,16 @@
       "RemoteUsername": "nextpagesoft",
       "RemoteRepo": "hivModelling",
       "RemoteRef": "master",
-      "RemoteSha": "ab8f2f0daa007a7325915ed26765457a93250df1",
+      "RemoteSha": "c3c577994c412ca212d1bfebab759abe6ceee081",
       "RemoteHost": "api.github.com",
-      "Hash": "9b5ac888051443463fc9e88adb544650"
+      "Hash": "7f1cff50b34fe8568b886d827a9b9ac8"
     },
     "hms": {
       "Package": "hms",
-      "Version": "0.5.2",
+      "Version": "0.5.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e8700e1bc2963a77ff8d80f42faa5a46"
+      "Hash": "726671f634529d470545f9fd1a9d1869"
     },
     "htmltools": {
       "Package": "htmltools",
@@ -359,10 +359,10 @@
     },
     "knitr": {
       "Package": "knitr",
-      "Version": "1.26",
+      "Version": "1.27",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "a1f86bbc39ae43c6ae183223a52527a1"
+      "Hash": "0eaaccb0946bf5ee33e2762882a4ae07"
     },
     "labeling": {
       "Package": "labeling",
@@ -548,10 +548,10 @@
     },
     "prettyunits": {
       "Package": "prettyunits",
-      "Version": "1.0.2",
+      "Version": "1.1.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f3c960f0105f2ed179460864979fc37c"
+      "Hash": "51bcc03e24fa50b5da40f285a916a1d6"
     },
     "processx": {
       "Package": "processx",
@@ -667,10 +667,10 @@
     },
     "shinycssloaders": {
       "Package": "shinycssloaders",
-      "Version": "0.2.0",
+      "Version": "0.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "0dfe43ea406fcef9efbf186bff0c34c8"
+      "Hash": "5b3c3722d8f548f1b8e095533d0a8e30"
     },
     "shinydashboard": {
       "Package": "shinydashboard",
@@ -681,10 +681,10 @@
     },
     "shinyjs": {
       "Package": "shinyjs",
-      "Version": "1.0",
+      "Version": "1.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "7b54dd72674b2a3793cb364c20cba41e"
+      "Hash": "b40a5207b6624f6e2b8cdb50689cdb69"
     },
     "sourcetools": {
       "Package": "sourcetools",
@@ -695,10 +695,10 @@
     },
     "stringi": {
       "Package": "stringi",
-      "Version": "1.4.3",
+      "Version": "1.4.5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "74a50760af835563fb2c124e66aa134e"
+      "Hash": "ced3b63472796155f74abc4eb5266c78"
     },
     "stringr": {
       "Package": "stringr",
@@ -737,10 +737,10 @@
     },
     "tinytex": {
       "Package": "tinytex",
-      "Version": "0.18",
+      "Version": "0.19",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "e2ce80882682180c2b5f86d2b47c9951"
+      "Hash": "b1c0c22cab714ec9ce9472a8073b6922"
     },
     "ucminf": {
       "Package": "ucminf",
@@ -779,10 +779,10 @@
     },
     "xfun": {
       "Package": "xfun",
-      "Version": "0.11",
+      "Version": "0.12",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "9ec720c772e46177f8a78792939f4bef"
+      "Hash": "ccd8453a7b9e380628f6cd2862e46cad"
     },
     "xml2": {
       "Package": "xml2",
