@@ -99,6 +99,7 @@ pre {
   color: #333;
   font-weight: bold;
   font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
+  padding: 12px 5px 12px 5px !important;
 }
 
 .skin-blue .sidebar-menu > li.active > a,

@@ -46,20 +46,24 @@ ui <- tagList(
         div(class = "navbar-custom-menu",
             div(sprintf("v. %s", version)),
             textOutput("userCount"),
-            div(tags$a(href = "./", target = "_blank", list(icon("external-link"), "Open new instance in separate tab"))),
+            div(tags$a(
+              href = "./",
+              target = "_blank",
+              list(icon("external-link"), "Open new instance in separate tab")
+            )),
             actionLink("setSeed", "Set seed", icon = icon("random"))
         )
       )
     ),
     dashboardSidebar(
       sidebarMenu(
-        menuItem("Input data upload",  tabName = "upload",      icon = icon("upload")),
-        menuItem("Input data summary", tabName = "summary",     icon = icon("bar-chart")),
-        menuItem("Adjustments",        tabName = "adjustments", icon = icon("bolt")),
-        menuItem("HIV Modelling",      tabName = "hivModel",    icon = icon("calculator")),
-        menuItem("Reports",            tabName = "reports",     icon = icon("book")),
-        menuItem("Outputs",            tabName = "outputs",     icon = icon("download")),
-        menuItem("Manual",             tabName = "manual",      icon = icon("book"))
+        menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
+        menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
+        menuItem("HIV Estimates Accuracy", tabName = "adjustments", icon = icon("bolt")),
+        menuItem("HIV Modelling",          tabName = "hivModel",    icon = icon("calculator")),
+        menuItem("Reports",                tabName = "reports",     icon = icon("book")),
+        menuItem("Outputs",                tabName = "outputs",     icon = icon("download")),
+        menuItem("Manual",                 tabName = "manual",      icon = icon("book"))
       ),
       width = 180
     ),
@@ -170,6 +174,4 @@ server <- function(input, output, session)
 }
 
 # Run application
-shinyApp(ui, server,
-         options = c(display.mode = "normal",
-                     test.mode = FALSE))
+shinyApp(ui, server, options = c(display.mode = "normal", test.mode = FALSE))
