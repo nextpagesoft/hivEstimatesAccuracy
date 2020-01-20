@@ -25,6 +25,8 @@ PrepareDataSetsForModel <- function(
   WorkFunc <- function(dt) {
     dt <- copy(dt)
 
+    dt[is.na(FirstCD4Count), FirstCD4Count := DateOfDiagnosisYear]
+
     # Prepare extra details
     dt[, ':='(
       HIVDiagnosisDate = GetDate(
@@ -47,7 +49,7 @@ PrepareDataSetsForModel <- function(
     )]
 
     # HIV file
-    hiv <- dt[!is.na(DateOfDiagnosisYear), .(Count = .N), by = c('DateOfDiagnosisYear', by)]
+    hiv <- dt[!is.na(DateOfDiagnosisYear), .(Count = .N), keyby = c('DateOfDiagnosisYear', by)]
     if (length(by) > 0) {
       hiv <- dcast(
         hiv,
@@ -57,7 +59,11 @@ PrepareDataSetsForModel <- function(
     }
 
     # HIV file
-    aids <- dt[!is.na(DateOfAIDSDiagnosisYear), .(Count = .N), by = c('DateOfAIDSDiagnosisYear', by)]
+    aids <- dt[
+      !is.na(DateOfAIDSDiagnosisYear),
+      .(Count = .N),
+      keyby = c('DateOfAIDSDiagnosisYear', by)
+    ]
     if (length(by) > 0) {
       aids <- dcast(
         aids,
@@ -67,7 +73,11 @@ PrepareDataSetsForModel <- function(
     }
 
     # HIVAIDS file
-    hivAids <- dt[!is.na(DateOfDiagnosisYear) & HIVToAIDSDaysCount <= 90, .(Count = .N), by = c('DateOfDiagnosisYear', by)]
+    hivAids <- dt[
+      !is.na(DateOfDiagnosisYear) & HIVToAIDSDaysCount <= 90,
+      .(Count = .N),
+      keyby = c('DateOfDiagnosisYear', by)
+    ]
     if (length(by) > 0) {
       hivAids <- dcast(
         hivAids,
@@ -83,7 +93,7 @@ PrepareDataSetsForModel <- function(
       sorted = TRUE
     )
     cd4 <- lapply(cd4, function(d) {
-      d <- d[, .(Count = .N), by = c('DateOfDiagnosisYear', by)]
+      d <- d[, .(Count = .N), keyby = c('DateOfDiagnosisYear', by)]
       if (length(by) > 0) {
         d <- dcast(
           d,
@@ -94,12 +104,23 @@ PrepareDataSetsForModel <- function(
       return(d)
     })
 
+    # Dead file
+    dead <- dt[!is.na(DateOfDeathYear), .(Count = .N), keyby = c('DateOfDeathYear', by)]
+    if (length(by) > 0) {
+      dead <- dcast(
+        dead,
+        as.formula(sprintf('DateOfDeathYear ~ %s', paste(by, collapse = ' + '))),
+        value.var = 'Count'
+      )
+    }
+
     return(
       modifyList(
         list(
           HIV = hiv,
           AIDS = aids,
-          HIVAIDS = hivAids
+          HIVAIDS = hivAids,
+          Dead = dead
         ),
         cd4
       )
