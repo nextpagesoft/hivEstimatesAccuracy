@@ -48,6 +48,8 @@ if (attrMappingStatus[["Valid"]]) {
 }
 
 if (!is.null(inputData)) {
+  hivModelData <- PrepareDataSetsForModel(inputData$Table, by = c('Gender', 'Transmission'))
+
   # Apply GroupedRegionOfOrigin mapping
   distr <- GetOriginDistribution(inputData$Table)
   map <- GetOriginGroupingMap(migrMappingType, distr)
