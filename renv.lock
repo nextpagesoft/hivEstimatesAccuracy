@@ -242,10 +242,10 @@
     },
     "foreign": {
       "Package": "foreign",
-      "Version": "0.8-74",
+      "Version": "0.8-75",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "fbd213a1d55f4709d295304300f3d95d"
+      "Hash": "9a7efaa7320b9f327a904d1e615b0b46"
     },
     "future": {
       "Package": "future",
@@ -639,10 +639,10 @@
     },
     "rmarkdown": {
       "Package": "rmarkdown",
-      "Version": "2.0",
+      "Version": "2.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "745a60d9256842b1abae2dcf7b64ebc1"
+      "Hash": "9d1c61d476c448350c482d6664e1b28b"
     },
     "rpart": {
       "Package": "rpart",
