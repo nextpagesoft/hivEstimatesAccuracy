@@ -237,9 +237,10 @@ inputDataUploadMigrant <- function(input, output, session, appStatus, inputDataB
   observe({
     inputData <- req(inputDataBeforeGrouping())
     map <- req(vals$map)
-    appStatus$InputData <- ApplyOriginGroupingMap(inputData, map)
+    inputData <- ApplyOriginGroupingMap(inputData, map)
+    appStatus$InputData <- inputData
     appStatus$AdjustedData <- NULL
-    appStatus$HIVModelData <- NULL
+    appStatus$HIVModelData <- PrepareDataSetsForModel(inputData$Table, by = c('Gender', 'Transmission'))
   })
 
   return(NULL)
