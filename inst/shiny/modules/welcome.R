@@ -7,28 +7,22 @@ welcomeUI <- function(id)
   ns <- NS(id)
 
   tagList(
-    div(style = "margin-top: 15px"),
-    box(
-      width = 12,
-      title = "Welcome",
-      solidHeader = FALSE,
-      collapsible = TRUE,
-      status = "primary",
-      actionButton(
-        ns("accuracy"),
-        label = "HIV Accuracy"
+    fluidRow(
+      style = "margin-top: 20px",
+      column(
+        width = 3, offset = 1, style = "text-align: center",
+        actionLink(ns("accuracy"), label = "HIV Accuracy", icon("calculator"))
       ),
-      actionButton(
-        ns("modelling"),
-        label = "HIV Modelling"
+      column(
+        width = 3, style = "text-align: center",
+        actionLink(ns("modelling"), label = "HIV Modelling", icon("bolt"))
       ),
-      actionButton(
-        ns("full"),
-        label = "HIV Accuracy and Modelling"
+      column(
+        width = 3, style = "text-align: center",
+        actionLink(ns("full"), label = "HIV Accuracy and Modelling", icon("blender"))
       )
     )
   )
-
 }
 
 # Server logic
@@ -45,5 +39,4 @@ welcome <- function(input, output, session, appStatus)
   observeEvent(input[["full"]], {
     appStatus$Mode <- "FULL"
   })
-
 }

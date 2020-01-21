@@ -159,12 +159,6 @@ pre {
   font-weight: bold;
 }
 
-/*
-.box-body h3, .box-body h4 {
-  font-size: 14px;
-}
-*/
-
 /* Tab sets */
 .nav-tabs-custom {
   box-shadow: 0 0 6px rgba(0, 0, 0, .5);
@@ -175,12 +169,6 @@ pre {
   height: 156px;
   overflow: auto;
 }
-
-/*
-.tab-content h3 {
-  font-size: 14px;
-}
-*/
 
 .nav a {
   font-weight: bold;
@@ -245,6 +233,17 @@ div.box-body .shiny-input-container h3 {
 }
 
 /* Pages */
+
+/* Welcome */
+#welcome-accuracy, #welcome-modelling, #welcome-full{
+  font-size: 20px;
+}
+
+
+#welcome-accuracy > i, #welcome-modelling > i, #welcome-full > i {
+  width: 100%;
+  font-size: 17rem;
+}
 
 /* Data upload */
 #upload-colNamesP  {
