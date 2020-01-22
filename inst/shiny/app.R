@@ -19,6 +19,7 @@ library(hivEstimatesAccuracy)
 # Load application modules
 modulesPath <- system.file("shiny/modules", package = "hivEstimatesAccuracy")
 wwwPath <- system.file("shiny/www", package = "hivEstimatesAccuracy")
+source(file.path(modulesPath, "welcome.R"))
 source(file.path(modulesPath, "inputDataUpload.R"))
 source(file.path(modulesPath, "dataSummary.R"))
 source(file.path(modulesPath, "dataAdjust.R"))
@@ -30,7 +31,7 @@ source(file.path(modulesPath, "hivModel.R"))
 addResourcePath("www", wwwPath)
 
 # App globals
-titleString <- "HIV Estimates Accuracy"
+titleString <- "HIV Tools"
 version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy", fields = "Version"))
 
 # Define application user interface
@@ -56,15 +57,8 @@ ui <- tagList(
       )
     ),
     dashboardSidebar(
-      sidebarMenu(
-        menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
-        menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
-        menuItem("HIV Estimates Accuracy", tabName = "adjustments", icon = icon("bolt")),
-        menuItem("HIV Modelling",          tabName = "hivModel",    icon = icon("calculator")),
-        menuItem("Reports",                tabName = "reports",     icon = icon("book")),
-        menuItem("Outputs",                tabName = "outputs",     icon = icon("download")),
-        menuItem("Manual",                 tabName = "manual",      icon = icon("book"))
-      ),
+      disable = TRUE,
+      sidebarMenuOutput("menu"),
       width = 180
     ),
     dashboardBody(
@@ -72,9 +66,10 @@ ui <- tagList(
         tags$script(async = NA, src = "https://www.googletagmanager.com/gtag/js?id=UA-125099925-2"),
         includeScript(path = file.path(wwwPath, "/js/google_analytics.js")),
         tags$link(rel = "stylesheet", type = "text/css", href = "./www/css/style.css"),
-        tags$title("HIV Estimates Accuracy")
+        tags$title(titleString)
       ),
       tabItems(
+        tabItem(tabName = "welcome",     fluidRow(welcomeUI("welcome"))),
         tabItem(tabName = "upload",      fluidRow(inputDataUploadUI("upload"))),
         tabItem(tabName = "summary",     fluidRow(dataSummaryUI("summary"))),
         tabItem(tabName = "adjustments", fluidRow(dataAdjustUI("adjustments"))),
@@ -91,6 +86,7 @@ ui <- tagList(
 server <- function(input, output, session)
 {
   appStatus <- reactiveValues(
+    Mode = "WELCOME",
     CreateTime = Sys.time(),
     Version = version,
     Seed = NULL,
@@ -120,6 +116,9 @@ server <- function(input, output, session)
     Report = ""
   )
 
+  # shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
+
+  callModule(welcome,         "welcome",     appStatus)
   callModule(inputDataUpload, "upload",      appStatus)
   callModule(dataSummary,     "summary",     appStatus)
   callModule(dataAdjust,      "adjustments", appStatus)
@@ -171,6 +170,66 @@ server <- function(input, output, session)
   output[["userCount"]] <- renderText({
     sprintf("Number of open instances: %d", users$count)
   })
+
+  output[["menu"]] <- renderMenu({
+    if (appStatus$Mode == "WELCOME") {
+      sidebarMenu(
+        id = "tabs",
+        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open"))
+      )
+    } else if (appStatus$Mode == "MODELLING") {
+      sidebarMenu(
+        id = "tabs",
+        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open")),
+        menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
+        menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
+        menuItem("HIV Modelling",          tabName = "hivModel",    icon = icon("calculator")),
+        menuItem("Reports",                tabName = "reports",     icon = icon("book")),
+        menuItem("Outputs",                tabName = "outputs",     icon = icon("download")),
+        menuItem("Manual",                 tabName = "manual",      icon = icon("book"))
+      )
+    } else if (appStatus$Mode == "ACCURACY") {
+      sidebarMenu(
+        id = "tabs",
+        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open")),
+        menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
+        menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
+        menuItem("HIV Estimates Accuracy", tabName = "adjustments", icon = icon("bolt")),
+        menuItem("Reports",                tabName = "reports",     icon = icon("book")),
+        menuItem("Outputs",                tabName = "outputs",     icon = icon("download")),
+        menuItem("Manual",                 tabName = "manual",      icon = icon("book"))
+      )
+    } else if (appStatus$Mode == "FULL") {
+      sidebarMenu(
+        id = "tabs",
+        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open")),
+        menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
+        menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
+        menuItem("HIV Estimates Accuracy", tabName = "adjustments", icon = icon("bolt")),
+        menuItem("HIV Modelling",          tabName = "hivModel",    icon = icon("calculator")),
+        menuItem("Reports",                tabName = "reports",     icon = icon("book")),
+        menuItem("Outputs",                tabName = "outputs",     icon = icon("download")),
+        menuItem("Manual",                 tabName = "manual",      icon = icon("book"))
+      )
+    }
+  })
+
+  observeEvent(input[["tabs"]], {
+    if (input$tabs == "welcome") {
+      appStatus$Mode <- "WELCOME"
+    }
+  })
+
+  observeEvent(appStatus[["Mode"]], {
+    if (appStatus$Mode == "WELCOME") {
+      shinyjs::addClass(selector = "body", class = "sidebar-collapse")
+      updateTabItems(session, "tabs", "welcome")
+    } else {
+      shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
+      updateTabItems(session, "tabs", "upload")
+    }
+  })
+
 }
 
 # Run application

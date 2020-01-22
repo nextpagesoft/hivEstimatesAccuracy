@@ -79,12 +79,9 @@ outputs <- function(input, output, session, appStatus)
 
   observe({
     adjustedData <- appStatus$AdjustedData
-    hivModelData <- appStatus$HIVModelData
     isolate({
       if (!is.null(adjustedData)) {
         finalData(adjustedData[[length(adjustedData)]])
-        hivModelData(hivModelData)
-
         rdAdjIdx <- which(sapply(adjustedData, "[[", "Type") == "REPORTING_DELAYS")
         if (length(rdAdjIdx) > 0 && rdAdjIdx > 0) {
           rdDistribution(adjustedData[[rdAdjIdx]]$Artifacts$RdDistribution)
@@ -92,6 +89,16 @@ outputs <- function(input, output, session, appStatus)
       } else {
         finalData(NULL)
         rdDistribution(NULL)
+      }
+    })
+  })
+
+  observe({
+    hivModelData <- appStatus$HIVModelData
+    isolate({
+      if (!is.null(hivModelData)) {
+        hivModelData(hivModelData)
+      } else {
         hivModelData(NULL)
       }
     })
@@ -167,7 +174,6 @@ outputs <- function(input, output, session, appStatus)
           output[["downloadDistrCsvBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "csv")
           output[["downloadDistrStataBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "dta")
         }
-
       } else {
         widget <- p("Download links for adjusted data will be available after performing adjustments.")
       }
