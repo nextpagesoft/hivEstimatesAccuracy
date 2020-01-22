@@ -23,8 +23,6 @@ PrepareDataSetsForModel <- function(
   }
 
   WorkFunc <- function(dt) {
-    dt <- copy(dt)
-
     dt[is.na(FirstCD4Count), FirstCD4Count := DateOfDiagnosisYear]
 
     # Prepare extra details
@@ -127,11 +125,14 @@ PrepareDataSetsForModel <- function(
     )
   }
 
-  if ('Imputation' %in% colnames(dt)) {
-    results <- lapply(split(dt, by = 'Imputation'), WorkFunc)
-  } else {
-    results <- WorkFunc(dt)
+  # Process data
+  dt <- copy(dt)
+
+  if (!('Imputation' %in% colnames(dt))) {
+    dt[, Imputation := 0L]
   }
 
-  return(results)
+  filesData <- lapply(split(dt, by = 'Imputation'), WorkFunc)
+
+  return(filesData)
 }
