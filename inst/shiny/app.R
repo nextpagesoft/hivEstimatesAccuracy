@@ -180,7 +180,7 @@ server <- function(input, output, session)
     } else if (appStatus$Mode == "MODELLING") {
       sidebarMenu(
         id = "tabs",
-        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open")),
+        menuItem("Home",                   tabName = "welcome",     icon = icon("door-open")),
         menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
         menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
         menuItem("HIV Modelling",          tabName = "hivModel",    icon = icon("calculator")),
@@ -191,7 +191,7 @@ server <- function(input, output, session)
     } else if (appStatus$Mode == "ACCURACY") {
       sidebarMenu(
         id = "tabs",
-        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open")),
+        menuItem("Home",                   tabName = "welcome",     icon = icon("door-open")),
         menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
         menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
         menuItem("HIV Estimates Accuracy", tabName = "adjustments", icon = icon("bolt")),
@@ -202,7 +202,7 @@ server <- function(input, output, session)
     } else if (appStatus$Mode == "FULL") {
       sidebarMenu(
         id = "tabs",
-        menuItem("Welcome",                tabName = "welcome",     icon = icon("door-open")),
+        menuItem("Home",                   tabName = "welcome",     icon = icon("door-open")),
         menuItem("Case based data upload", tabName = "upload",      icon = icon("upload")),
         menuItem("Data summary",           tabName = "summary",     icon = icon("bar-chart")),
         menuItem("HIV Estimates Accuracy", tabName = "adjustments", icon = icon("bolt")),
