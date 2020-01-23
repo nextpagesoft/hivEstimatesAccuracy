@@ -28,15 +28,15 @@ welcomeUI <- function(id)
     fluidRow(
       column(
         width = 3, offset = 1, style = "text-align: center",
-        actionLink(ns("accuracy"), label = "HIV Accuracy", icon("calculator"))
+        actionLink(ns("modelling"), label = "Modelling", icon("bolt"))
       ),
       column(
         width = 3, style = "text-align: center",
-        actionLink(ns("modelling"), label = "HIV Modelling", icon("bolt"))
+        actionLink(ns("accuracy"), label = "Accuracy", icon("calculator"))
       ),
       column(
         width = 3, style = "text-align: center",
-        actionLink(ns("full"), label = "HIV Accuracy and Modelling", icon("blender"))
+        actionLink(ns("full"), label = "Both", icon("blender"))
       )
     )
   )
