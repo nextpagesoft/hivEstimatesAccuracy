@@ -103,12 +103,16 @@ if (!is.null(inputData)) {
     params <- GetMainReportArtifacts(params)
   }
 
-  params <- modifyList(params,
-                       list(Artifacts =
-                              list(FileName = inputDataFilePath,
-                                   DiagYearRange = diagYearRange,
-                                   NotifQuarterRange = notifQuarterRange,
-                                   DiagYearRangeApply = TRUE)))
+  params <- modifyList(
+    params,
+    list(
+      Artifacts = list(
+        FileName = inputDataFilePath,
+        DiagYearRange = diagYearRange,
+        NotifQuarterRange = notifQuarterRange,
+        DiagYearRangeApply = TRUE)
+    )
+  )
 
   htmlReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,

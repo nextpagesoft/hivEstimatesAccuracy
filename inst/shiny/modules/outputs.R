@@ -19,7 +19,8 @@ outputsUI <- function(id)
         tags$li(downloadLink(ns("downloadStateRdsBtn"), "R rds file"))
       ),
       p("This file contains the full state of the application. Loading it later will restore the application to the current state."),
-      uiOutput(ns("downloadLinks"))
+      uiOutput(ns("hivDownloadLinks")),
+      uiOutput(ns("adjDownloadLinks"))
     ),
     uiOutput(ns("adjustedDataTableBox"))
   )
@@ -36,7 +37,7 @@ outputs <- function(input, output, session, appStatus)
   hivModelData <- reactiveVal(NULL)
 
   # EVENT: Button "Download csv/stata data" clicked
-  DownloadData <- function(type = "ADJUSTED_DATA", format) {
+  DownloadData <- function(type, format) {
     if (type == "ADJUSTED_DATA") {
       downloadData <- finalData()
       fileNamePrefix <- "AdjustedData"
@@ -48,7 +49,7 @@ outputs <- function(input, output, session, appStatus)
     } else if (type == "HIV_MODEL_DATA") {
       downloadData <- hivModelData()
       fileNamePrefix <- "HIVModelData"
-      timeStamp <- finalData()$TimeStamp
+      timeStamp <- GetTimeStamp()
     } else {
       downloadData <- NULL
     }
@@ -60,9 +61,12 @@ outputs <- function(input, output, session, appStatus)
     downloadHandler(
       filename = function() {
         fileName <- sprintf("%s_%s.%s", fileNamePrefix, timeStamp, format)
+        print(fileName)
         return(fileName)
       },
       content = function(file) {
+        print(file)
+        print(downloadData)
         withProgress(
           message = "Creating download data output file",
           detail = "The file will be available for download shortly.",
@@ -106,8 +110,7 @@ outputs <- function(input, output, session, appStatus)
 
   output[['downloadStateRdsBtn']] <- downloadHandler(
     filename = function() {
-      fileName <- sprintf("HIV_state_%s.rds", GetTimeStamp())
-      return(fileName)
+      return(sprintf("HIV_state_%s.rds", GetTimeStamp()))
     },
     content = function(file) {
       withProgress(
@@ -123,9 +126,32 @@ outputs <- function(input, output, session, appStatus)
     }
   )
 
-  output[["downloadLinks"]] <- renderUI({
-    finalData <- finalData()
+  output[["hivDownloadLinks"]] <- renderUI({
     hivModelData <- hivModelData()
+    widget <- list()
+
+    isolate({
+      if (!is.null(hivModelData)) {
+        widget[["HD_Header"]] <- h3("HIV Modelling data downloads")
+        widget[["HD_Description"]] <- p("Input data can be downloaded as:")
+        widget[["HD_Buttons"]] <- tags$ul(
+          tags$li(downloadLink(ns("hivDownloadDataRdsBtn"), "R rds file")),
+          tags$li(downloadLink(ns("hivDownloadDataZipBtn"), "Zipped HIV Modelling input data files"))
+        )
+
+        output[["hivDownloadDataRdsBtn"]] <- DownloadData(type = "HIV_MODEL_DATA", "rds")
+        output[["hivDownloadDataZipBtn"]] <- DownloadData(type = "HIV_MODEL_DATA", "zip")
+      } else {
+        widget <- p("Download links for HIV Modelling input data will be available after uploading TESSy format data.")
+      }
+    })
+
+    return(tagList(widget))
+  })
+
+
+  output[["adjDownloadLinks"]] <- renderUI({
+    finalData <- finalData()
     rdDistribution <- rdDistribution()
 
     widget <- list()
@@ -135,10 +161,9 @@ outputs <- function(input, output, session, appStatus)
         widget[["AD_Header"]] <- h3("Adjusted data downloads")
         widget[["AD_Description"]] <- p("Adjusted data can be downloaded as:")
         widget[["AD_Buttons"]] <- tags$ul(
-          tags$li(downloadLink(ns("downloadDataRdsBtn"), "R rds file")),
-          tags$li(downloadLink(ns("downloadDataCsvBtn"), "csv file")),
-          tags$li(downloadLink(ns("downloadDataStataBtn"), "Stata dta file")),
-          tags$li(downloadLink(ns("downloadDataZipBtn"), "Zipped HIV Modelling input data files"))
+          tags$li(downloadLink(ns("adjDownloadDataRdsBtn"), "R rds file")),
+          tags$li(downloadLink(ns("adjDownloadDataCsvBtn"), "csv file")),
+          tags$li(downloadLink(ns("adjDownloadDataStataBtn"), "Stata dta file"))
         )
 
         widget[["AD_HelpText"]] <- tagList(
@@ -156,23 +181,22 @@ outputs <- function(input, output, session, appStatus)
           p("Data saved as csv (extension 'csv') or Stata (extension 'dta') file contain only the adjusted data.")
         )
 
-        output[["downloadDataRdsBtn"]] <- DownloadData(type = "ADJUSTED_DATA", "rds")
-        output[["downloadDataCsvBtn"]] <- DownloadData(type = "ADJUSTED_DATA", "csv")
-        output[["downloadDataStataBtn"]] <- DownloadData(type = "ADJUSTED_DATA", "dta")
-        output[["downloadDataZipBtn"]] <- DownloadData(type = "HIV_MODEL_DATA", "zip")
+        output[["adjDownloadDataRdsBtn"]] <- DownloadData(type = "ADJUSTED_DATA", "rds")
+        output[["adjDownloadDataCsvBtn"]] <- DownloadData(type = "ADJUSTED_DATA", "csv")
+        output[["adjDownloadDataStataBtn"]] <- DownloadData(type = "ADJUSTED_DATA", "dta")
 
         if (!is.null(rdDistribution)) {
           widget[["RD_Header"]] <- h3("Reporting delays downloads")
           widget[["RD_Description"]] <- p("Reporting delays distributions can be downloaded as:")
           widget[["RD_Buttons"]] <- tags$ul(
-            tags$li(downloadLink(ns("downloadDistrRdsBtn"), "R rds file")),
-            tags$li(downloadLink(ns("downloadDistrCsvBtn"), "csv file")),
-            tags$li(downloadLink(ns("downloadDistrStataBtn"), "Stata dta file"))
+            tags$li(downloadLink(ns("adjDownloadDistrRdsBtn"), "R rds file")),
+            tags$li(downloadLink(ns("adjDownloadDistrCsvBtn"), "csv file")),
+            tags$li(downloadLink(ns("adjDownloadDistrStataBtn"), "Stata dta file"))
           )
 
-          output[["downloadDistrRdsBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "rds")
-          output[["downloadDistrCsvBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "csv")
-          output[["downloadDistrStataBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "dta")
+          output[["adjDownloadDistrRdsBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "rds")
+          output[["adjDownloadDistrCsvBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "csv")
+          output[["adjDownloadDistrStataBtn"]] <- DownloadData(type = "RD_DISTRIBUTION", "dta")
         }
       } else {
         widget <- p("Download links for adjusted data will be available after performing adjustments.")
@@ -199,13 +223,16 @@ outputs <- function(input, output, session, appStatus)
     })
   })
 
-  output[["adjustedDataTable"]] <- renderDataTable(finalData()$Table,
-                                                   options = list(
-                                                     dom = '<"top">lirt<"bottom">p',
-                                                     autoWidth = FALSE,
-                                                     pageLength = 25,
-                                                     scrollX = TRUE,
-                                                     deferRender = TRUE,
-                                                     serverSide = TRUE,
-                                                     scroller = FALSE))
+  output[["adjustedDataTable"]] <- renderDataTable(
+    finalData()$Table,
+    options = list(
+      dom = '<"top">lirt<"bottom">p',
+      autoWidth = FALSE,
+      pageLength = 25,
+      scrollX = TRUE,
+      deferRender = TRUE,
+      serverSide = TRUE,
+      scroller = FALSE
+    )
+  )
 }
