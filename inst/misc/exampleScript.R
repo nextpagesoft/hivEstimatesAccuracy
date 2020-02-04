@@ -51,8 +51,7 @@ if (!is.null(inputData)) {
   hivModelData <- PrepareDataSetsForModel(inputData$Table, by = c('Gender', 'Transmission'))
 
   # Apply GroupedRegionOfOrigin mapping
-  distr <- GetOriginDistribution(inputData$Table)
-  map <- GetOriginGroupingMap(migrMappingType, distr)
+  map <- GetOriginGroupingMap(migrMappingType, GetOriginDistribution(inputData$Table))
 
   map[FullRegionOfOrigin %in% c("CENTEUR", "EASTEUR", "EUROPE", "WESTEUR"),
       GroupedRegionOfOrigin := "EUROPE"]
@@ -82,22 +81,26 @@ if (!is.null(inputData)) {
                                  seed = NULL)
 
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
-  # Take the last adjustment output as final data
+  # Last adjustment output is the final data
   finalData <- adjustedData[[length(adjustedData)]][["Table"]]
 
   hivModelData <- PrepareDataSetsForModel(finalData, by = c('Gender', 'Transmission'))
 
   # Write output
-  outputDataFilePath <- CreateOutputFileName(inputDataFilePath,
-                                             suffix = paste0("_", GetTimeStamp()))
+  outputDataFilePath <- CreateOutputFileName(
+    inputDataFilePath,
+    suffix = paste0("_", GetTimeStamp())
+  )
   WriteDataFile(finalData, outputDataFilePath)
 
   # 7. CREATE FINAL REPORT (OPTIONALLY) ------------------------------------------------------------
   reportFilePath <- GetReportFileNames()[reportName]
-  params <- list(AdjustedData = adjustedData,
-                 ReportingDelay = TRUE,
-                 Smoothing = TRUE,
-                 CD4ConfInt = FALSE)
+  params <- list(
+    AdjustedData = adjustedData,
+    ReportingDelay = TRUE,
+    Smoothing = TRUE,
+    CD4ConfInt = FALSE
+  )
 
   if (is.element(reportName, c("Main Report"))) {
     params <- GetMainReportArtifacts(params)
@@ -110,7 +113,8 @@ if (!is.null(inputData)) {
         FileName = inputDataFilePath,
         DiagYearRange = diagYearRange,
         NotifQuarterRange = notifQuarterRange,
-        DiagYearRangeApply = TRUE)
+        DiagYearRangeApply = TRUE
+      )
     )
   )
 
@@ -118,26 +122,30 @@ if (!is.null(inputData)) {
     reportFilePath = reportFilePath,
     format = "html_document",
     params = params,
-    outDir = dirname(inputDataFilePath))
+    outDir = dirname(inputDataFilePath)
+  )
   browseURL(htmlReportFileName)
 
   latexReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,
     format = "latex_document",
     params = params,
-    outDir = dirname(inputDataFilePath))
+    outDir = dirname(inputDataFilePath)
+  )
 
   pdfReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,
     format = "pdf_document",
     params = params,
-    outDir = dirname(inputDataFilePath))
+    outDir = dirname(inputDataFilePath)
+  )
   browseURL(pdfReportFileName)
 
   wordReportFileName <- RenderReportToFile(
     reportFilePath = reportFilePath,
     format = "word_document",
     params = params,
-    outDir = dirname(inputDataFilePath))
+    outDir = dirname(inputDataFilePath)
+  )
   browseURL(wordReportFileName)
 }

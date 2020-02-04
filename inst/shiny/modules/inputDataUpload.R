@@ -19,6 +19,11 @@ inputDataUploadUI <- function(id)
       solidHeader = FALSE,
       status = "primary",
       collapsible = TRUE,
+      tabsetPanel(
+        type = "tabs",
+        tabPanel("Case-based data upload", "Plot"),
+        tabPanel("Aggregated data upload", "Summary")
+      ),
       fluidRow(
         column(width = 4,
                fileInput(ns("fileInput"),
