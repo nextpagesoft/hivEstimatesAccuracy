@@ -68,9 +68,9 @@ pre {
   background-color: transparent !important;
   line-height: 120px;
   height: 120px;
-  width: 360px;
+  width: 500px;
   padding-left: 125px;
-  font-size: 32pt;
+  font-size: 44pt;
   font-weight: bold;
   color: #333;
   font-family: "MetaPro", Georgia, "Times New Roman", Times, serif;
@@ -236,13 +236,13 @@ div.box-body .shiny-input-container h3 {
 
 /* Welcome */
 #welcome-accuracy, #welcome-modelling, #welcome-full{
-  font-size: 20px;
+  font-size: 28px;
 }
 
 
 #welcome-accuracy > i, #welcome-modelling > i, #welcome-full > i {
   width: 100%;
-  font-size: 17rem;
+  font-size: 10rem;
 }
 
 /* Data upload */

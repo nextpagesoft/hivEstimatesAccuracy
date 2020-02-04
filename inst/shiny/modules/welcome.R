@@ -28,15 +28,18 @@ welcomeUI <- function(id)
     fluidRow(
       column(
         width = 3, offset = 1, style = "text-align: center",
-        actionLink(ns("modelling"), label = "Modelling", icon("bolt"))
+        actionLink(ns("accuracy"), label = "1. Accuracy", icon("calculator")),
+        h2("Adjust case-based data for missing values and reporting delay")
       ),
       column(
         width = 3, style = "text-align: center",
-        actionLink(ns("accuracy"), label = "Accuracy", icon("calculator"))
+        actionLink(ns("modelling"), label = "2. Modelling", icon("bolt")),
+        h2("Estimate number of PLHIV and incidence")
       ),
       column(
         width = 3, style = "text-align: center",
-        actionLink(ns("full"), label = "Both", icon("blender"))
+        actionLink(ns("full"), label = "3. All-in-one", icon("blender")),
+        h2("Accuracy adjustments and modeling integrated in one tool")
       )
     )
   )

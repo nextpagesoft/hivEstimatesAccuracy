@@ -31,7 +31,7 @@ source(file.path(modulesPath, "hivModel.R"))
 addResourcePath("www", wwwPath)
 
 # App globals
-titleString <- "HIV Tools"
+titleString <- "HIV Platform"
 version <- as.character(packageDescription(pkg = "hivEstimatesAccuracy", fields = "Version"))
 
 # Define application user interface
