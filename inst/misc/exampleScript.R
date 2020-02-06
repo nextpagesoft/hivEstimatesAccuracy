@@ -63,9 +63,11 @@ if (!is.null(inputData)) {
   inputData <- ApplyOriginGroupingMap(inputData, map)
 
   # Get "Summary" page plots (optionally)
-  inputData$Table <-
-    inputData$Table[is.na(DateOfDiagnosisYear) | is.na(NotificationTime) |
-                      (DateOfDiagnosisYear %between% diagYearRange & NotificationTime %between% notifQuarterRange)]
+  inputData$Table <- inputData$Table[
+    is.na(DateOfDiagnosisYear) |
+      is.na(NotificationTime) |
+      (DateOfDiagnosisYear %between% diagYearRange & NotificationTime %between% notifQuarterRange)
+  ]
 
   GetDiagnosisYearDensityPlot(plotData = inputData$Table)
   GetNotificationQuarterDensityPlot(plotData = inputData$Table)

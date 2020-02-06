@@ -48,10 +48,11 @@ PrepareDataSetsForModel <- function(
 
     # HIV file
     hiv <- dt[!is.na(DateOfDiagnosisYear), .(Count = .N), keyby = c('DateOfDiagnosisYear', by)]
+    setnames(hiv, old = c('DateOfDiagnosisYear'), new = c('Year'))
     if (length(by) > 0) {
       hiv <- dcast(
         hiv,
-        as.formula(sprintf('DateOfDiagnosisYear ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -62,10 +63,11 @@ PrepareDataSetsForModel <- function(
       .(Count = .N),
       keyby = c('DateOfAIDSDiagnosisYear', by)
     ]
+    setnames(aids, old = c('DateOfAIDSDiagnosisYear'), new = c('Year'))
     if (length(by) > 0) {
       aids <- dcast(
         aids,
-        as.formula(sprintf('DateOfAIDSDiagnosisYear ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -76,10 +78,11 @@ PrepareDataSetsForModel <- function(
       .(Count = .N),
       keyby = c('DateOfDiagnosisYear', by)
     ]
+    setnames(hivAids, old = c('DateOfDiagnosisYear'), new = c('Year'))
     if (length(by) > 0) {
       hivAids <- dcast(
         hivAids,
-        as.formula(sprintf('DateOfDiagnosisYear ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -92,10 +95,11 @@ PrepareDataSetsForModel <- function(
     )
     cd4 <- lapply(cd4, function(d) {
       d <- d[, .(Count = .N), keyby = c('DateOfDiagnosisYear', by)]
+      setnames(d, old = c('DateOfDiagnosisYear'), new = c('Year'))
       if (length(by) > 0) {
         d <- dcast(
           d,
-          as.formula(sprintf('DateOfDiagnosisYear ~ %s', paste(by, collapse = ' + '))),
+          as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
           value.var = 'Count'
         )
       }
@@ -104,24 +108,46 @@ PrepareDataSetsForModel <- function(
 
     # Dead file
     dead <- dt[!is.na(DateOfDeathYear), .(Count = .N), keyby = c('DateOfDeathYear', by)]
+    setnames(dead, old = c('DateOfDeathYear'), new = c('Year'))
     if (length(by) > 0) {
       dead <- dcast(
         dead,
-        as.formula(sprintf('DateOfDeathYear ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
         value.var = 'Count'
       )
     }
 
+    dataSet <- modifyList(
+      list(
+        HIV = hiv,
+        AIDS = aids,
+        HIVAIDS = hivAids,
+        Dead = dead
+      ),
+      cd4
+    )
+
+    # Ensure all data items have the same columns
+    requiredColumns <- Reduce(
+      union,
+      lapply(dataSet, colnames),
+      init = c()
+    )
+
+    dataSet <- lapply(
+      dataSet,
+      function(dt) {
+        missingCols <- setdiff(requiredColumns, colnames(dt))
+        if (length(missingCols) > 0) {
+          dt[, (missingCols) := NA_integer_]
+        }
+        setcolorder(dt, requiredColumns)
+        return(dt)
+      }
+    )
+
     return(
-      modifyList(
-        list(
-          HIV = hiv,
-          AIDS = aids,
-          HIVAIDS = hivAids,
-          Dead = dead
-        ),
-        cd4
-      )
+      dataSet
     )
   }
 
@@ -132,7 +158,7 @@ PrepareDataSetsForModel <- function(
     dt[, Imputation := 0L]
   }
 
-  filesData <- lapply(split(dt, by = 'Imputation'), WorkFunc)
+  dataSets <- lapply(split(dt, by = 'Imputation'), WorkFunc)
 
-  return(filesData)
+  return(dataSets)
 }

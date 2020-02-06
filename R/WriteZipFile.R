@@ -12,6 +12,7 @@
 #' @examples
 #' \dontrun{
 #' WriteZipFile(hivModelData)
+#' }
 #'
 #' @export
 WriteZipFile <- function(

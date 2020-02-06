@@ -20,3 +20,9 @@ File name of the saved zip file
 Saves sets of files to a zip file. The file contains multiple folders, one for each
 member of input list.
 }
+\examples{
+\dontrun{
+WriteZipFile(hivModelData)
+}
+
+}
