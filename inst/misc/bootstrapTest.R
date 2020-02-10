@@ -16,7 +16,7 @@ context <- GetRunContext(
   parameters = list(
     INCIDENCE = list(
       ModelMinYear = 1985,
-      ModelMaxYear = 2013,
+      ModelMaxYear = 2017,
       FitPosMinYear = 1985,
       FitPosMaxYear = 2017,
       FitPosCD4MinYear = 1985,
@@ -38,3 +38,5 @@ context <- GetRunContext(
 populationData <- GetPopulationData(context)
 
 mainResults <- PerformMainFit(context, populationData)
+
+plots <- CreateOutputPlots(mainResults)
