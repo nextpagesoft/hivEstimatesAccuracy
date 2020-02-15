@@ -4,12 +4,15 @@
 \alias{PrepareDataSetsForModel}
 \title{PrepareDataSetsForModel}
 \usage{
-PrepareDataSetsForModel(dt, by = NULL)
+PrepareDataSetsForModel(dt, splitBy = "Imputation", strata = NULL)
 }
 \arguments{
 \item{dt}{Input data set as data.table object. Required.}
 
-\item{by}{Character vector of strata names. Optional. Def = \code{NULL}}
+\item{splitBy}{Name of column with values to be used for separation of data sets. Optional.
+Default = 'Imputation'}
+
+\item{strata}{Character vector of strata names. Optional. Default = \code{NULL}}
 }
 \value{
 List of HIV models
@@ -19,7 +22,7 @@ Prepares data sets for HIV Model
 }
 \examples{
 \dontrun{
-  PrepareDataSetsForModel(dt, by = 'transmission')
+  PrepareDataSetsForModel(dt, splitBy = 'Imputation', strata = 'Transmission')
 }
 
 }

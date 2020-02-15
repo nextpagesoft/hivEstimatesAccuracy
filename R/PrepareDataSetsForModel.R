@@ -3,20 +3,23 @@
 #' Prepares data sets for HIV Model
 #'
 #' @param dt Input data set as data.table object. Required.
-#' @param by Character vector of strata names. Optional. Def = \code{NULL}
+#' @param splitBy Name of column with values to be used for separation of data sets. Optional.
+#'   Default = 'Imputation'
+#' @param strata Character vector of strata names. Optional. Default = \code{NULL}
 #'
 #' @return
 #' List of HIV models
 #'
 #' @examples
 #' \dontrun{
-#'   PrepareDataSetsForModel(dt, by = 'transmission')
+#'   PrepareDataSetsForModel(dt, splitBy = 'Imputation', strata = 'Transmission')
 #' }
 #'
 #' @export
 PrepareDataSetsForModel <- function(
   dt,
-  by = NULL
+  splitBy = 'Imputation',
+  strata = NULL
 ) {
   if (is.null(dt)) {
     return(NULL)
@@ -47,12 +50,12 @@ PrepareDataSetsForModel <- function(
     )]
 
     # HIV file
-    hiv <- dt[!is.na(DateOfDiagnosisYear), .(Count = .N), keyby = c('DateOfDiagnosisYear', by)]
+    hiv <- dt[!is.na(DateOfDiagnosisYear), .(Count = .N), keyby = c('DateOfDiagnosisYear', strata)]
     setnames(hiv, old = c('DateOfDiagnosisYear'), new = c('Year'))
-    if (length(by) > 0) {
+    if (length(strata) > 0) {
       hiv <- dcast(
         hiv,
-        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(strata, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -61,13 +64,13 @@ PrepareDataSetsForModel <- function(
     aids <- dt[
       !is.na(DateOfAIDSDiagnosisYear),
       .(Count = .N),
-      keyby = c('DateOfAIDSDiagnosisYear', by)
+      keyby = c('DateOfAIDSDiagnosisYear', strata)
     ]
     setnames(aids, old = c('DateOfAIDSDiagnosisYear'), new = c('Year'))
-    if (length(by) > 0) {
+    if (length(strata) > 0) {
       aids <- dcast(
         aids,
-        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(strata, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -76,13 +79,13 @@ PrepareDataSetsForModel <- function(
     hivAids <- dt[
       !is.na(DateOfDiagnosisYear) & HIVToAIDSDaysCount <= 90,
       .(Count = .N),
-      keyby = c('DateOfDiagnosisYear', by)
+      keyby = c('DateOfDiagnosisYear', strata)
     ]
     setnames(hivAids, old = c('DateOfDiagnosisYear'), new = c('Year'))
-    if (length(by) > 0) {
+    if (length(strata) > 0) {
       hivAids <- dcast(
         hivAids,
-        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(strata, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -94,12 +97,12 @@ PrepareDataSetsForModel <- function(
       sorted = TRUE
     )
     cd4 <- lapply(cd4, function(d) {
-      d <- d[, .(Count = .N), keyby = c('DateOfDiagnosisYear', by)]
+      d <- d[, .(Count = .N), keyby = c('DateOfDiagnosisYear', strata)]
       setnames(d, old = c('DateOfDiagnosisYear'), new = c('Year'))
-      if (length(by) > 0) {
+      if (length(strata) > 0) {
         d <- dcast(
           d,
-          as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
+          as.formula(sprintf('Year ~ %s', paste(strata, collapse = ' + '))),
           value.var = 'Count'
         )
       }
@@ -107,12 +110,12 @@ PrepareDataSetsForModel <- function(
     })
 
     # Dead file
-    dead <- dt[!is.na(DateOfDeathYear), .(Count = .N), keyby = c('DateOfDeathYear', by)]
+    dead <- dt[!is.na(DateOfDeathYear), .(Count = .N), keyby = c('DateOfDeathYear', strata)]
     setnames(dead, old = c('DateOfDeathYear'), new = c('Year'))
-    if (length(by) > 0) {
+    if (length(strata) > 0) {
       dead <- dcast(
         dead,
-        as.formula(sprintf('Year ~ %s', paste(by, collapse = ' + '))),
+        as.formula(sprintf('Year ~ %s', paste(strata, collapse = ' + '))),
         value.var = 'Count'
       )
     }
@@ -151,14 +154,15 @@ PrepareDataSetsForModel <- function(
     )
   }
 
-  # Process data
-  dt <- copy(dt)
-
-  if (!('Imputation' %in% colnames(dt))) {
-    dt[, Imputation := 0L]
+  if (!is.null(splitBy)) {
+    if (splitBy %in% colnames(dt)) {
+      dataSets <- lapply(split(dt, by = splitBy), WorkFunc)
+    } else {
+      stop('Column name provided in argument "splitBy" does not exist in the data')
+    }
+  } else {
+    dataSets <- WorkFunc(copy(dt))
   }
-
-  dataSets <- lapply(split(dt, by = 'Imputation'), WorkFunc)
 
   return(dataSets)
 }
