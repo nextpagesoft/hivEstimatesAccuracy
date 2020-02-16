@@ -4,7 +4,7 @@
 #'
 #' @param dt Input data set as data.table object. Required.
 #' @param splitBy Name of column with values to be used for separation of data sets. Optional.
-#'   Default = 'Imputation'
+#'   Default = \code{NULL}
 #' @param strata Character vector of strata names. Optional. Default = \code{NULL}
 #'
 #' @return
@@ -18,7 +18,7 @@
 #' @export
 PrepareDataSetsForModel <- function(
   dt,
-  splitBy = 'Imputation',
+  splitBy = NULL,
   strata = NULL
 ) {
   if (is.null(dt)) {
