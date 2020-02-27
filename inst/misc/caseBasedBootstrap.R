@@ -24,12 +24,7 @@ bootstrapCount <- 20
 
 # Common parameters to be used throughout the model runs. Normally, they will be determined from
 # data, but this work is not finalized yet.
-parameters <- list(
-  INCIDENCE = list(
-    ModelNoKnots = 4,
-    FitDistribution = 'POISSON'
-  )
-)
+parameters <- list()
 
 
 # B. MAIN FIT --------------------------------------------------------------------------------------
