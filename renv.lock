@@ -681,10 +681,10 @@
     },
     "tinytex": {
       "Package": "tinytex",
-      "Version": "0.19",
+      "Version": "0.20",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "b1c0c22cab714ec9ce9472a8073b6922"
+      "Hash": "d2cef450cbbf081b4a2ef1067fae9f32"
     },
     "ucminf": {
       "Package": "ucminf",
