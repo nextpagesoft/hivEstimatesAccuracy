@@ -174,6 +174,10 @@ pre {
   font-weight: bold;
 }
 
+.nav a.disabled, .nav a.disabled:active, .nav a.disabled:visited, .nav a.disabled:link, .nav a.disabled:hover {
+  color: silver;
+}
+
 .nav-tabs-custom > .nav-tabs > li.active {
   border-top-color: #7cbdc1;
 }
@@ -251,33 +255,33 @@ div.box-body .shiny-input-container h3 {
   overflow: auto;
 }
 
-#upload-attrMappingTable {
+#upload-main-attrMappingTable {
   width: 100%;
   border-collapse: separate;
   background: #f5f5f5;
 }
 
-.upload-attrNameCol {
+.upload-main-attrNameCol {
   width: 200px;
 }
 
-#upload-attrMappingTable th:first-child,
-#upload-attrMappingTable td:first-child {
+#upload-main-attrMappingTable th:first-child,
+#upload-main-attrMappingTable td:first-child {
   box-shadow: inset 1px 0 0 #fff;
 }
 
-#upload-attrMappingTable th:last-child,
-#upload-attrMappingTable td:last-child {
+#upload-main-attrMappingTable th:last-child,
+#upload-main-attrMappingTable td:last-child {
   border-right: 1px solid #e8e8e8;
   box-shadow: inset -1px 0 0 #fff;
 }
 
-#upload-attrMappingTable tr:nth-child(odd) td {
+#upload-main-attrMappingTable tr:nth-child(odd) td {
   background: #f1f1f1;
 }
 
-#upload-attrMappingTable th,
-#upload-attrMappingTable td {
+#upload-main-attrMappingTable th,
+#upload-main-attrMappingTable td {
   vertical-align: middle;
   border-right: 1px solid #fff;
   border-left: 1px solid #e8e8e8;
@@ -286,42 +290,42 @@ div.box-body .shiny-input-container h3 {
   padding: 5px;
 }
 
-#upload-attrMappingTable th {
+#upload-main-attrMappingTable th {
   border-top: 1px solid #e8e8e8;
 }
 
-#upload-attrMappingTable .form-group {
+#upload-main-attrMappingTable .form-group {
   height: 34px;
 }
 
-#upload-attrMappingTable .form-group,
-#upload-attrMappingTable .selectize-control {
+#upload-main-attrMappingTable .form-group,
+#upload-main-attrMappingTable .selectize-control {
   margin: 0;
 }
 
-#upload-attrMappingStatus .box, #upload-valueCheckStatus .box {
+#upload-main-attrMappingStatus .box, #upload-valueCheckStatus .box {
   box-shadow: none;
 }
 
-#upload-valueCheckStatusBox ol {
+#upload-main-valueCheckStatusBox ol {
   margin: 0;
 }
 
 /* Data table */
 
-#upload-inputDataTable, #outputs-adjustedDataTableBox {
+#upload-main-inputDataTable, #outputs-adjustedDataTableBox {
   font-size: 12px;
 }
 
-#upload-inputDataTable table, #outputs-adjustedDataTableBox table {
+#upload-main-inputDataTable table, #outputs-adjustedDataTableBox table {
   white-space: nowrap;
 }
 
-#upload-inputDataTable tr, #outputs-adjustedDataTableBox tr {
+#upload-main-inputDataTable tr, #outputs-adjustedDataTableBox tr {
   height: 30px;
 }
 
-#upload-inputDataTable td, #outputs-adjustedDataTableBox td {
+#upload-main-inputDataTable td, #outputs-adjustedDataTableBox td {
   text-align: right;
   padding: 5px;
   font-size: 11px;

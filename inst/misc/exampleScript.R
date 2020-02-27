@@ -48,7 +48,18 @@ if (attrMappingStatus[["Valid"]]) {
 }
 
 if (!is.null(inputData)) {
-  hivModelData <- PrepareDataSetsForModel(inputData$Table, by = c('Gender', 'Transmission'))
+  hivModelData <- PrepareDataSetsForModel(
+    inputData$Table,
+    splitBy = 'Imputation',
+    strata = c('Gender', 'Transmission'),
+    listIndex = 0
+  )
+
+  context <- GetRunContext(data = hivModelData[[1]])
+
+  # 4. Create work data set for the model
+  data <- GetPopulationData(context, populationSet)
+
 
   # Apply GroupedRegionOfOrigin mapping
   map <- GetOriginGroupingMap(migrMappingType, GetOriginDistribution(inputData$Table))
@@ -76,17 +87,24 @@ if (!is.null(inputData)) {
   summaryArtifacts <- GetDataSummaryArtifacts(inputData = summaryInputData)
 
   # 5. RUN ADJUSTMENTS -----------------------------------------------------------------------------
-  adjustedData <- RunAdjustments(data = inputData$Table,
-                                 adjustmentSpecs = adjustmentSpecs,
-                                 diagYearRange = NULL,
-                                 notifQuarterRange = NULL,
-                                 seed = NULL)
+  adjustedData <- RunAdjustments(
+    data = inputData$Table,
+    adjustmentSpecs = adjustmentSpecs,
+    diagYearRange = NULL,
+    notifQuarterRange = NULL,
+    seed = NULL
+  )
 
   # 6. SAVE ADJUSTED DATA --------------------------------------------------------------------------
   # Last adjustment output is the final data
   finalData <- adjustedData[[length(adjustedData)]][["Table"]]
 
-  hivModelData <- PrepareDataSetsForModel(finalData, by = c('Gender', 'Transmission'))
+  hivModelData <- PrepareDataSetsForModel(
+    finalData,
+    splitBy = 'Imputation',
+    strata = c('Gender', 'Transmission'),
+    listIndex = 0
+  )
 
   # Write output
   outputDataFilePath <- CreateOutputFileName(

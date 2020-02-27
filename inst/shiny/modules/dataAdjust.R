@@ -279,8 +279,12 @@ dataAdjust <- function(input, output, session, appStatus)
       task <<- NULL
       if (is.list(adjustedData)) {
         appStatus$AdjustedData <- adjustedData
-        appStatus$HIVModelData <-
-          PrepareDataSetsForModel(adjustedData[[length(adjustedData)]][['Table']])
+        appStatus$HIVModelData <- PrepareDataSetsForModel(
+          adjustedData[[length(adjustedData)]][['Table']],
+          splitBy = 'Imputation',
+          strata = c('Gender', 'Transmission'),
+          listIndex = 0
+        )
 
         intermReport <- RenderReportToHTML(
           reportFilePath = system.file("reports/intermediate/0.PreProcess.Rmd",
@@ -314,6 +318,8 @@ dataAdjust <- function(input, output, session, appStatus)
       prog$close()
       shinyjs::enable("runAdjustBtn")
       shinyjs::disable("cancelAdjustBtn")
+
+      print(appStatus$HIVModelData)
     })
 
   })

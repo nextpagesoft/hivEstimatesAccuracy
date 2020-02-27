@@ -6,6 +6,9 @@
 #' @param splitBy Name of column with values to be used for separation of data sets. Optional.
 #'   Default = \code{NULL}
 #' @param strata Character vector of strata names. Optional. Default = \code{NULL}
+#' @param listIndex Index in the output list to use if 'splitBy' columns does not exist in the
+#'   input data set and cannot be used for indexing output data set. If NULL then output file set
+#'   is not indexed and returned directly. Optional. Default = 0.
 #'
 #' @return
 #' List of HIV models
@@ -19,7 +22,8 @@
 PrepareDataSetsForModel <- function(
   dt,
   splitBy = NULL,
-  strata = NULL
+  strata = NULL,
+  listIndex = 0
 ) {
   if (is.null(dt)) {
     return(NULL)
@@ -157,6 +161,9 @@ PrepareDataSetsForModel <- function(
   if (!is.null(splitBy)) {
     if (splitBy %in% colnames(dt)) {
       dataSets <- lapply(split(dt, by = splitBy), WorkFunc)
+    } else if (!is.null(listIndex)) {
+      dataSets <- list()
+      dataSets[[as.character(listIndex)]] <- WorkFunc(copy(dt))
     } else {
       stop('Column name provided in argument "splitBy" does not exist in the data')
     }
