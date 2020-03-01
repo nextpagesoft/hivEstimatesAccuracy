@@ -36,7 +36,7 @@ caseBasedData <- fread(caseBasedDataPath)
 hivModelDataSet <- PrepareDataSetsForModel(caseBasedData, splitBy, strata)
 
 # 3. Create context
-context <- GetRunContext(data = hivModelDataSet, parameters = parameters)
+originalContext <- GetRunContext(data = hivModelDataSet, parameters = parameters)
 
 # 4. Create work data set for the model
 data <- GetPopulationData(context, populationSet)
@@ -80,6 +80,14 @@ for (iter in seq_len(bootstrapCount)) {
 
   # 3. Create context
   context <- GetRunContext(data = hivModelDataSet, parameters = parameters)
+
+  # context <- GetRunContext(data = hivModelDataSet, parameters = list(
+  #   ModelMinYear = originalContext$Parameters$INCIDENCE$ModelMinYear,
+  #   ModelMaxYear = originalContext$Parameters$INCIDENCE$ModelMaxYear
+  # ))
+
+  # context$Parameters$INCIDENCE$ModelMinYear <- 'equal to original'
+  # context$Parameters$INCIDENCE$ModelMaxYear <- 'equal to original'
 
   # 4. Create final data set for the model
   data <- GetPopulationData(context)
@@ -145,7 +153,7 @@ theta <- c(0.0000, 683.7634, 171.1121, 828.2901, 1015.1668, 935.0453, 1058.9732,
 # beta <- bootstrapResults[[1]]$Param$Beta
 # theta <- bootstrapResults[[1]]$Param$Theta
 
-# Fit model
+# Evaluate model
 model <- FitModel(beta, theta, context, data)
 
 # Get model outputs

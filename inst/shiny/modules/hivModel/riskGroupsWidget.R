@@ -3,44 +3,88 @@ riskGroupsWidgetUI <- function(id)
 {
   ns <- NS(id)
 
-  fluidRow(
-    column(
-      width = 12,
-      h1('Populations combinations')
+  tagList(
+    fluidRow(
+      column(
+        width = 12,
+        h1('Create populations')
+      ),
+      column(
+        width = 6,
+        wellPanel(
+          fluidRow(
+            column(
+              width = 4,
+              tags$b('Stratification name'),
+              tags$br(),
+              'Gender only',
+              tags$br(),
+              'Transmission only',
+              tags$br(),
+              'Gender and Transmission'
+            ),
+            column(
+              width = 4,
+              tags$b('Selected variables'),
+              tags$br(),
+              'Gender',
+              tags$br(),
+              'Transmission',
+              tags$br(),
+              'Gender, Transmission'
+            ),
+            column(
+              width = 4,
+              tags$b('Defined populations'),
+              tags$br(),
+              'F, M',
+              tags$br(),
+              'IDU, MSM',
+              tags$br(),
+              'F_IDU, F_MSM, M_IDU, M_MSM'
+            )
+          )
+        )
+      )
     ),
-    column(
-      width = 6,
-      wellPanel(
-        fluidRow(
-          column(
-            width = 4,
-            selectInput(
-              ns('riskGroupSelect'),
-              label = 'Select populations combination',
-              choices = c(),
-              selectize = TRUE
-            )
-          ),
-          column(
-            width = 4,
-            textInput(
-              ns('riskGroupName'),
-              label = 'Edit name'
-            )
-          ),
-          column(
-            width = 4,
-            checkboxGroupInput(
-              ns('populationSelect'),
-              label = 'Select populations for combination',
-              choices = c()
+    fluidRow(
+      column(
+        width = 12,
+        h1('Populations combinations')
+      ),
+      column(
+        width = 6,
+        wellPanel(
+          fluidRow(
+            column(
+              width = 4,
+              selectInput(
+                ns('riskGroupSelect'),
+                label = 'Select populations combination',
+                choices = c(),
+                selectize = TRUE
+              )
+            ),
+            column(
+              width = 4,
+              textInput(
+                ns('riskGroupName'),
+                label = 'Edit name'
+              )
+            ),
+            column(
+              width = 4,
+              checkboxGroupInput(
+                ns('populationSelect'),
+                label = 'Select populations for combination',
+                choices = c()
+              )
             )
           )
         )
       )
     )
   )
-
 }
 
 # Server logic

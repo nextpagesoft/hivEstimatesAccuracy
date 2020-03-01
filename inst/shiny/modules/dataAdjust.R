@@ -4,10 +4,8 @@
 # libPaths <- .libPaths()
 
 # Module globals
-adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(),
-                          GetListObject)
+adjustmentSpecs <- lapply(GetAdjustmentSpecFileNames(), GetListObject)
 adjustmentSpecsType <- lapply(adjustmentSpecs, "[[", "Type")
-
 isLinux <- tolower(Sys.info()[["sysname"]]) == "linux"
 
 # User interface

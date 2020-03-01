@@ -1,0 +1,60 @@
+---
+name: "HIV Model Report"
+author: "HIV Estimates Accuracy tool"
+title: "Adjustments report"
+date: "`r format(Sys.time(), '%d %B %Y, %H:%M:%S')`"
+editor_options: 
+  chunk_output_type: console
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \usepackage{titling}
+- \pretitle{\begin{center}\LARGE\includegraphics[width=3cm]{resources/ECDC_logo.pdf}\\[\bigskipamount]}
+- \posttitle{\end{center}}  
+output:
+  html_fragment:
+    smart: yes
+    toc: yes
+    number_sections: yes
+    dev: svg
+  html_document:
+    highlight: null
+    mathjax: null
+    number_sections: yes
+    dev: svg
+    self_contained: yes
+    theme: default
+    toc: yes
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  latex_document:
+    toc: yes
+    template: default
+    highlight: null
+    citation_package: none
+    number_sections: yes
+  pdf_document:
+    toc: yes
+    template: default
+    highlight: null
+    citation_package: none
+    number_sections: yes
+  word_document:
+    reference_docx: ./resources/template_ECDC.docx
+    fig_width: 7
+    fig_height: 4
+    toc: yes
+params:
+  Artifacts: NA
+  Test:
+    label: "Test parameter"
+    value: TRUE
+    input: checkbox
+---
+
+----------------------------------------------------------------------------------------------------
+
+# Introduction
+
+This is a test report for outcomes of HIV Model.

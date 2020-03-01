@@ -1,4 +1,5 @@
 # 1. LOAD LIBRARY ----------------------------------------------------------------------------------
+library(hivModelling)
 library(hivEstimatesAccuracy)
 
 # 2. LOAD SETTINGS ---------------------------------------------------------------------------------
@@ -54,12 +55,10 @@ if (!is.null(inputData)) {
     strata = c('Gender', 'Transmission'),
     listIndex = 0
   )
-
   context <- GetRunContext(data = hivModelData[[1]])
-
-  # 4. Create work data set for the model
-  data <- GetPopulationData(context, populationSet)
-
+  data <- GetPopulationData(context)
+  modelResults <- PerformMainFit(context, data)
+  modelPlots <- CreateOutputPlots(modelResults)
 
   # Apply GroupedRegionOfOrigin mapping
   map <- GetOriginGroupingMap(migrMappingType, GetOriginDistribution(inputData$Table))

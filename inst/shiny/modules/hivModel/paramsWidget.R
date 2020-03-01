@@ -100,21 +100,6 @@ paramsWidgetUI <- function(id)
             )
           )
         ),
-        # fluidRow(
-        #   h2('Confidence intervals'),
-        #   wellPanel(
-        #     fluidRow(
-        #       column(
-        #         width = 6,
-        #         'Number of iterations'
-        #       ),
-        #       column(
-        #         width = 6,
-        #         numericInput(ns('numIter'), label = NULL, value = 20)
-        #       )
-        #     )
-        #   )
-        # ),
         fluidRow(
           h2('Incidence curve'),
           wellPanel(

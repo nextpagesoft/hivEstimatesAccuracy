@@ -29,7 +29,8 @@ inputDataUploadUI <- function(id)
               width = 4,
               fileInput(ns('caseFileInput'), width = '100%', label = 'File input:'),
               p(
-                'Maximum file size: 70MB', tags$br(),
+                'Maximum file size: 70MB',
+                tags$br(),
                 'Supported files types: rds, txt, csv, xls, xlsx (uncompressed and zip archives)'
               )
             ),
@@ -46,7 +47,11 @@ inputDataUploadUI <- function(id)
             style = 'margin-top: 10px',
             column(
               width = 4,
-              wellPanel('Upload widget')
+              wellPanel(
+                'Upload widget',
+                tags$br(),
+                'Data provided here will override case-based derived data'
+              )
             ),
             column(
               width = 8,

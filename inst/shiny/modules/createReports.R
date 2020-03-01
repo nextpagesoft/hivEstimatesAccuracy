@@ -57,7 +57,8 @@ createReports <- function(input, output, session, appStatus)
   }
 
   adjustedDataAvailable <- reactive({
-    !is.null(appStatus$AdjustedData)
+    # !is.null(appStatus$AdjustedData)
+    TRUE
   })
 
   observe({
@@ -148,7 +149,8 @@ createReports <- function(input, output, session, appStatus)
 
   # EVENT: Button "Create report" clicked
   observeEvent(input[["createReportBtn"]], {
-    adjustedData <- req(appStatus$AdjustedData)
+    # adjustedData <- req(appStatus$AdjustedData)
+    adjustedData <- appStatus$AdjustedData
     fileName <- appStatus$FileName
     diagYearRangeApply <- appStatus$DiagYearRangeApply
     diagYearRange <- appStatus$DiagYearRange
@@ -163,17 +165,23 @@ createReports <- function(input, output, session, appStatus)
     prog$set(message = "Creating report...", value = 0.5)
 
     # Define parameters
-    params <- append(list(AdjustedData = adjustedData),
-                     vals$reportParams[[vals$selectedReportName]])
+    if (vals$selectedReportName == 'Main Report') {
+      params <- append(list(AdjustedData = adjustedData),
+                       vals$reportParams[[vals$selectedReportName]])
+    } else {
+      params <- vals$reportParams[[vals$selectedReportName]]
+    }
 
     if (isLinux) {
       reportTask <<- CreateTask({
-        params <- GetMainReportArtifacts(params)
-        params <- modifyList(params,
-                             list(Artifacts =
-                                    list(FileName = fileName,
-                                         DiagYearRange = diagYearRange,
-                                         DiagYearRangeApply = diagYearRangeApply)))
+        if (vals$selectedReportName == 'Main Report') {
+          params <- GetMainReportArtifacts(params)
+          params <- modifyList(params,
+                               list(Artifacts =
+                                      list(FileName = fileName,
+                                           DiagYearRange = diagYearRange,
+                                           DiagYearRangeApply = diagYearRangeApply)))
+        }
 
         report <- RenderReportToHTML(reportFileNames[vals$selectedReportName],
                                      params = params)
