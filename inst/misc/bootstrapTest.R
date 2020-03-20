@@ -2,12 +2,12 @@ library(data.table)
 library(hivModelling)
 
 caseBasedData <- fread('~/share/HIV Bootstrap/Dummy_case_based.csv')
-hivModelDataSets <- PrepareDataSetsForModel(caseBasedData, by = c('Gender', 'Transmission'))
+hivModelDataSets <- PrepareDataSetsForModel(caseBasedData, strata = c('Gender', 'Transmission'))
 # saveRDS(hivModelDataSets, file = '~/share/HIV Bootstrap/Dummy_aggregated.rds')
 # hivModelDataSets <- readRDS(file = '~/share/HIV Bootstrap/Dummy_aggregated.rds')
 
 caseBasedData <- fread('~/share/HIV Bootstrap/BE_case_based.csv')
-hivModelDataSets <- PrepareDataSetsForModel(caseBasedData, by = c('Gender', 'Transmission'))
+hivModelDataSets <- PrepareDataSetsForModel(caseBasedData, strata = c('Gender', 'Transmission'))
 # saveRDS(hivModelDataSets, file = '~/share/HIV Bootstrap/BE_aggregated.rds')
 # hivModelDataSets <- readRDS(file = '~/share/HIV Bootstrap/BE_aggregated.rds')
 
