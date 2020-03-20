@@ -3,7 +3,7 @@ library(miniCRAN)
 repoCRAN <- "https://cran.r-project.org/"
 
 pkgs <- c(
-  "callr", "data.table", "foreign", "future", "grid", "ggplot2", "graphics", "jomo", "knitr",
+  "callr", "DT", "data.table", "foreign", "future", "grid", "ggplot2", "graphics", "jomo", "knitr",
   "mice", "mitools", "quantreg", "parallel", "readxl", "rmarkdown", "scales", "shiny",
   "shinycssloaders", "shinydashboard", "shinyjs", "SparseM", "stats", "survival", "tools", "utils",
   "yaml", "xml2"
