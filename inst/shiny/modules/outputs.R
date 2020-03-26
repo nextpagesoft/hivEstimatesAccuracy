@@ -178,13 +178,13 @@ outputs <- function(input, output, session, appStatus)
           solidHeader = FALSE,
           status = "warning",
           collapsible = TRUE,
-          dataTableOutput(ns("adjustedDataTable"))
+          DT::DTOutput(ns("adjustedDataTable"))
         )
       }
     })
   })
 
-  output[["adjustedDataTable"]] <- renderDataTable(finalData()$Table,
+  output[["adjustedDataTable"]] <- DT::renderDT(finalData()$Table,
                                                    options = list(
                                                      dom = '<"top">lirt<"bottom">p',
                                                      autoWidth = FALSE,

@@ -4,8 +4,13 @@
 \alias{RunAdjustments}
 \title{RunAdjustments}
 \usage{
-RunAdjustments(data, adjustmentSpecs = list(), diagYearRange = NULL,
-  notifQuarterRange = NULL, seed = NULL)
+RunAdjustments(
+  data,
+  adjustmentSpecs = list(),
+  diagYearRange = NULL,
+  notifQuarterRange = NULL,
+  seed = NULL
+)
 }
 \arguments{
 \item{data}{data table object on which adjustments should be applied. Required.}

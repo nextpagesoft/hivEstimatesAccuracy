@@ -4,7 +4,9 @@
 \name{countryData}
 \alias{countryData}
 \title{Country names, codes, regions information}
-\format{data.table}
+\format{
+data.table
+}
 \usage{
 countryData
 }

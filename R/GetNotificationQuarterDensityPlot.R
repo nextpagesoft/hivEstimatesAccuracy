@@ -52,8 +52,8 @@ GetNotificationQuarterDensityPlot <- function(
   labels[breaks %% 2 != 0] <- ""
 
   plot <-
-    ggplot(plotDt, aes(x = NotificationTime, y = Count, fill = Gender, color = Gender)) +
-    geom_col(aes(alpha = Selected), position = "stack", width = 0.25, size = 0.1) +
+    ggplot(plotDt, aes(x = factor(NotificationTime), y = Count, fill = Gender, color = Gender)) +
+    geom_col(aes(alpha = Selected), position = "stack", width = 1, size = 0.1) +
     scale_colour_manual("Gender",
                         values = colorPalette,
                         labels = genderLabels) +
@@ -61,9 +61,9 @@ GetNotificationQuarterDensityPlot <- function(
                       values = colorPalette,
                       labels = genderLabels) +
     scale_alpha_manual(values = c("TRUE" = 0.7, "FALSE" = 0.2), guide = "none") +
-    scale_x_continuous(expand = c(0, 0), breaks = breaks, labels = labels) +
+    scale_x_discrete(expand = c(0, 0), breaks = breaks, labels = labels) +
     scale_y_continuous(expand = c(0, 0)) +
-    expand_limits(x = xLimits, y = 0) +
+    # expand_limits(x = xLimits, y = 0) +
     theme_classic() +
     theme(plot.title = element_text(size = 11),
           axis.title.x = element_text(size = 10),

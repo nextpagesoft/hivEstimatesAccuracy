@@ -4,8 +4,9 @@
 \alias{GetReportFileNames}
 \title{GetReportFileNames}
 \usage{
-GetReportFileNames(path = system.file("reports", package =
-  "hivEstimatesAccuracy"))
+GetReportFileNames(
+  path = system.file("reports", package = "hivEstimatesAccuracy")
+)
 }
 \arguments{
 \item{path}{Path to the folder with adjustment specifications. Optional.

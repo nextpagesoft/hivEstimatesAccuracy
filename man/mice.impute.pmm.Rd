@@ -4,8 +4,16 @@
 \alias{mice.impute.pmm}
 \title{mice.impute.pmm}
 \usage{
-mice.impute.pmm(y, ry, x, wy = NULL, donors = 5L, matchtype = 1L,
-  ridge = 1e-05, ...)
+mice.impute.pmm(
+  y,
+  ry,
+  x,
+  wy = NULL,
+  donors = 5L,
+  matchtype = 1L,
+  ridge = 1e-05,
+  ...
+)
 }
 \arguments{
 \item{y}{y}

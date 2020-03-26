@@ -479,12 +479,12 @@ inputDataUpload <- function(input, output, session, appStatus)
         solidHeader = FALSE,
         status = "warning",
         collapsible = TRUE,
-        dataTableOutput(ns("inputDataTable"))
+        DT::DTOutput(ns("inputDataTable"))
       )
     }
   })
 
-  output[["inputDataTable"]] <- renderDataTable({
+  output[["inputDataTable"]] <- DT::renderDT({
     req(appStatus$InputData$Table)[, -c("GroupOfOrigin", "SqCD4")]
   },
   options = list(

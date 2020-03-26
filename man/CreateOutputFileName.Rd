@@ -4,8 +4,13 @@
 \alias{CreateOutputFileName}
 \title{CreateOutputFileName}
 \usage{
-CreateOutputFileName(inputFileName, outputPath = dirname(inputFileName),
-  prefix = "", suffix = "", extension = "txt")
+CreateOutputFileName(
+  inputFileName,
+  outputPath = dirname(inputFileName),
+  prefix = "",
+  suffix = "",
+  extension = "txt"
+)
 }
 \arguments{
 \item{inputFileName}{Input file name. Required.}
