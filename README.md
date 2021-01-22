@@ -1,7 +1,3 @@
-# Status
-
-[![Travis-CI Build Status](https://travis-ci.org/nextpagesoft/hivEstimatesAccuracy.svg?branch=1.0)](https://travis-ci.org/nextpagesoft/hivEstimatesAccuracy.svg?branch=1.0)
-
 # European Centre for Disease Prevention and Control
 
 An agency of the European Union

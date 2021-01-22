@@ -1,3 +1,8 @@
+Version 1.0.9 (2020/01/22)
+
+* Misc: upgrade to R 4.0.3 and renv. Update all dependencies.
+
+
 Version 1.0.7 (2019/05/31)
 
 * RD: Adjust VarT and Tf by plus one

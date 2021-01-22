@@ -1,0 +1,7 @@
+external.libraries: D:/Documents/R/win-library/4.0/
+ignored.packages: testthat
+package.dependency.fields: Imports, Depends, LinkingTo
+r.version:
+snapshot.type: implicit
+use.cache: TRUE
+vcs.ignore.library: TRUE
